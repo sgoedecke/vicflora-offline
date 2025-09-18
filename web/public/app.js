@@ -10,7 +10,8 @@ const views = {
 };
 
 const dichElements = {
-  select: document.querySelector('#dichotomous-key-select'),
+  search: document.querySelector('#dichotomous-key-search'),
+  datalist: document.querySelector('#dichotomous-key-list'),
   header: document.querySelector('#dichotomous-header'),
   options: document.querySelector('#dichotomous-options'),
   result: document.querySelector('#dichotomous-result'),
@@ -78,12 +79,12 @@ function populateDichotomousSelect(keys) {
     entries.unshift(primary);
   }
 
-  dichElements.select.innerHTML = '';
+  dichElements.datalist.innerHTML = '';
   entries.forEach(entry => {
     const option = document.createElement('option');
-    option.value = entry.id;
-    option.textContent = entry.title;
-    dichElements.select.appendChild(option);
+    option.value = `${entry.title} [${entry.id}]`;
+    option.dataset.keyId = entry.id;
+    dichElements.datalist.appendChild(option);
   });
   return entries;
 }
@@ -172,8 +173,10 @@ function handleDichotomousChoice(index) {
 }
 
 function bindDichotomousControls(keys) {
-  dichElements.select.addEventListener('change', event => {
-    const keyId = event.target.value;
+  dichElements.search.addEventListener('change', event => {
+    const value = event.target.value;
+    const match = Array.from(dichElements.datalist.options).find(option => option.value === value);
+    const keyId = match?.dataset.keyId || value.replace(/.*\[(\d+)\]$/, '$1');
     try {
       dichNavigator = createNavigatorFromData(keys, keyId);
       renderDichotomous();
@@ -367,7 +370,7 @@ async function loadData() {
   const dichEntries = populateDichotomousSelect(globalDichKeys);
   if (dichEntries.length) {
     dichNavigator = createNavigatorFromData(globalDichKeys, dichEntries[0].id);
-    dichElements.select.value = dichEntries[0].id;
+    dichElements.search.value = `${dichEntries[0].title} [${dichEntries[0].id}]`;
     renderDichotomous();
   }
   bindDichotomousControls(globalDichKeys);

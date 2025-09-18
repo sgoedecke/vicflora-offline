@@ -30,26 +30,27 @@ header h1 {
   margin: 0 0 0.25rem 0;
 }
 
-header nav {
+.tabs {
   margin-top: 1rem;
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  border-bottom: 2px solid var(--border);
+  gap: 1rem;
 }
 
-header nav button {
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  color: var(--fg);
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
+.tabs .tab {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 0.75rem 0;
   cursor: pointer;
+  font-weight: 600;
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
-header nav button.active {
-  background: var(--accent);
+.tabs .tab.active {
+  color: var(--accent);
   border-color: var(--accent);
-  color: white;
 }
 
 main {

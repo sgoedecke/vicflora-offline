@@ -11,10 +11,10 @@
     <header>
       <h1>VicFlora Offline Keys</h1>
       <p>Multi-access and dichotomous keys packaged for offline browsing.</p>
-      <nav>
-        <button data-view="dichotomous" class="active">Dichotomous Keys</button>
-        <button data-view="multi">Multi-Access Keys</button>
-        <button data-view="about">About</button>
+      <nav class="tabs" role="tablist">
+        <button data-view="dichotomous" class="tab active" role="tab" aria-selected="true">Dichotomous Keys</button>
+        <button data-view="multi" class="tab" role="tab" aria-selected="false">Multi-Access Keys</button>
+        <button data-view="about" class="tab" role="tab" aria-selected="false">About</button>
       </nav>
     </header>
 
@@ -25,10 +25,9 @@
         <div class="panel">
           <h2>Dichotomous Keys</h2>
           <div class="controls">
-            <label>
-              Select key:
-              <select id="dichotomous-key-select"></select>
-            </label>
+            <label for="dichotomous-key-search">Search key:</label>
+            <input id="dichotomous-key-search" list="dichotomous-key-list" placeholder="Start typing a key…" />
+            <datalist id="dichotomous-key-list"></datalist>
             <button id="dichotomous-restart" class="secondary">Restart</button>
             <button id="dichotomous-back" class="secondary">Back</button>
           </div>
@@ -75,17 +74,15 @@
         <div class="panel">
           <h2>About</h2>
           <p>
-            This static web app bundles selected VicFlora dichotomous and multi-access keys and installs
-            as a Progressive Web App (PWA) so you can use it completely offline. Refresh the data bundle
-            with <code>web/web-config.json</code>, then host or share the contents of <code>web/public</code>.
+            This static web app bundles selected VicFlora dichotomous and multi-access keys.
           </p>
           <p>
             On iOS, open this page in Safari, tap the share button, and choose “Add to Home Screen” to keep
-            it available offline with a native-like experience.
+            it available offline.
           </p>
           <p>
             Visit <a href="https://seangoedecke.com" target="_blank" rel="noopener">seangoedecke.com</a>
-            for more projects and updates, or view the source on
+            for more about me specifically, or view the source on
             <a href="https://github.com/sgoedecke/vicflora-offline" target="_blank" rel="noopener">GitHub</a>.
           </p>
         </div>
