@@ -7,6 +7,7 @@ const ASSETS = [
   './modules/dichotomous.js',
   './modules/multiaccess.js',
   './manifest.json',
+  './favicon.svg',
   './data/dichotomous-keys.json',
   './data/multi-keys.json',
   './icons/icon-192.png',
