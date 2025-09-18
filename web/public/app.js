@@ -25,7 +25,8 @@ const multiElements = {
   states: document.querySelector('#multi-states'),
   selections: document.querySelector('#multi-selections'),
   remaining: document.querySelector('#multi-remaining'),
-  reset: document.querySelector('#multi-reset')
+  reset: document.querySelector('#multi-reset'),
+  undo: document.querySelector('#multi-undo')
 };
 
 let dichNavigator = null;
@@ -266,7 +267,10 @@ function renderMultiStates(session, characterId) {
   statesCard?.classList.add('active');
 
   requestAnimationFrame(() => {
-    multiElements.states.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const topOffset = statesCard?.getBoundingClientRect().top ?? 0;
+    if (Math.abs(topOffset) > 20) {
+      statesCard?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
     const firstButton = multiElements.states.querySelector('button');
     if (firstButton) {
       firstButton.focus({ preventScroll: true });
@@ -335,6 +339,20 @@ function bindMultiControls(list) {
     multiSession.reset();
     multiState.currentCharacterId = null;
     renderMultiAll(multiSession);
+  });
+
+  multiElements.undo.addEventListener('click', () => {
+    if (!multiSession) return;
+    const undone = multiSession.undoLastSelection?.();
+    if (!undone) {
+      setStatus('No selections to undo.');
+      return;
+    }
+    multiState.currentCharacterId = undone.characterId;
+    renderMultiAll(multiSession);
+    const character = multiSession.getCharacterById(undone.characterId);
+    const state = multiSession.getStatesByCharacter(undone.characterId).find(s => s.id === undone.stateId);
+    setStatus(`Removed ${character?.name || undone.characterId}: ${state?.name || undone.stateId}.`);
   });
 }
 

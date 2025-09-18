@@ -111,10 +111,36 @@ export class MultiAccessSession {
     this.recomputePossibleTaxa();
   }
 
+  undoLastSelection() {
+    if (this.selectedStates.size === 0) {
+      return null;
+    }
+
+    let lastKey;
+    for (const key of this.selectedStates.keys()) {
+      lastKey = key;
+    }
+    if (lastKey === undefined) {
+      return null;
+    }
+
+    const stateId = this.selectedStates.get(lastKey);
+    this.selectedStates.delete(lastKey);
+    this.recomputePossibleTaxa();
+    return {
+      characterId: lastKey,
+      stateId
+    };
+  }
+
   recomputePossibleTaxa() {
+    const snapshot = Array.from(this.selectedStates.entries());
+    this.selectedStates.clear();
+
     this.possibleTaxa = toSet(Object.keys(this.keyData.decompressedScores || {}));
     this.eliminatedTaxa.clear();
-    for (const [characterId, stateId] of this.selectedStates) {
+
+    for (const [characterId, stateId] of snapshot) {
       this.chooseState(characterId, stateId);
     }
   }
