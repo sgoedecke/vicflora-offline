@@ -1,20 +1,10 @@
 # VicFlora Offline Keys
 
-This project lets you scrape VicFlora dichotomous (KeyBase) and multi-access (Lucid) keys for offline use, and provides lightweight CLIs to work through each key type once the data is on disk.
+https://imaginative-panda-8c7f64.netlify.app/
 
-## Repository Overview
+VicFlora offers multiple keys to let you identify plants. But the website is pretty slow, and sometimes you're looking at plants where you don't have reception. What if there was a way to use the VicFlora keys without any internet at all?
 
-- `main.js` – entry point for scraping commands.
-- `multi-access-scraper.js` – downloads Lucid multi-access keys and decompresses their matrices.
-- `keybase-scraper-simple.js` – reads `keybase-list.html` and downloads the referenced KeyBase JSON exports.
-- `vicflora-exporter.js` – writes scraped data into `vicflora-data/` (JSON + CSV summaries).
-- `keying-cli-simple.js` – interactive multi-access key CLI (uses files in `vicflora-data/`).
-- `keybase-cli.js` – interactive dichotomous key CLI (uses files in `keybase-data/`).
-
-Cached data lives beside the code:
-
-- `vicflora-data/` – multi-access keys and derived CSV exports.
-- `keybase-data/` – raw KeyBase JSON exports downloaded from RBG Victoria.
+This project imports the VicFlora keys (both dichotomous and multi-access) and hosts them in a self-contained SPA website that can be saved to your mobile home screen for offline use.
 
 ## Prerequisites
 
@@ -58,11 +48,12 @@ The downloader:
 npm run build:web
 ```
 
-This script gathers the keys referenced in `web/web-config.json` and produces
-`web/public/data/*.json`. The `web/public/` folder is a self-contained static
-site: host it from any HTTP server (or share the files directly) and the app will
-install as a PWA, caching everything for offline use. Update `web/web-config.json`
-to include the key IDs or filenames you want bundled, then rerun the script.
+This script gathers the keys referenced in `web/web-config.json`, automatically
+pulls in any linked `to_key` chains, and writes `web/public/data/*.json`. The
+`web/public/` folder is a self-contained static site: host it from any HTTP
+server (or share the files directly) and the app will install as a PWA, caching
+everything for offline use. Update `web/web-config.json` to choose the seed keys
+you want bundled, then rerun the script.
 
 ## Offline CLI usage
 
@@ -112,4 +103,6 @@ npm run key:dichotomous       # node keybase-cli.js
 
 ## License
 
-MIT – please respect VicFlora terms of use when scraping or redistributing data.
+I'm not 100% sure what VicFlora's terms of use are for their key data. I assume it falls under "text" [here](https://vicflora.rbg.vic.gov.au/pages/copyright), which would make it CC BY 4.0. All the data is pulled via public APIs and "export" buttons.
+
+VicFlora (2025). Flora of Victoria, Royal Botanic Gardens Victoria. Available online: https://vicflora.rbg.vic.gov.au (accessed on: 18 Sep. 2025).

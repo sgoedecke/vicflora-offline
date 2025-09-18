@@ -43,14 +43,32 @@ async function main() {
 
   // Build dichotomous dataset
   const dichotomous = {};
-  for (const id of config.dichotomousKeys) {
+  const pending = [...config.dichotomousKeys.map(id => String(id))];
+  const seen = new Set();
+
+  while (pending.length) {
+    const id = pending.shift();
+    if (seen.has(id)) continue;
+    seen.add(id);
+
     const filePath = path.join(root, 'keybase-data', `${id}.json`);
     if (!(await fileExists(filePath))) {
       console.warn(`⚠️  Missing dichotomous key ${id} at ${filePath}`);
       continue;
     }
+
     const key = await loadJSON(filePath);
-    dichotomous[id] = key.keybase || key;
+    const normalized = key.keybase || key;
+    dichotomous[id] = normalized;
+
+    for (const item of normalized.items || []) {
+      if (item?.to_key) {
+        const nextId = String(item.to_key);
+        if (!seen.has(nextId)) {
+          pending.push(nextId);
+        }
+      }
+    }
   }
   await writeJSON(path.join(webDataDir, 'dichotomous-keys.json'), {
     generatedAt: new Date().toISOString(),

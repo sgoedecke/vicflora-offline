@@ -47,6 +47,7 @@ npm run build:web
 
 - Open the generated `web/public/index.html` (or host the folder).
 - The app will prompt the browser to cache assets for offline use. On iOS, use “Add to Home Screen”.
-- Adjust `web/web-config.json` before building to choose which keys ship with the bundle.
+- Adjust `web/web-config.json` before building to choose which seed keys ship with the bundle.
+- The build step automatically loads any linked `to_key` references reachable from those seeds.
 - Deploying via Netlify? The provided `netlify.toml` already points Netlify at the correct
   build command and publish directory—just hook up the repo and deploy.
