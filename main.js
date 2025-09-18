@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
+const path = require('path');
 const MultiAccessScraper = require('./multi-access-scraper');
-const IdentificationKeyScraper = require('./identification-key-scraper');
+const { downloadAllKeybaseKeys } = require('./keybase-scraper-simple');
 const VicFloraExporter = require('./vicflora-exporter');
 
 async function main() {
@@ -65,40 +66,25 @@ async function scrapeMultiAccessKeys() {
 }
 
 async function scrapeIdentificationKeys() {
-  console.log('=== VicFlora Identification Key Scraper ===\n');
+  console.log('=== VicFlora KeyBase Downloader ===\n');
 
-  const scraper = new IdentificationKeyScraper();
   const exporter = new VicFloraExporter();
+  const htmlPath = path.resolve('keybase-list.html');
+  const outputDir = path.resolve('keybase-data');
 
-  const keys = await scraper.discoverIdentificationKeys();
+  const { entries, summary } = await downloadAllKeybaseKeys({ htmlPath, outputDir });
 
-  if (keys.length === 0) {
-    console.log('No identification keys found');
-    return;
+  console.log(`\n=== KeyBase Downloads ===`);
+  console.log(`Listed ${entries.length} keys from ${path.relative(process.cwd(), htmlPath)}`);
+  console.log(`Downloaded ${summary.downloaded.length} new keys to ${path.relative(process.cwd(), outputDir)}`);
+  if (summary.skipped.length) {
+    console.log(`Skipped ${summary.skipped.length} keys already on disk`);
+  }
+  if (summary.failed.length) {
+    console.warn(`Failed downloads for ${summary.failed.length} keys (check log above).`);
   }
 
-  const keybaseData = await scraper.downloadKeyBaseKeys(keys);
-
-  console.log(`\n=== Export Results ===`);
-  console.log(`Found ${keys.length} identification keys`);
-
-  await exporter.exportToJSON(keys, 'all-identification-keys');
-  await exporter.exportIdentificationKeysSummary(keys);
-
-  if (keybaseData.length > 0) {
-    for (const entry of keybaseData) {
-      await exporter.exportIdentificationKey(entry);
-    }
-  } else {
-    console.warn('No KeyBase exports were downloaded');
-  }
-
-  console.log('\n=== Found Keys ===');
-  keys.forEach(key => {
-    console.log(`ID ${key.id}: ${key.title}`);
-    if (key.taxonomicScope) console.log(`  Scope: ${key.taxonomicScope}`);
-    if (key.created) console.log(`  Created: ${key.created}`);
-  });
+  await exporter.exportToJSON(entries, 'keybase-keys');
 }
 
 async function scrapeAllKeys() {
@@ -175,7 +161,7 @@ Usage:
 
 Commands:
   multi-access    Scrape all multi-access (Lucid) keys
-  identification  Discover and scrape identification (dichotomous) keys
+  identification  Download dichotomous (KeyBase) keys listed in keybase-list.html
   all             Scrape both multi-access and identification keys
   list            List available multi-access keys without downloading
   analyze <id>    Download and analyze a specific multi-access key

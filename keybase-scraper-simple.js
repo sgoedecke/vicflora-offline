@@ -24,49 +24,40 @@ async function downloadKey(id, title, outDir) {
   const target = path.join(outDir, `${id}.json`);
   try {
     await fs.access(target);
-    console.log(`🔁 Skipping ${id} (${title}) – already downloaded`);
-    return;
+    return { status: 'skipped', target };
   } catch (_) {
     // continue to download
   }
 
   const url = `https://keybase.rbg.vic.gov.au/keys/export/${id}?format=json`;
-  console.log(`⬇️  Downloading ${id} (${title})`);
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}`);
   }
   const body = await res.text();
   await fs.writeFile(target, body);
+  return { status: 'downloaded', target };
 }
 
 async function main() {
   const [htmlPath = 'keybase-list.html', outputDir = 'keybase-data'] = process.argv.slice(2);
 
-  const html = await fs.readFile(htmlPath, 'utf8');
-  const keys = await parseKeyList(html);
+  try {
+    const { entries, summary } = await downloadAllKeybaseKeys({ htmlPath, outputDir });
 
-  if (keys.length === 0) {
-    console.error('No keys found in HTML.');
+    console.log(`📋 Found ${entries.length} keys`);
+    console.log(`⬇️  Downloaded ${summary.downloaded.length} new keys`);
+    if (summary.skipped.length) {
+      console.log(`🔁 Skipped ${summary.skipped.length} existing keys`);
+    }
+    if (summary.failed.length) {
+      console.log(`⚠️  Failed downloads: ${summary.failed.map(f => f.id).join(', ')}`);
+    }
+    console.log('✅ Done');
+  } catch (error) {
+    console.error('Error:', error.message);
     process.exit(1);
   }
-
-  console.log(`📋 Found ${keys.length} keys`);
-  await ensureDir(outputDir);
-
-  for (let i = 0; i < keys.length; i++) {
-    const entry = keys[i];
-    try {
-      await downloadKey(entry.id, entry.title, outputDir);
-    } catch (error) {
-      console.warn(`⚠️  Failed to download ${entry.id}: ${error.message}`);
-    }
-    if (i % 25 === 24) {
-      await new Promise(r => setTimeout(r, 1000));
-    }
-  }
-
-  console.log('✅ Done');
 }
 
 if (require.main === module) {
@@ -76,4 +67,57 @@ if (require.main === module) {
   });
 }
 
-module.exports = { parseKeyList };
+async function loadKeyEntries(htmlPath) {
+  const html = await fs.readFile(htmlPath, 'utf8');
+  return parseKeyList(html);
+}
+
+async function downloadAllKeybaseKeys(options = {}) {
+  const {
+    htmlPath = 'keybase-list.html',
+    outputDir = 'keybase-data',
+    delayMs = 1000
+  } = options;
+
+  const entries = await loadKeyEntries(htmlPath);
+
+  if (!entries.length) {
+    throw new Error('No keys found in HTML list.');
+  }
+
+  await ensureDir(outputDir);
+
+  const summary = {
+    downloaded: [],
+    skipped: [],
+    failed: []
+  };
+
+  for (let index = 0; index < entries.length; index++) {
+    const entry = entries[index];
+    try {
+      const result = await downloadKey(entry.id, entry.title, outputDir);
+      if (result.status === 'downloaded') {
+        console.log(`⬇️  Downloaded ${entry.id} (${entry.title})`);
+        summary.downloaded.push(entry);
+        if (delayMs) {
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+      } else {
+        summary.skipped.push(entry);
+        console.log(`🔁 Skipping ${entry.id} (${entry.title}) – already downloaded`);
+      }
+    } catch (error) {
+      console.warn(`⚠️  Failed to download ${entry.id}: ${error.message}`);
+      summary.failed.push({ ...entry, error: error.message });
+    }
+  }
+
+  return { entries, summary, outputDir: path.resolve(outputDir) };
+}
+
+module.exports = {
+  parseKeyList,
+  loadKeyEntries,
+  downloadAllKeybaseKeys
+};
