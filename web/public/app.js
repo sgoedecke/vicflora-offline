@@ -370,7 +370,7 @@ async function loadData() {
     dichElements.select.value = dichEntries[0].id;
     renderDichotomous();
   }
-  bindDichotomousControls(dichKeys);
+  bindDichotomousControls(globalDichKeys);
 
   const multiList = listMultiKeys(multiBundle.keys || {});
   if (multiList.length) {
