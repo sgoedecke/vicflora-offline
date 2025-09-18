@@ -1,0 +1,288 @@
+Character ID,Character Name,Character Type,Parent ID,State ID,State Name,State Description
+1,Occurrence,grouping,,,,
+2,Plant,grouping,,,,
+3,Bark,grouping,,,,
+4,Branches,grouping,,,,
+5,Leaf,grouping,,,,
+6,Cluster of buds or flowers (inflorescence),grouping,,,,
+7,Bud,grouping,,,,
+8,Flower,grouping,,,,
+9,Fruit,grouping,,,,
+10,Seed,grouping,,,,
+11,Immature plant,grouping,,,,
+12,Distribution by Natural Region,discrete,1,1,Murray & Lowan Mallee,
+12,Distribution by Natural Region,discrete,1,2,Wimmera,
+12,Distribution by Natural Region,discrete,1,3,Wannon,
+12,Distribution by Natural Region,discrete,1,4,Grampians,
+12,Distribution by Natural Region,discrete,1,5,Riverina,
+12,Distribution by Natural Region,discrete,1,6,Midlands,
+12,Distribution by Natural Region,discrete,1,7,Victorian Volcanic Plain,
+12,Distribution by Natural Region,discrete,1,8,Otway Plain,
+12,Distribution by Natural Region,discrete,1,9,Otway Range,
+12,Distribution by Natural Region,discrete,1,10,Eastern Highlands,
+12,Distribution by Natural Region,discrete,1,11,Gippsland Plain,
+12,Distribution by Natural Region,discrete,1,12,Gippsland Highlands,
+12,Distribution by Natural Region,discrete,1,13,Wilsons Promontory,
+12,Distribution by Natural Region,discrete,1,14,Snowfields,
+12,Distribution by Natural Region,discrete,1,15,East Gippsland,
+13,Landform,discrete,1,16,Coastal plains, coastal low hills and headlands or coastal dunes,
+13,Landform,discrete,1,17,Inland plains, inland low hills or inland dunes (includes deserts),
+13,Landform,discrete,1,18,Tablelands,
+13,Landform,discrete,1,19,Hills or ridges or mountain tops,
+13,Landform,discrete,1,20,Valley bottoms or flats,
+14,Water habitats,discrete,1,21,On riverbanks or terraces,
+14,Water habitats,discrete,1,22,Associated with fresh-water swamps, lakes, depressions.,
+14,Water habitats,discrete,1,23,Associated with salt-water swamps, lakes, depressions (wet or dry),
+14,Water habitats,discrete,1,24,On floodplains,
+15,Soil type,discrete,1,25,Sand (desert or coastal dune, or sandplain or river sands),
+15,Soil type,discrete,1,26,Loam, clay or gravel (sandy loam, sandy clay or rocky or gravelly),
+15,Soil type,discrete,1,27,Black cracking clay,
+16,Height (m),numeric,2,,,
+17,Habit,discrete,2,28,Tree,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/33478","type":2}]
+17,Habit,discrete,2,29,Mallee or shrub,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/125086","type":2}]
+18,Bark persistence or type (on trunk or stem),discrete,3,30,Wholly smooth,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/125820","type":2}]
+18,Bark persistence or type (on trunk or stem),discrete,3,31,Partly rough (including partly-decorticated curls over whole trunk),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25942","type":2}]
+18,Bark persistence or type (on trunk or stem),discrete,3,32,Wholly rough,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/12698","type":2}]
+19,Smooth bark colour (trunk or larger branches),discrete,3,33,White,
+19,Smooth bark colour (trunk or larger branches),discrete,3,34,Cream,
+19,Smooth bark colour (trunk or larger branches),discrete,3,35,Yellow,
+19,Smooth bark colour (trunk or larger branches),discrete,3,36,Pink (or reddish),
+19,Smooth bark colour (trunk or larger branches),discrete,3,37,Orange,
+19,Smooth bark colour (trunk or larger branches),discrete,3,38,Coppery,
+19,Smooth bark colour (trunk or larger branches),discrete,3,39,Brown,
+19,Smooth bark colour (trunk or larger branches),discrete,3,40,Green (olive green, bronze),
+19,Smooth bark colour (trunk or larger branches),discrete,3,41,Grey,
+20,Scribbles (on smooth bark),discrete,3,42,Scribbles present,
+20,Scribbles (on smooth bark),discrete,3,43,Scribbles absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29080","type":2}]
+21,Ribbons (of bark in the upper branches),discrete,3,44,Ribbons present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/146752","type":2}]
+21,Ribbons (of bark in the upper branches),discrete,3,45,Ribbons absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11468","type":2}]
+22,Rough bark type,discrete,3,46,Ironbark,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29284","type":2}]
+22,Rough bark type,discrete,3,47,Tessellated (includes bloodwoods, ghost gums and some boxes),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29084","type":2}]
+22,Rough bark type,discrete,3,48,Stringy or fibrous,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29180","type":2}]
+22,Rough bark type,discrete,3,49,Box (incl. crumbly, thick & flaky),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29224","type":2}]
+22,Rough bark type,discrete,3,50,Imperfectly shed ribbons, strips or curls,
+22,Rough bark type,discrete,3,51,Compacted,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35553","type":2}]
+22,Rough bark type,discrete,3,52,Loose basal slabs,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29080","type":2}]
+23,Rough bark colour,discrete,3,53,Grey,
+23,Rough bark colour,discrete,3,54,Brown,
+23,Rough bark colour,discrete,3,55,Reddish or pinkish,
+23,Rough bark colour,discrete,3,56,Black,
+23,Rough bark colour,discrete,3,57,Yellow,
+23,Rough bark colour,discrete,3,58,Mottled with grey and white patches,
+23,Rough bark colour,discrete,3,59,Orange,
+23,Rough bark colour,discrete,3,60,White,
+24,Branch bark (on canopy branches more than ca. 8 cm diam.),discrete,4,61,Smooth,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19984","type":2}]
+24,Branch bark (on canopy branches more than ca. 8 cm diam.),discrete,4,62,Rough,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11204","type":2}]
+25,Branchlet glaucescence (on second or third year growth),discrete,4,63,Branchlet white with wax (glaucous),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/30630","type":2}]
+25,Branchlet glaucescence (on second or third year growth),discrete,4,64,Branchlet without wax (not glaucous),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35207","type":2}]
+26,Pith oil glands in branchlets,discrete,4,65,Pith glands present,
+26,Pith oil glands in branchlets,discrete,4,66,Pith glands absent,
+27,Leaf position on branches in mature crown,discrete,5,67,Opposite,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35133","type":2}]
+27,Leaf position on branches in mature crown,discrete,5,68,Not opposite, i.e. alternate or disjunct,
+28,Leaf stalk (petiole),discrete,5,69,Present (petiolate),
+28,Leaf stalk (petiole),discrete,5,70,Absent (sessile),
+29,Leaf petiole length (cm.),numeric,5,,,
+30,Leaf blade shape,discrete,5,71,Linear,
+30,Leaf blade shape,discrete,5,72,Lanceolate,
+30,Leaf blade shape,discrete,5,73,Elliptical,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29228","type":2}]
+30,Leaf blade shape,discrete,5,74,Sickle-shaped or curved (falcate),
+30,Leaf blade shape,discrete,5,75,Ovate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40233","type":2}]
+30,Leaf blade shape,discrete,5,76,Orbicular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29259","type":2}]
+30,Leaf blade shape,discrete,5,77,Oblong,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/31222","type":2}]
+30,Leaf blade shape,discrete,5,78,Obovate,
+30,Leaf blade shape,discrete,5,79,Cordate,
+30,Leaf blade shape,discrete,5,80,Obcordate,
+31,Leaf blade length (cm.),numeric,5,,,
+32,Leaf blade width (cm.),numeric,5,,,
+33,Leaf blade undulation,discrete,5,81,Flat,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19078","type":2}]
+33,Leaf blade undulation,discrete,5,82,Undulate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/12696","type":2}]
+34,Leaf base shape,discrete,5,83,Oblique on petiole (more than 3 mm displacement),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29242","type":2}]
+34,Leaf base shape,discrete,5,84,Tapering to petiole (on both sides, or slightly oblique),
+34,Leaf base shape,discrete,5,85,Lobed (auriculate),
+34,Leaf base shape,discrete,5,86,Stem-clasping (amplexicaul),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11206","type":2}]
+34,Leaf base shape,discrete,5,87,Rounded,
+34,Leaf base shape,discrete,5,88,Connate (leaves paired and bases joined),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29218","type":2}]
+35,Leaf margin,discrete,5,89,Entire,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29184","type":2}]
+35,Leaf margin,discrete,5,90,Scalloped or toothed (crenulate or denticulate),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/125086","type":2}]
+36,Leaf apex shape,discrete,5,91,Leaf apex rounded,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11206","type":2}]
+36,Leaf apex shape,discrete,5,92,Leaf apex notched (emarginate),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29268","type":2}]
+36,Leaf apex shape,discrete,5,93,Leaf apex pointed,
+37,Leaf upper and lower surface,discrete,5,94,Same colour on both surfaces (concolorous),
+37,Leaf upper and lower surface,discrete,5,95,Upper and lower surfaces different colours (discolorous),
+38,Leaf colour (upper surface),discrete,5,96,Green or olive green,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25932","type":2}]
+38,Leaf colour (upper surface),discrete,5,97,Blue-green or grey-green or blue-grey,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/12696","type":2}]
+38,Leaf colour (upper surface),discrete,5,98,Whitish from surface wax (glaucous),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35133","type":2}]
+39,Leaf sheen (upper surface),discrete,5,99,Glossy,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25932","type":2}]
+39,Leaf sheen (upper surface),discrete,5,100,Dull,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22173","type":2}]
+40,Leaf side-veins,discrete,5,101,Side-veins acute (side-veins at an angle less than 45�to midrib),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29228","type":2}]
+40,Leaf side-veins,discrete,5,102,Side-veins at an angle greater than 45� to midrib,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/42165","type":2}]
+40,Leaf side-veins,discrete,5,103,Parallel veined (side-veins parallel to midrib),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/18970","type":2}]
+40,Leaf side-veins,discrete,5,104,Side-veins not seen, may be obscured by oil glands,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/30654","type":2}]
+41,Leaf vein network (reticulation density),discrete,5,105,Sparsely reticulate or reticulation obscure or absent,
+41,Leaf vein network (reticulation density),discrete,5,106,Moderately reticulate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29150","type":2}]
+41,Leaf vein network (reticulation density),discrete,5,107,Densely reticulate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29316","type":2}]
+41,Leaf vein network (reticulation density),discrete,5,108,Very densely reticulate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29268","type":2}]
+42,Leaf oil glands,discrete,5,109,Island (mostly isolated from veinlets),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29316","type":2}]
+42,Leaf oil glands,discrete,5,110,Intersectional (mostly intersecting with veinlets),
+42,Leaf oil glands,discrete,5,111,Obscure or apparently absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29268","type":2}]
+42,Leaf oil glands,discrete,5,112,Abundant, obscuring veins,
+43,Type of bud or flower cluster (inflorescence),discrete,6,113,Clusters (compound inflorescences) formed at leafless ends of branches (terminal),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29272","type":2}]
+43,Type of bud or flower cluster (inflorescence),discrete,6,114,Single cluster (umbel) in leaf axil (axillary single),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11214","type":2}]
+43,Type of bud or flower cluster (inflorescence),discrete,6,115,Two clusters (umbels) in leaf axil (axillary paired),
+43,Type of bud or flower cluster (inflorescence),discrete,6,116,Compound inflorescence formed in leaf axil (axillary compound),
+44,Bud or flower cluster stalk (peduncle) cross-section,discrete,6,117,Rounded to angular to narrowly and slightly flattened,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22114","type":2}]
+44,Bud or flower cluster stalk (peduncle) cross-section,discrete,6,118,Broadly flattened (strap-like),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20532","type":2}]
+45,Bud or flower cluster stalk (peduncle) orientation,discrete,6,119,Erect (in the same direction as the branch),
+45,Bud or flower cluster stalk (peduncle) orientation,discrete,6,120,Pendulous or rigidly down-curved (in the opposite direction to branch),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19988","type":2}]
+46,Bud or flower cluster stalk (peduncle) length (cm.),numeric,6,,,
+47,Number of buds or flowers per cluster (umbel),discrete,6,121,One-flowered,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20188","type":2}]
+47,Number of buds or flowers per cluster (umbel),discrete,6,122,Three-flowered,
+47,Number of buds or flowers per cluster (umbel),discrete,6,123,Seven-flowered,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22176","type":2}]
+47,Number of buds or flowers per cluster (umbel),discrete,6,124,More than seven to fifteen-flowered,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22139","type":2}]
+47,Number of buds or flowers per cluster (umbel),discrete,6,125,More than fifteen-flowered,
+48,Bud or flower stalk (pedicel),discrete,7,126,Bud stalk present (pedicellate),
+48,Bud or flower stalk (pedicel),discrete,7,127,Bud stalk absent (sessile),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/13090","type":2}]
+49,Bud stalk (pedicel) length (cm),numeric,7,,,
+50,Bud shape (not including fused buds),discrete,7,128,Club-shaped to obovoid (clavate - obovoid),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36939","type":2}]
+50,Bud shape (not including fused buds),discrete,7,129,Oblong (cylindrical),
+50,Bud shape (not including fused buds),discrete,7,130,Ovoid,
+50,Bud shape (not including fused buds),discrete,7,131,Spindle-shaped (fusiform),
+50,Bud shape (not including fused buds),discrete,7,132,Diamond-shaped (broadly fusiform),
+50,Bud shape (not including fused buds),discrete,7,133,Pear-shaped (pyriform),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26112","type":2}]
+50,Bud shape (not including fused buds),discrete,7,134,Globular,
+50,Bud shape (not including fused buds),discrete,7,135,Square in cross-section,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26008","type":2}]
+50,Bud shape (not including fused buds),discrete,7,136,Very elongated,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19980","type":2}]
+50,Bud shape (not including fused buds),discrete,7,137,Mushroom shaped,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20532","type":2}]
+51,Bud glaucescence,discrete,7,138,Bud white from wax (glaucous),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22096","type":2}]
+51,Bud glaucescence,discrete,7,139,Bud not white from wax (not glaucous),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26008","type":2}]
+52,Bud surface texture,discrete,7,140,Smooth,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22122","type":2}]
+52,Bud surface texture,discrete,7,141,Warty,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22154","type":2}]
+52,Bud surface texture,discrete,7,142,Scaly or scurfy,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11472","type":2}]
+52,Bud surface texture,discrete,7,143,Hairy,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/thumbnail/hortflora/193?maxsize=256","type":2}]
+53,Bud ridges, ribs or angles (longitudinal),discrete,7,144,Bud ridges, ribs or angles present,
+53,Bud ridges, ribs or angles (longitudinal),discrete,7,145,Bud ridges, ribs or angles absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22114","type":2}]
+54,Scar on bud from cap (operculum) falling off,discrete,7,146,Scar present,
+54,Scar on bud from cap (operculum) falling off,discrete,7,147,Scar absent,
+55,Cap (operculum) shape,discrete,7,148,Beaked,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/30620","type":2}]
+55,Cap (operculum) shape,discrete,7,149,Conical,
+55,Cap (operculum) shape,discrete,7,150,Horn-shaped,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19980","type":2}]
+55,Cap (operculum) shape,discrete,7,151,Rounded- hemispherical/shortly cylindrical (may be apiculate/umbonate),
+55,Cap (operculum) shape,discrete,7,152,Flattened (may be umbonate or radially ridged),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36019","type":2}]
+55,Cap (operculum) shape,discrete,7,153,Pyramidal,
+55,Cap (operculum) shape,discrete,7,154,Turban shaped (like a Sheik's turban),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19978","type":2}]
+56,Stamen inflexion in bud (longitudinal section),discrete,7,155,Erect,
+56,Stamen inflexion in bud (longitudinal section),discrete,7,156,Inflexed,
+56,Stamen inflexion in bud (longitudinal section),discrete,7,157,Irregular,
+56,Stamen inflexion in bud (longitudinal section),discrete,7,158,Some outer filaments erect, most deflexed,
+57,Perianth (petals and sepals),discrete,8,159,Fused to form a cap (operculum),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35035","type":2}]
+57,Perianth (petals and sepals),discrete,8,160,Outer of free sepals, inner of free petals,
+58,Sterile stamens (staminodes),discrete,8,161,Sterile stamens (staminodes) present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26008","type":2}]
+58,Sterile stamens (staminodes),discrete,8,162,Sterile stamens (staminodes) absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36019","type":2}]
+59,Anther shape (mature but undistorted by dehiscence),discrete,8,163,Oblong (cuboid),
+59,Anther shape (mature but undistorted by dehiscence),discrete,8,164,Kidney-shaped to heart-shaped (reniform to cordate),
+59,Anther shape (mature but undistorted by dehiscence),discrete,8,165,Wedge-shaped (cuneate),
+59,Anther shape (mature but undistorted by dehiscence),discrete,8,166,Spherical (globoid),
+60,Anther attachment,discrete,8,167,Pivoting (versatile),
+60,Anther attachment,discrete,8,168,Rigid (adnate),
+61,Anther dehiscence (slits or pores),discrete,8,169,Confluent,
+61,Anther dehiscence (slits or pores),discrete,8,170,Remaining separate,
+62,Flower colour (filament colour),discrete,8,171,White or creamy white,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36019","type":2}]
+62,Flower colour (filament colour),discrete,8,172,Red,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/18914","type":2}]
+62,Flower colour (filament colour),discrete,8,173,Pink,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27550","type":2}]
+62,Flower colour (filament colour),discrete,8,174,Yellow or lemon,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20081","type":2}]
+63,Ovary chamber number (= valve number in fruit),discrete,8,175,Three or four,
+63,Ovary chamber number (= valve number in fruit),discrete,8,176,More than four,
+64,Ovule row number (vertical rows in each locule),discrete,8,177,Two,
+64,Ovule row number (vertical rows in each locule),discrete,8,178,Four,
+64,Ovule row number (vertical rows in each locule),discrete,8,179,Six or more,
+64,Ovule row number (vertical rows in each locule),discrete,8,180,Three, five, seven or indistinct (bloodwoods & ghost gums),
+65,Fruit cluster stalk (peduncle) orientation,discrete,9,181,Peduncle erect (in the same direction as branch),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/30650","type":2}]
+65,Fruit cluster stalk (peduncle) orientation,discrete,9,182,Peduncle pendulous or rigidly down-curved (in the opposite direction to branch),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19984","type":2}]
+66,Fruit stalk (pedicel),discrete,9,183,Fruit stalk present (pedicellate),
+66,Fruit stalk (pedicel),discrete,9,184,Fruit stalk absent (sessile),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36017","type":2}]
+67,Fruit stalk (pedicel) length (cm.),numeric,9,,,
+68,Fruit fusion,discrete,9,185,Fused by fruit walls (hypanthia),
+68,Fruit fusion,discrete,9,186,Fruit free,
+69,Fruit shape (excluding disc and fused fruit),discrete,9,187,Cup-shaped,
+69,Fruit shape (excluding disc and fused fruit),discrete,9,188,Cylindrical,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/13220","type":2}]
+69,Fruit shape (excluding disc and fused fruit),discrete,9,189,Urn-shaped (urceolate),
+69,Fruit shape (excluding disc and fused fruit),discrete,9,190,Barrel-shaped (truncate-ovoid),
+69,Fruit shape (excluding disc and fused fruit),discrete,9,191,Funnel-shaped (obconical),
+69,Fruit shape (excluding disc and fused fruit),discrete,9,192,Bell-shaped (campanulate),
+69,Fruit shape (excluding disc and fused fruit),discrete,9,193,Hemispherical,
+69,Fruit shape (excluding disc and fused fruit),discrete,9,194,Truncate-globose or spherical,
+69,Fruit shape (excluding disc and fused fruit),discrete,9,195,Square in cross-section,
+70,Fruit length (cm; avoid fused fruit),numeric,9,,,
+71,Fruit width (cm; avoid fused fruit),numeric,9,,,
+72,Fruit wall,discrete,9,196,Ridged, ribbed or angled longitudinally,
+72,Fruit wall,discrete,9,197,Not ridged, ribbed or angled longitudinally,
+73,Fruit glaucescence,discrete,9,198,Fruit white from wax (glaucous),
+73,Fruit glaucescence,discrete,9,199,Fruit not white from wax,
+74,Disc of fruit,discrete,9,200,Raised above rim,
+74,Disc of fruit,discrete,9,201,Level with rim,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35207","type":2}]
+74,Disc of fruit,discrete,9,202,Descending inside rim,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22199","type":2}]
+75,Valve number (= ovary chamber number),discrete,9,203,Three or four,
+75,Valve number (= ovary chamber number),discrete,9,204,More than four,
+76,Valve tips (mature dehisced fruit),discrete,9,205,Strongly exserted,
+76,Valve tips (mature dehisced fruit),discrete,9,206,Near rim level (just above or just below),
+76,Valve tips (mature dehisced fruit),discrete,9,207,Enclosed (not visible),
+77,Valve tips fusion (in dehisced fruit),discrete,9,208,Tips fused across orifice,
+77,Valve tips fusion (in dehisced fruit),discrete,9,209,Tips free,
+78,Seed colour (excluding chaff),discrete,10,210,Black,
+78,Seed colour (excluding chaff),discrete,10,211,Brown,
+78,Seed colour (excluding chaff),discrete,10,212,Reddish brown  & dull,
+78,Seed colour (excluding chaff),discrete,10,213,Reddish brown  & lustrous,
+78,Seed colour (excluding chaff),discrete,10,214,Grey,
+78,Seed colour (excluding chaff),discrete,10,215,Yellow to straw coloured,
+79,Seed shape,discrete,10,216,Flattened or saucer shaped,
+79,Seed shape,discrete,10,217,Pyramidal or obliquely pyramidal,
+79,Seed shape,discrete,10,218,Boat-shaped,
+79,Seed shape,discrete,10,219,Cuboid,
+79,Seed shape,discrete,10,220,Pointed at one end,
+79,Seed shape,discrete,10,221,D-shaped,
+79,Seed shape,discrete,10,222,Ovoid or flattened-ovoid,
+80,Seed hilum position,discrete,10,223,Ventral,
+80,Seed hilum position,discrete,10,224,Terminal,
+81,Juvenile stem cross-section (juvenile or coppice growth to 50 cm),discrete,11,225,Juvenile stem rounded (terete),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29330","type":2}]
+81,Juvenile stem cross-section (juvenile or coppice growth to 50 cm),discrete,11,226,Juvenile stem square,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29162","type":2}]
+81,Juvenile stem cross-section (juvenile or coppice growth to 50 cm),discrete,11,227,Juvenile stem prominently winged,
+81,Juvenile stem cross-section (juvenile or coppice growth to 50 cm),discrete,11,228,Juvenile stem three-sided,
+81,Juvenile stem cross-section (juvenile or coppice growth to 50 cm),discrete,11,229,Juvenile stem five-sided,
+82,Juvenile leaf position (juvenile or coppice growth to 50 cm),discrete,11,230,Juvenile leaves opposite,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35549","type":2}]
+82,Juvenile leaf position (juvenile or coppice growth to 50 cm),discrete,11,231,Juvenile leaves not opposite, i.e. disjunct or spiral,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29114","type":2}]
+83,Juvenile leaf stalk (leaf petiole, juvenile or coppice growth to 50 cm),discrete,11,232,Present on most leaves (petiolate),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19532","type":2}]
+83,Juvenile leaf stalk (leaf petiole, juvenile or coppice growth to 50 cm),discrete,11,233,Absent on most leaves (sessile),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29330","type":2}]
+84,Juvenile leaf blade shape (juvenile or coppice growth to 50 cm),discrete,11,234,Juvenile leaves orbicular (round or sometimes wider than long),
+84,Juvenile leaf blade shape (juvenile or coppice growth to 50 cm),discrete,11,235,Juvenile leaves ovate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35549","type":2}]
+84,Juvenile leaf blade shape (juvenile or coppice growth to 50 cm),discrete,11,236,Juvenile leaves lanceolate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29330","type":2}]
+84,Juvenile leaf blade shape (juvenile or coppice growth to 50 cm),discrete,11,237,Juvenile leaves sickle-shaped or curved (falcate),
+84,Juvenile leaf blade shape (juvenile or coppice growth to 50 cm),discrete,11,238,Juvenile leaves elliptical,
+84,Juvenile leaf blade shape (juvenile or coppice growth to 50 cm),discrete,11,239,Juvenile leaves cordate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22117","type":2}]
+84,Juvenile leaf blade shape (juvenile or coppice growth to 50 cm),discrete,11,240,Juvenile leaves linear,
+84,Juvenile leaf blade shape (juvenile or coppice growth to 50 cm),discrete,11,241,Juvenile leaves triangular (deltoid),
+84,Juvenile leaf blade shape (juvenile or coppice growth to 50 cm),discrete,11,242,Juvenile leaves oblong,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29162","type":2}]
+85,Juvenile leaf blade length (juvenile or coppice growth to 50 cm in cm.),numeric,11,,,
+86,Juvenile leaf blade width (juvenile or coppice growth to 50 cm in cm.),numeric,11,,,
+87,Juvenile leaf base shape (juvenile or coppice growth to 50 cm),discrete,11,243,Juvenile leaf base connate (leaves paired with bases joined),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29218","type":2}]
+87,Juvenile leaf base shape (juvenile or coppice growth to 50 cm),discrete,11,244,Juvenile leaf base stem-clasping (amplexicaul),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22117","type":2}]
+87,Juvenile leaf base shape (juvenile or coppice growth to 50 cm),discrete,11,245,Juvenile leaf base peltate,
+87,Juvenile leaf base shape (juvenile or coppice growth to 50 cm),discrete,11,246,Juvenile leaf base tapering to petiole (on both sides, or slightly oblique),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/33952","type":2}]
+87,Juvenile leaf base shape (juvenile or coppice growth to 50 cm),discrete,11,247,Juvenile leaf base distinctly oblique on petiole (more than 3 mm displacement),
+87,Juvenile leaf base shape (juvenile or coppice growth to 50 cm),discrete,11,248,Juvenile leaf base lobed (auriculate),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/13082","type":2}]
+87,Juvenile leaf base shape (juvenile or coppice growth to 50 cm),discrete,11,249,Juvenile leaf base squared (truncate),
+87,Juvenile leaf base shape (juvenile or coppice growth to 50 cm),discrete,11,250,Juvenile leaf base rounded,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29246","type":2}]
+88,Juvenile leaf margin (juvenile or coppice growth to 50 cm),discrete,11,251,Juvenile leaf margin entire,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29330","type":2}]
+88,Juvenile leaf margin (juvenile or coppice growth to 50 cm),discrete,11,252,Juvenile leaf margin scalloped or toothed (crenulate or denticulate), or irregular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/125086","type":2}]
+89,Juvenile leaf apex shape (juvenile or coppice growth to 50 cm),discrete,11,253,Juvenile leaf apex rounded,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35137","type":2}]
+89,Juvenile leaf apex shape (juvenile or coppice growth to 50 cm),discrete,11,254,Juvenile leaf apex notched (emarginate),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29118","type":2}]
+89,Juvenile leaf apex shape (juvenile or coppice growth to 50 cm),discrete,11,255,Juvenile leaf apex pointed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29330","type":2}]
+90,Juvenile leaf colour (juvenile or coppice growth to 50 cm),discrete,11,256,Juvenile leaves blue-green or grey-green or blue-grey,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/33958","type":2}]
+90,Juvenile leaf colour (juvenile or coppice growth to 50 cm),discrete,11,257,Juvenile leaves green,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29330","type":2}]
+90,Juvenile leaf colour (juvenile or coppice growth to 50 cm),discrete,11,258,Juvenile leaves whitish with surface wax (glaucous),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35137","type":2}]
+91,Juvenile leaf hairs, or scabridity (juvenile or coppice growth to 50 cm),discrete,11,259,Juvenile leaf hairs or scabridity present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25938","type":2}]
+91,Juvenile leaf hairs, or scabridity (juvenile or coppice growth to 50 cm),discrete,11,260,Juvenile leaf hairs or scabridity absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29330","type":2}]
+92,Seedling stem cross-section (cultivated seedling),discrete,11,261,Seedling stem rounded (terete),
+92,Seedling stem cross-section (cultivated seedling),discrete,11,262,Seedling stem square,
+92,Seedling stem cross-section (cultivated seedling),discrete,11,263,Seedling stem prominently winged,
+92,Seedling stem cross-section (cultivated seedling),discrete,11,264,Seedling stem three-sided,
+92,Seedling stem cross-section (cultivated seedling),discrete,11,265,Seedling stem five-sided (or more),

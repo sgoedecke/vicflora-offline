@@ -1,0 +1,80 @@
+Character ID,Character Name,Character Type,Parent ID,State ID,State Name,State Description
+1,Occurrence,grouping,,,,
+2,Culm,grouping,,,,
+3,Inflorescence,grouping,,,,
+4,Flower,grouping,,,,
+5,Fruit,grouping,,,,
+6,Natural Region,discrete,1,1,Murray Mallee,
+6,Natural Region,discrete,1,2,Lowan Mallee,
+6,Natural Region,discrete,1,3,Wimmera,
+6,Natural Region,discrete,1,4,Wannon,
+6,Natural Region,discrete,1,5,Grampians,
+6,Natural Region,discrete,1,6,Riverina,
+6,Natural Region,discrete,1,7,Midlands,
+6,Natural Region,discrete,1,8,Victorian Volcanic Plain,
+6,Natural Region,discrete,1,9,Otway Plain,
+6,Natural Region,discrete,1,10,Otway Ranges,
+6,Natural Region,discrete,1,11,Eastern Highlands,
+6,Natural Region,discrete,1,12,Gippsland Plain,
+6,Natural Region,discrete,1,13,Gippsland Highlands,
+6,Natural Region,discrete,1,14,Wilsons Promontory,
+6,Natural Region,discrete,1,15,Snowfields,
+6,Natural Region,discrete,1,16,East Gippsland,
+7,Height,grouping,2,,,
+8,Diameter,grouping,2,,,
+9,Cross-section,discrete,2,17,Trigonous or triquetrous,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/124836?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#trigonous-or-triquetrous","type":2}]
+9,Cross-section,discrete,2,18,Terete,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#terete","type":2}]
+9,Cross-section,discrete,2,19,Flat,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#flat","type":2}]
+9,Cross-section,discrete,2,20,Biconvex, narrow-ellipsoid or with one side convex,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#biconvex-narrow-ellipsoid-or-with-one-side-convex","type":2}]
+9,Cross-section,discrete,2,21,Square,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#square","type":2}]
+10,Nodes,discrete,2,22,present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21875?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#present","type":2}]
+10,Nodes,discrete,2,23,absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26442?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#absent","type":2}]
+11,Length,grouping,3,,,
+12,Type,discrete,3,24,Paniculate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22072?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#paniculate","type":2}]
+12,Type,discrete,3,25,Anthelate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27826?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#anthelate","type":2}]
+12,Type,discrete,3,26,Single spikelet or spike,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41313?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#single-spikelet-or-spike","type":2}]
+12,Type,discrete,3,27,Lateral head,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/9784?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#lateral-head","type":2}]
+12,Type,discrete,3,28,Terminal Head,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11760?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#terminal-head","type":2}]
+13,Basic inflorescence unit Spikelet/Spike (in Carex) length,grouping,3,,,
+14,Flower number per basic inflorescence unit,discrete,3,29,1,
+14,Flower number per basic inflorescence unit,discrete,3,30,2,
+14,Flower number per basic inflorescence unit,discrete,3,31,3-5,
+14,Flower number per basic inflorescence unit,discrete,3,32,6-10,
+14,Flower number per basic inflorescence unit,discrete,3,33,greater than 10,
+15,Glume arrangement,discrete,3,34,Distichous,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/33904?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#distichous","type":2}]
+15,Glume arrangement,discrete,3,35,Spirally arranged,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/31304?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#spirally-arranged","type":2}]
+16,Floret sexuality,discrete,3,36,Both unisexual and bisexual florets present,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#both-unisexual-and-bisexual-florets-present","type":2}]
+16,Floret sexuality,discrete,3,37,All florets bisexual,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#all-florets-bisexual","type":2}]
+16,Floret sexuality,discrete,3,38,All florets unisexual,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#all-florets-unisexual","type":2}]
+17,Glume length,grouping,4,,,
+18,Style arm number,discrete,4,39,2,
+18,Style arm number,discrete,4,40,3,
+18,Style arm number,discrete,4,41,4,
+18,Style arm number,discrete,4,42,5,
+19,Stamen number,discrete,4,43,1,
+19,Stamen number,discrete,4,44,2,
+19,Stamen number,discrete,4,45, 3,
+19,Stamen number,discrete,4,46,4,
+19,Stamen number,discrete,4,47,5,
+19,Stamen number,discrete,4,48,6,
+19,Stamen number,discrete,4,49,7,
+19,Stamen number,discrete,4,50,8,
+20,Structures attached at base of ovary or nut,discrete,4,51,Bristles,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16646?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#bristles","type":2}]
+20,Structures attached at base of ovary or nut,discrete,4,52,Scales,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/15390?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#scales","type":2}]
+20,Structures attached at base of ovary or nut,discrete,4,53,Both scales and bristles absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/17094?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/cyperaceae#both-scales-and-bristles-present","type":2}]
+21,Number of scales or bristles attached at base of nut,grouping,4,,,
+22,Colour,discrete,5,54,Green,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36549?maxsize=1024","type":2}]
+22,Colour,discrete,5,55,Straw, cream or yellow,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16682?maxsize=1024","type":2}]
+22,Colour,discrete,5,56,White or grey,
+22,Colour,discrete,5,57,Black,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/12350?maxsize=1024","type":2}]
+22,Colour,discrete,5,58,Brown,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16590?maxsize=1024","type":2}]
+22,Colour,discrete,5,59,Red-brown,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16768?maxsize=1024","type":2}]
+22,Colour,discrete,5,60,Red or orange,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/31650?maxsize=1024","type":2}]
+23,Length,grouping,5,,,
+24,cm,numeric,7,,,
+25,mm,numeric,8,,,
+26,cm,numeric,11,,,
+27,mm,numeric,13,,,
+28,mm,numeric,17,,,
+29,,numeric,21,,,
+30,mm,numeric,23,,,

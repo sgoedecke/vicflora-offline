@@ -1,0 +1,33 @@
+{
+  "name": "vicflora-scraper",
+  "version": "1.0.0",
+  "description": "Scraper for VicFlora dichotomous keys and multi-access keys",
+  "main": "main.js",
+  "bin": {
+    "vicflora-scraper": "./main.js"
+  },
+  "scripts": {
+    "start": "node main.js",
+    "scrape:multi": "node main.js multi-access",
+    "scrape:identification": "node main.js identification",
+    "scrape:all": "node main.js all",
+    "scrape:keybase": "node keybase-scraper-simple.js keybase-list.html keybase-data",
+    "list": "node main.js list",
+    "key": "node keying-cli-simple.js",
+    "key:dichotomous": "node keybase-cli.js"
+  },
+  "dependencies": {
+    "keypress": "^0.2.1",
+    "node-fetch": "^2.7.0"
+  },
+  "keywords": [
+    "vicflora",
+    "botanical",
+    "keys",
+    "scraping",
+    "taxonomy",
+    "flora"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,325 @@
+Character ID,Character Name,Character Type,Parent ID,State ID,State Name,State Description
+1,Lifeform,grouping,,,,
+2,Root,grouping,,,,
+3,Indumentum,grouping,,,,
+4,Stem,grouping,,,,
+5,Sap,grouping,,,,
+6,Leaf,grouping,,,,
+7,Tendril,grouping,,,,
+8,Inflorescence,grouping,,,,
+9,Flower,grouping,,,,
+10,Sepal,grouping,,,,
+11,Petal,grouping,,,,
+12,Male floral parts,grouping,,,,
+13,Female floral parts,grouping,,,,
+14,Fruit,grouping,,,,
+15,Seed,grouping,,,,
+16,Occurrence,grouping,,,,
+17,Habit,discrete,1,1,Tree,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29202?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#tree","type":2}]
+17,Habit,discrete,1,2,Shrub,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25732?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#shrub","type":2}]
+17,Habit,discrete,1,3,Vine,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/125442?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#vine","type":2}]
+17,Habit,discrete,1,4,Scrambler,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41659?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26886?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#scrambler","type":2}]
+17,Habit,discrete,1,5,Palm,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/126268?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#palm","type":2}]
+17,Habit,discrete,1,6,Subshrub,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/31528?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#subshrub","type":2}]
+17,Habit,discrete,1,7,Herb,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34152?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/24102?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#herb","type":2}]
+17,Habit,discrete,1,8,Grass/grass-like,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/37330?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34056?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#grassgrass-like","type":2}]
+18,Classification,discrete,1,9,Monocot,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#monocot","type":2}]
+18,Classification,discrete,1,10,Dicot,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#dicot","type":2}]
+19,Habitat,discrete,1,11,Terrestrial or aerial,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#terrestrial-or-aerial","type":2}]
+19,Habitat,discrete,1,12,Submerged aquatic,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/18294?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#submerged-aquatic","type":2}]
+19,Habitat,discrete,1,13,Floating aquatic,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21586?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#floating-aquatic","type":2}]
+20,Nutrient uptake,grouping,1,,,
+21,Root type,discrete,2,14,Taproot/network,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35709?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29954?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#taprootnetwork","type":2}]
+21,Root type,discrete,2,15,Rhizome/stolon,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40535?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/32990?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#rhizomestolon","type":2}]
+21,Root type,discrete,2,16,Bulb/corm,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40851?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#bulbcorm","type":2}]
+21,Root type,discrete,2,17,Tuber,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/55004?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21835?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#tuber","type":2}]
+22,Indumentum types,discrete,3,18,Simple hairs,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#simple-hairs","type":2}]
+22,Indumentum types,discrete,3,19,Stiff/bristle/hispid,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stiffbristlehispid","type":2}]
+22,Indumentum types,discrete,3,20,Tuberculate/scabrid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/32788?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#tuberculatescabrid","type":2}]
+22,Indumentum types,discrete,3,21,Forked/centifixed/peltate,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#forkedcentifixedpeltate","type":2}]
+22,Indumentum types,discrete,3,22,Branched hairs,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27450?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#branched-hairs","type":2}]
+22,Indumentum types,discrete,3,23,Woolly/cottony/silky hairs,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/55038?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#woollycottonysilkyhairs","type":2}]
+22,Indumentum types,discrete,3,24,Glandular hairs/sessile glands,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#glandular-hairssessile-glands","type":2}]
+22,Indumentum types,discrete,3,25,Bladder-hairs,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20582?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#bladder-hairs","type":2}]
+22,Indumentum types,discrete,3,26,Stinging hairs,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27044?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stinging-hairs","type":2}]
+22,Indumentum types,discrete,3,27,Glabrous,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#glabrous","type":2}]
+23,Stem spines,discrete,4,28,Spines present,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34290?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35571?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#spines-present","type":2}]
+23,Stem spines,discrete,4,29,Spines absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#spines-absent","type":2}]
+24,Sap type,discrete,5,30,Not milky,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#not-milky","type":2}]
+24,Sap type,discrete,5,31,Milky,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#milky","type":2}]
+25,Leaf type,discrete,6,32,Simple leaves,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#simple-leaves","type":2}]
+25,Leaf type,discrete,6,33,Compound leaves,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19670?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/43477?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#compound-leaves","type":2}]
+25,Leaf type,discrete,6,34,Leaves absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/55316?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#leaves-absent","type":2}]
+25,Leaf type,discrete,6,35,Phyllode,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25144?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#phyllode","type":2}]
+25,Leaf type,discrete,6,36,Scales/spines/thallus/leaf sheath only,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21070?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#scalesspinesthallusleaf-sheath-only","type":2}]
+26,Leaflet number,discrete,6,37,1,
+26,Leaflet number,discrete,6,38,2,
+26,Leaflet number,discrete,6,39,3,
+26,Leaflet number,discrete,6,40,4,
+26,Leaflet number,discrete,6,41,5,
+26,Leaflet number,discrete,6,42,6,
+26,Leaflet number,discrete,6,43,7,
+26,Leaflet number,discrete,6,44,>7,
+27,Leaf length,discrete,6,45,<1 cm,
+27,Leaf length,discrete,6,46,1-7 cm,
+27,Leaf length,discrete,6,47,7.1-30 cm,
+27,Leaf length,discrete,6,48,30.1-100 cm,
+27,Leaf length,discrete,6,49,>100 cm,
+28,Leaf blade margin,discrete,6,50,Entire/undulate,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/32876?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/13364?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#entireundulate","type":2}]
+28,Leaf blade margin,discrete,6,51,Minute teeth,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21212?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#minute-teeth","type":2}]
+28,Leaf blade margin,discrete,6,52,Lobed/toothed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/33056?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#lobedtoothed","type":2}]
+28,Leaf blade margin,discrete,6,53,Pinnatifid/pinnatisect,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26324?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#pinnatifidpinnatisect","type":2}]
+29,Leaf arrangement,discrete,6,54,Alternate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3750?maxsize=1227","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#alternate","type":2}]
+29,Leaf arrangement,discrete,6,55,Opposite,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/37057?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#opposite","type":2}]
+29,Leaf arrangement,discrete,6,56,Cluster,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22496?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#cluster","type":2}]
+29,Leaf arrangement,discrete,6,57,Whorl,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11034?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#whorl","type":2}]
+29,Leaf arrangement,discrete,6,58,Basal/rosette,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/10322?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#basalrosette","type":2}]
+30,Leaf upper surface indument,discrete,6,59,Upper surface glabrous,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#upper-surface-glabrous","type":2}]
+30,Leaf upper surface indument,discrete,6,60,Upper surface glabrescent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#upper-surface-glabrescent","type":2}]
+30,Leaf upper surface indument,discrete,6,61,Upper surface viscid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28906?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#upper-surface-viscid","type":2}]
+30,Leaf upper surface indument,discrete,6,62,Upper surface hairy,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/30284?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#upper-surface-hairy","type":2}]
+31,Leaf upper surface colour,discrete,6,63,Green/colourless/reddish,
+31,Leaf upper surface colour,discrete,6,64,Glossy green,
+31,Leaf upper surface colour,discrete,6,65,Bluish-green,
+31,Leaf upper surface colour,discrete,6,66,Grey-green,
+31,Leaf upper surface colour,discrete,6,67,Varigated,
+32,Leaf lower surface indument,discrete,6,68,Lower surface glabrous/glabrescent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/123304?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#lower-surface-glabrousglabrescent","type":2}]
+32,Leaf lower surface indument,discrete,6,69,Lower surface hairy,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25502?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#lower-surface-hairy","type":2}]
+32,Leaf lower surface indument,discrete,6,70,Lower surface densely tomentose,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/43897?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#lower-surface-densely-tomentose","type":2}]
+33,Leaf lower surface colour,discrete,6,71,Green/reddish/blue-green,
+33,Leaf lower surface colour,discrete,6,72,White/silver/grey,
+33,Leaf lower surface colour,discrete,6,73,Rusty/golden,
+34,Leaf texture,discrete,6,74,Fleshy/succulent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/31376?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#fleshysucculent","type":2}]
+34,Leaf texture,discrete,6,75,Herbaceous/chartaceous,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27306?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/33190?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#herbaceouschartaceous","type":2}]
+34,Leaf texture,discrete,6,76,Tough/ericoid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21405?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#toughericoid","type":2}]
+35,Leaf attachement,discrete,6,77,Basal petiole,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/31376?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#basal-petiole","type":2}]
+35,Leaf attachement,discrete,6,78,Sessile/subsessile,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/56128?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#sessilesubsessile","type":2}]
+35,Leaf attachement,discrete,6,79,Peltate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41451?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#peltate","type":2}]
+36,Leaf blade base,discrete,6,80,Wedge-shaped/obtuse/rounded,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35877?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#wedge-shapedobtuserounded","type":2}]
+36,Leaf blade base,discrete,6,81,Truncate/subcordate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34687?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#truncatesubcordate","type":2}]
+36,Leaf blade base,discrete,6,82,Auriculate/cordate/reniform/sagittate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/127172?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#auriculatecordatereniformsagittate","type":2}]
+37,Leaf architecture,discrete,6,83,Flat,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#flat","type":2}]
+37,Leaf architecture,discrete,6,84,Strongly curved/folded,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/8032?maxsize=751","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/5114?maxsize=624","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#strongly-curvedfolded","type":2}]
+37,Leaf architecture,discrete,6,85,Terete/triangular/quadrangular,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23508?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22826?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#teretetriangularquadrangular","type":2}]
+38,Leaf spines,discrete,6,86,Spines present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21440?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#spines-present","type":2}]
+38,Leaf spines,discrete,6,87,Spines absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#spines-absent","type":2}]
+39,Leaf sheath,discrete,6,88,Sheath absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#sheath-absent","type":2}]
+39,Leaf sheath,discrete,6,89,Sheath present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/32340?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#sheath-present","type":2}]
+40,Venation,discrete,6,90,Net-like/pinnate,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28066?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/42165?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#net-likepinnate","type":2}]
+40,Venation,discrete,6,91,Parallel to mid-vein,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/38321?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#parallel-to-mid-vein","type":2}]
+40,Venation,discrete,6,92,Venation indistinct,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#venation-indistinct","type":2}]
+41,Odor,discrete,6,93,Aromatic,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#aromatic","type":2}]
+41,Odor,discrete,6,94,Not aromatic,[{"path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#not-aromatic","type":2}]
+42,Stipules,discrete,6,95,Stipules absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stipules-absent","type":2}]
+42,Stipules,discrete,6,96,Stipules scale-like,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21766?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stipules-scale-like","type":2}]
+42,Stipules,discrete,6,97,Stipules leafy,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/8366?maxsize=2025","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/42025?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stipules-leafy","type":2}]
+42,Stipules,discrete,6,98,Stipules spinose,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22008?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stipules-spinose","type":2}]
+42,Stipules,discrete,6,99,Stipules minute/indistinct,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stipules-minuteindistinct","type":2}]
+43,Ligule,discrete,6,100,Ligule present,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41265?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/123396?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#ligule%20present","type":2}]
+43,Ligule,discrete,6,101,Ligule absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#ligule-absent","type":2}]
+44,Tendril position,discrete,7,102,Tendrils absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#tendrils-absent","type":2}]
+44,Tendril position,discrete,7,103,Tendrils axillary/stipules,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/14022?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#tendrils-axillarystipules","type":2}]
+44,Tendril position,discrete,7,104,Tendrils terminal on branchlets,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40933?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#tendrils-terminal-on-branchlets","type":2}]
+44,Tendril position,discrete,7,105,Tendrils formed on leaves,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34655?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#tendrils-formed-on-leaves","type":2}]
+45,Flower arrangement,discrete,8,106,Single flowers,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29248?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#single-flowers","type":2}]
+45,Flower arrangement,discrete,8,107,Small cluster,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21132?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#small-cluster","type":2}]
+45,Flower arrangement,discrete,8,108,Spike,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28800?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35717?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#spike","type":2}]
+45,Flower arrangement,discrete,8,109,Raceme/panicle/cyme,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/13950?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/44007?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#racemepaniclecyme","type":2}]
+45,Flower arrangement,discrete,8,110,Umbel,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27208?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#umbel","type":2}]
+45,Flower arrangement,discrete,8,111,Head,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/55334?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/32830?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#head","type":2}]
+46,Flower stalk,discrete,8,112,Flowers stalked,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23292?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#flowers-stalked","type":2}]
+46,Flower stalk,discrete,8,113,Flowers sessile,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28874?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#flowers-sessile","type":2}]
+47,Bracts,discrete,8,114,Bracts present,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36469?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41569?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#bracts-present","type":2}]
+47,Bracts,discrete,8,115,Bracts absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#bracts-absent","type":2}]
+48,Bracteoles,discrete,8,116,Bracteoles present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35687?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#bracteoles-present","type":2}]
+48,Bracteoles,discrete,8,117,Bracteoles absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#bracteoles-absent","type":2}]
+49,Flower type,discrete,9,118,Flowers petaloid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34184?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#flowers-petaloid","type":2}]
+49,Flower type,discrete,9,119,Flowers sepaloid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28776?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#flowers-sepaloid","type":2}]
+49,Flower type,discrete,9,120,Perianth minute or absent/bracteate,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/38523?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26728?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#perianth-minute-or-absentbracteate","type":2}]
+49,Flower type,discrete,9,121,Flowers staminate/stylar,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19988?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#flowers-staminatestylar","type":2}]
+50,Flower colour,discrete,9,122,Flowers white/cream/grey,
+50,Flower colour,discrete,9,123,Flowers green,
+50,Flower colour,discrete,9,124,Flowers yellow,
+50,Flower colour,discrete,9,125,Flowers red,
+50,Flower colour,discrete,9,126,Flowers purple,
+50,Flower colour,discrete,9,127,Flowers lilac,
+50,Flower colour,discrete,9,128,Flowers mauve,
+50,Flower colour,discrete,9,129,Flowers blue,
+50,Flower colour,discrete,9,130,Flowers brown/black,
+50,Flower colour,discrete,9,131,Flowers pink,
+50,Flower colour,discrete,9,132,Flowers orange,
+51,Flower sexuality,discrete,9,133,Bisexual,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#bisexual","type":2}]
+51,Flower sexuality,discrete,9,134,Unisexual,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#unisexual","type":2}]
+52,Flower symmetry,discrete,9,135,Regular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27354?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#regular","type":2}]
+52,Flower symmetry,discrete,9,136,Irregular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25816?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#irregular","type":2}]
+53,Hypanthium,discrete,9,137,Prominent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22240?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#prominent","type":2}]
+53,Hypanthium,discrete,9,138,Inconspicuous,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#inconspicuous","type":2}]
+54,Number of perianth whorls,discrete,9,139,1 whorl,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20030?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#1-whorl","type":2}]
+54,Number of perianth whorls,discrete,9,140,2 or more whorls,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23906?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#2-or-more-whorls","type":2}]
+54,Number of perianth whorls,discrete,9,141,Perianth absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/43507?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#perianth-absent","type":2}]
+55,Sepal number,discrete,10,142,1,
+55,Sepal number,discrete,10,143,2,
+55,Sepal number,discrete,10,144,3,
+55,Sepal number,discrete,10,145,4,
+55,Sepal number,discrete,10,146,5,
+55,Sepal number,discrete,10,147,6,
+55,Sepal number,discrete,10,148,7,
+55,Sepal number,discrete,10,149,8,
+55,Sepal number,discrete,10,150,9,
+55,Sepal number,discrete,10,151,10,
+55,Sepal number,discrete,10,152,>10,
+55,Sepal number,discrete,10,153,absent,
+56,Sepal fusion,discrete,10,154,Sepals free,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25590?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#sepals-free","type":2}]
+56,Sepal fusion,discrete,10,155,Sepals fused,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/54636?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#sepals-fused","type":2}]
+56,Sepal fusion,discrete,10,156,Sepals forming calyptra,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35555?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#sepals-forming-calyptra","type":2}]
+57,Petal number,discrete,11,157,1,
+57,Petal number,discrete,11,158,2,
+57,Petal number,discrete,11,159,3,
+57,Petal number,discrete,11,160,4,
+57,Petal number,discrete,11,161,5,
+57,Petal number,discrete,11,162,6,
+57,Petal number,discrete,11,163,7,
+57,Petal number,discrete,11,164,8,
+57,Petal number,discrete,11,165,9,
+57,Petal number,discrete,11,166,10,
+57,Petal number,discrete,11,167,>10,
+57,Petal number,discrete,11,168,absent,
+58,Petal fusion,discrete,11,169,Petals free or 1,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/32820?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petals-free-or-1","type":2}]
+58,Petal fusion,discrete,11,170,Petals fused at base,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/42895?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petals-fused-at-base","type":2}]
+58,Petal fusion,discrete,11,171,Petals tubular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36009?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petals-tubular","type":2}]
+58,Petal fusion,discrete,11,172,Petals 2-liped,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40679?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petals-2-liped","type":2}]
+58,Petal fusion,discrete,11,173,Petals forming calyptra,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35555?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petals-forming-calyptra","type":2}]
+58,Petal fusion,discrete,11,174,Petals fan-shaped/ligule,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26932?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petals-fan-shapedligule","type":2}]
+59,Petal apex,discrete,11,175,Petal apex pointed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11364?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petal-apex-pointed","type":2}]
+59,Petal apex,discrete,11,176,Petal apex rounded/flat,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/17670?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petal-apex-roundedflat","type":2}]
+59,Petal apex,discrete,11,177,Petal apex emarginate/lobed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/32792?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petal-apex-emarginatelobed","type":2}]
+59,Petal apex,discrete,11,178,Petal apex bifid/deeply lobed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25592?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petal-apex-bifiddeeply-lobed","type":2}]
+60,Petal markings/vestiture,discrete,11,179,Markings absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#markings-absent","type":2}]
+60,Petal markings/vestiture,discrete,11,180,Petals with coloured markings,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19122?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petals-with-coloured-markings","type":2}]
+60,Petal markings/vestiture,discrete,11,181,Petals with hairs,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/55900?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/38321?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petals-with-haris","type":2}]
+60,Petal markings/vestiture,discrete,11,182,Petals with scales/lumps,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23480?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20219?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petals-with-scaleslumps","type":2}]
+61,Petal margins,discrete,11,183,Petal margins entire,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petal-margins-entire","type":2}]
+61,Petal margins,discrete,11,184,Petal margins winged,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21653?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petal-margins-winged","type":2}]
+61,Petal margins,discrete,11,185,Petal margins lobed/toothed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28584?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petal-margins-lobedtoothed","type":2}]
+61,Petal margins,discrete,11,186,Petal margins ciliate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22784?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petal-margins-ciliate","type":2}]
+61,Petal margins,discrete,11,187,Petal margins fringed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34569?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#petal-margins-fringed","type":2}]
+62,Petal length,discrete,11,188,Shorter to hardly exceeding sepals,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#shorter-to-hardly-exceeding-sepals","type":2}]
+62,Petal length,discrete,11,189,Distinctly exceeding sepals,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#distinctly-exceeding-sepals","type":2}]
+63,Corona,discrete,11,190,Corona present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23278?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#corona-present","type":2}]
+63,Corona,discrete,11,191,Corona absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#corona-absent","type":2}]
+64,Stamen number,discrete,12,192,1,
+64,Stamen number,discrete,12,193,2,
+64,Stamen number,discrete,12,194,3,
+64,Stamen number,discrete,12,195,4,
+64,Stamen number,discrete,12,196,5,
+64,Stamen number,discrete,12,197,6,
+64,Stamen number,discrete,12,198,7,
+64,Stamen number,discrete,12,199,8,
+64,Stamen number,discrete,12,200,9,
+64,Stamen number,discrete,12,201,10,
+64,Stamen number,discrete,12,202,>10,
+65,Stamen fusion,discrete,12,203,Stamens free,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22486?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stamens-free","type":2}]
+65,Stamen fusion,discrete,12,204,Stamens fused together,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/4778?maxsize=867","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/9338?maxsize=1417","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stamens-fused-together","type":2}]
+65,Stamen fusion,discrete,12,205,Stamens fused to perianth,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36097?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stamens-fused-to-perianth","type":2}]
+65,Stamen fusion,discrete,12,206,Stamens fused together and to perianth,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stamens-fused-together-and-to-perianth","type":2}]
+65,Stamen fusion,discrete,12,207,Stamens fused to carpel,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36921?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stamens-fused-to-carpel","type":2}]
+66,Stamen arrangement,discrete,12,208,Stamens regular (or 1),[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stamens-regular-or-1","type":2}]
+66,Stamen arrangement,discrete,12,209,Stamens grouped in clusters,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25786?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stamens-grouped-in-clusters","type":2}]
+66,Stamen arrangement,discrete,12,210,Stamens asymmetric,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21300?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22507?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stamens-asymmetric","type":2}]
+67,Stamen vestiture,discrete,12,211,Stamens hairy/appendaged,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21530?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stamens-hairyappendaged","type":2}]
+67,Stamen vestiture,discrete,12,212,Stamen vestiture absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stamen-vestiture-absent","type":2}]
+68,Staminodes,discrete,12,213,Staminodes filament-like,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#staminodes-filament-like","type":2}]
+68,Staminodes,discrete,12,214,Staminodes petaloid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23590?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#staminodes-petaloid","type":2}]
+68,Staminodes,discrete,12,215,Staminodes absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#staminodes-absent","type":2}]
+69,Ovary position,discrete,13,216,Ovary superior,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23906?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#ovary-superior","type":2}]
+69,Ovary position,discrete,13,217,Ovary semi-inferior,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/2370?maxsize=1347","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#ovary-semi-inferior","type":2}]
+69,Ovary position,discrete,13,218,Ovary inferior,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20212?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#ovary-inferior","type":2}]
+70,Ovary number and fusion,discrete,13,219,>1 free ovaries,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27438?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#1-free-ovaries","type":2}]
+70,Ovary number and fusion,discrete,13,220,Ovary and carpels partially fused,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/37267?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#ovary-and-carpels-partially-fused","type":2}]
+70,Ovary number and fusion,discrete,13,221,Single ovary,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23500?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23906?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#single-ovary","type":2}]
+71,Carpel number per ovary,discrete,13,222,1,
+71,Carpel number per ovary,discrete,13,223,2,
+71,Carpel number per ovary,discrete,13,224,3,
+71,Carpel number per ovary,discrete,13,225,4,
+71,Carpel number per ovary,discrete,13,226,5,
+71,Carpel number per ovary,discrete,13,227,6,
+71,Carpel number per ovary,discrete,13,228,7,
+71,Carpel number per ovary,discrete,13,229,8,
+71,Carpel number per ovary,discrete,13,230,9,
+71,Carpel number per ovary,discrete,13,231,10,
+71,Carpel number per ovary,discrete,13,232,>10,
+72,Style morphology,discrete,13,233,Style simple/sessile,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26608?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#style-simplesessile","type":2}]
+72,Style morphology,discrete,13,234,Cup-shaped (indusium/pollen presentor),[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21668?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#cup-shaped-indusiumpollen-presenter","type":2}]
+72,Style morphology,discrete,13,235,Style branched,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/1756?maxsize=790","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#style-branched","type":2}]
+72,Style morphology,discrete,13,236,Style plumose,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/39355?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#style-plumose","type":2}]
+72,Style morphology,discrete,13,237,Style petaloid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35885?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#style-petaloid","type":2}]
+73,Style number per ovary,discrete,13,238,1,
+73,Style number per ovary,discrete,13,239,2,
+73,Style number per ovary,discrete,13,240,3,
+73,Style number per ovary,discrete,13,241,4,
+73,Style number per ovary,discrete,13,242,5,
+73,Style number per ovary,discrete,13,243,6,
+73,Style number per ovary,discrete,13,244,7,
+73,Style number per ovary,discrete,13,245,8,
+73,Style number per ovary,discrete,13,246,9,
+73,Style number per ovary,discrete,13,247,10,
+73,Style number per ovary,discrete,13,248,>10,
+74,Fruit type,discrete,14,249,Capsule,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/thumbnail/public/29193","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41167?maxsize=1024","type":2},{"caption":"Image 3","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20138?maxsize=1024","type":2},{"caption":"Image 4","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/2710?maxsize=1398","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#capsule","type":2}]
+74,Fruit type,discrete,14,250,Single fleshy fruit,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27786?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22470?maxsize=1024","type":2},{"caption":"Image 3","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35525?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#single-fleshy-fruit","type":2}]
+74,Fruit type,discrete,14,251,Aggregate of fused fleshy fruits,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23080?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/17614?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#aggregate-of-fused-fleshy-fruits","type":2}]
+74,Fruit type,discrete,14,252,Schizocarp,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36731?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16738?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#schizocarp","type":2}]
+74,Fruit type,discrete,14,253,Cone,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/10669?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#cone","type":2}]
+74,Fruit type,discrete,14,254,Follicle,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23784?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11080?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#follicle","type":2}]
+74,Fruit type,discrete,14,255,Siliqua/pod,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41333?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41447?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#siliquapod","type":2}]
+74,Fruit type,discrete,14,256,Samara,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16494?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35637?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#samara","type":2}]
+74,Fruit type,discrete,14,257,Achene/cypsela/grain,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35675?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28134?maxsize=1024","type":2},{"caption":"Image 3","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/39093?maxsize=1024","type":2},{"caption":"Image 4","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16714?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#achenecypselagrain","type":2}]
+74,Fruit type,discrete,14,258,Nut,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40517?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34220?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#nut","type":2}]
+74,Fruit type,discrete,14,259,Dry or spongy pericarp/utricle,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/24666?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/12978?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#dry-or-spongy-pericarputricle","type":2}]
+75,Fruit coulour,discrete,14,260,Fruit green/yellow/brown/grey,
+75,Fruit coulour,discrete,14,261,Fruit red/pink,
+75,Fruit coulour,discrete,14,262,Fruit blue/purple,
+75,Fruit coulour,discrete,14,263,Fruit white,
+75,Fruit coulour,discrete,14,264,Fruit orange,
+75,Fruit coulour,discrete,14,265,Fruit black,
+76,Fruit shape,discrete,14,266,Fruit round,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16574?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#fruit-round","type":2}]
+76,Fruit shape,discrete,14,267,Fruit flattened/angular,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36487?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34681?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#fruit-flattenedangular","type":2}]
+77,Fruit division,discrete,14,268,Fruit lobed,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/26535?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27257?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#fruit-lobed","type":2}]
+77,Fruit division,discrete,14,269,Fruit unlobed,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#fruit-unlobed","type":2}]
+78,Fruit margins,discrete,14,270,Fruit not winged,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#fruit-not-winged","type":2}]
+78,Fruit margins,discrete,14,271,Fruit winged/strongly ridged,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23120?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/42485?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#fruit-wingedstrongly-ridged","type":2}]
+79,Fruit spines,discrete,14,272,Fruit spinose,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23758?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#fruit-spinose","type":2}]
+79,Fruit spines,discrete,14,273,Fruit lacking spines,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#fruit-lacking-spines","type":2}]
+80,Seed margins,discrete,15,274,Seed winged,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40885?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/126188?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#seed-winged","type":2}]
+80,Seed margins,discrete,15,275,Seed not winged,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#seed-not-winged","type":2}]
+81,Aril,discrete,15,276,Aril present,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/17078?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/126124?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#aril-present","type":2}]
+81,Aril,discrete,15,277,Aril absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#aril-absent","type":2}]
+82,Seed hair,discrete,15,278,Hairs present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/14358?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#hairs-present","type":2}]
+82,Seed hair,discrete,15,279,Hairs absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#hairs-absent","type":2}]
+83,Seed surface,discrete,15,280,Smooth/wrinkled,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#smoothwrinkled","type":2}]
+83,Seed surface,discrete,15,281,Ridged,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40863?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/17248?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#ridged","type":2}]
+83,Seed surface,discrete,15,282,Warty/pitted,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16048?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16852?maxsize=1024","type":2},{"caption":"Image 3","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28134?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#wartypitted","type":2}]
+84,Seed appendages,discrete,15,283,Appendages absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#appendages-absent","type":2}]
+84,Seed appendages,discrete,15,284,Appendages terminal,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40875?maxsize=1024","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/17096?maxsize=1024","type":2},{"caption":"Image 3","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23793?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#appendages-terminal","type":2}]
+84,Seed appendages,discrete,15,285,Appendages lateral,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22966?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#appendages-lateral","type":2}]
+84,Seed appendages,discrete,15,286,Appendages basal,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16646?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#appendages-basal","type":2}]
+85,Bioregion,discrete,16,287,Riverina,[{"caption":"Informtiaon","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/riverina","type":2}]
+85,Bioregion,discrete,16,288,Murray Mallee,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/murray-mallee","type":2}]
+85,Bioregion,discrete,16,289,Lowan Mallee,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/lowan-mallee","type":2}]
+85,Bioregion,discrete,16,290,Wimmera,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/wimmera","type":2}]
+85,Bioregion,discrete,16,291,Wannon,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/wannon","type":2}]
+85,Bioregion,discrete,16,292,Grampians,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/grampians","type":2}]
+85,Bioregion,discrete,16,293,Midlands,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/midlands","type":2}]
+85,Bioregion,discrete,16,294,Victorian Volcanic Plain,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/victorian-volcanic-plain","type":2}]
+85,Bioregion,discrete,16,295,Otway Plain,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/otway-plain","type":2}]
+85,Bioregion,discrete,16,296,Gippsland Plain,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/gippsland-plain","type":2}]
+85,Bioregion,discrete,16,297,Otway Range,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/otway-range","type":2}]
+85,Bioregion,discrete,16,298,Gippsland Highlands,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/gippsland-highlands","type":2}]
+85,Bioregion,discrete,16,299,Eastern Highlands,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/eastern-highlands","type":2}]
+85,Bioregion,discrete,16,300,East Gippsland,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/east-gippsland","type":2}]
+85,Bioregion,discrete,16,301,Snowfields,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/snowfields","type":2}]
+85,Bioregion,discrete,16,302,Wilsons Promontory,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/wilsons-promontory","type":2}]
+86,Nutrient source,discrete,20,303,Producer,[{"caption":"Informaiton","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#producer","type":2}]
+86,Nutrient source,discrete,20,304,Consumer,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#consumer","type":2}]
+87,Parasitic plants,discrete,20,305,Stem parasite,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25652?maxsize=1024  ","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#stem-parasite","type":2}]
+87,Parasitic plants,discrete,20,306,Root parasite,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/30518?maxsize=1024 ","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#root-parasite","type":2}]
+87,Parasitic plants,discrete,20,307,Carnivourous plant,[{"caption":"Image1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/30598?maxsize=1024 ","type":2},{"caption":"Image2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/124124?maxsize=1024 ","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/magnoliopsida#carnivourous-plant","type":2}]

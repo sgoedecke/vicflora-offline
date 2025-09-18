@@ -1,0 +1,9103 @@
+{
+  "title": "Multiaccess key to the Juncaceae of Victoria",
+  "basePath": "key/multiaccess_key_to_the_juncaceae_of_vi/",
+  "retainUncerts": true,
+  "allowMisints": true,
+  "matchType": 0,
+  "features": [
+    {
+      "id": 1,
+      "name": "Natural Region",
+      "parent": 0,
+      "type": 1,
+      "inc_best": true,
+      "states": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/bioregions",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#natural-region",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Plant",
+      "parent": 0,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#plant",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Culm",
+      "parent": 0,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#culm",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Leaf",
+      "parent": 0,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#leaf",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Inflorescence",
+      "parent": 0,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#inflorescence",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Flower",
+      "parent": 0,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#flower",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Fruit",
+      "parent": 0,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#fruit",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Longevity",
+      "parent": 2,
+      "type": 1,
+      "inc_best": true,
+      "states": [
+        17,
+        18
+      ],
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#longevity",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Growth form",
+      "parent": 2,
+      "type": 1,
+      "inc_best": true,
+      "states": [
+        19,
+        20
+      ],
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#growth-form",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Height",
+      "parent": 3,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#height",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Diameter",
+      "parent": 3,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#diameter",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Blade presence",
+      "parent": 4,
+      "type": 1,
+      "inc_best": true,
+      "states": [
+        21,
+        22
+      ],
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#blade-presence",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Width",
+      "parent": 4,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#width",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Blade cross section",
+      "parent": 4,
+      "type": 1,
+      "inc_best": true,
+      "states": [
+        23,
+        24
+      ],
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#blade-cross-section",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Inflorescence length",
+      "parent": 5,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#inflorescence-length",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Primary bract continuation of culm",
+      "parent": 5,
+      "type": 1,
+      "inc_best": true,
+      "states": [
+        25,
+        26
+      ],
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#primary-bract-continuation-of-culm",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Primary bract length",
+      "parent": 5,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#primary-bract-length",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Basal bracts",
+      "parent": 6,
+      "type": 1,
+      "inc_best": true,
+      "states": [
+        27,
+        28
+      ],
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#basal-bracts",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Tepal length",
+      "parent": 6,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#tepal-length",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Stamen number",
+      "parent": 6,
+      "type": 1,
+      "inc_best": true,
+      "states": [
+        29,
+        30,
+        31,
+        32
+      ],
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#stamen-number",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Anther length",
+      "parent": 6,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#anther-length",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Sexuality",
+      "parent": 6,
+      "type": 1,
+      "inc_best": true,
+      "states": [
+        33,
+        34
+      ],
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#sexuality",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Capsule length",
+      "parent": 7,
+      "children": true,
+      "type": 0,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#capsule-length",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Seeds per capsule",
+      "parent": 7,
+      "type": 1,
+      "inc_best": true,
+      "states": [
+        35,
+        36
+      ],
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#seeds-per-capsule",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "cm",
+      "parent": 10,
+      "type": 2,
+      "inc_best": true
+    },
+    {
+      "id": 26,
+      "name": "mm",
+      "parent": 11,
+      "type": 2,
+      "inc_best": true
+    },
+    {
+      "id": 27,
+      "name": "mm",
+      "parent": 13,
+      "type": 2,
+      "inc_best": true
+    },
+    {
+      "id": 28,
+      "name": "cm",
+      "parent": 15,
+      "type": 2,
+      "inc_best": true
+    },
+    {
+      "id": 29,
+      "name": "cm",
+      "parent": 17,
+      "type": 2,
+      "inc_best": true
+    },
+    {
+      "id": 30,
+      "name": "mm",
+      "parent": 19,
+      "type": 2,
+      "inc_best": true
+    },
+    {
+      "id": 31,
+      "name": "mm",
+      "parent": 21,
+      "type": 2,
+      "inc_best": true
+    },
+    {
+      "id": 32,
+      "name": "mm",
+      "parent": 23,
+      "type": 2,
+      "inc_best": true
+    }
+  ],
+  "states": [
+    {
+      "id": 1,
+      "name": "Murray Mallee",
+      "feature": 1
+    },
+    {
+      "id": 2,
+      "name": "Lowan Mallee",
+      "feature": 1
+    },
+    {
+      "id": 3,
+      "name": "Wimmera",
+      "feature": 1
+    },
+    {
+      "id": 4,
+      "name": "Wannon",
+      "feature": 1
+    },
+    {
+      "id": 5,
+      "name": "Grampians",
+      "feature": 1
+    },
+    {
+      "id": 6,
+      "name": "Riverina",
+      "feature": 1
+    },
+    {
+      "id": 7,
+      "name": "Midlands",
+      "feature": 1
+    },
+    {
+      "id": 8,
+      "name": "Victorian Volcanic Plain",
+      "feature": 1
+    },
+    {
+      "id": 9,
+      "name": "Otway Plain",
+      "feature": 1
+    },
+    {
+      "id": 10,
+      "name": "Otway Ranges",
+      "feature": 1
+    },
+    {
+      "id": 11,
+      "name": "Eastern Highlands",
+      "feature": 1
+    },
+    {
+      "id": 12,
+      "name": "Gippsland Plain",
+      "feature": 1
+    },
+    {
+      "id": 13,
+      "name": "Gippsland Highlands",
+      "feature": 1
+    },
+    {
+      "id": 14,
+      "name": "Wilsons Promontory",
+      "feature": 1
+    },
+    {
+      "id": 15,
+      "name": "Snowfields",
+      "feature": 1
+    },
+    {
+      "id": 16,
+      "name": "East Gippsland",
+      "feature": 1
+    },
+    {
+      "id": 17,
+      "name": "Annual",
+      "feature": 8,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#annual",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Perennial",
+      "feature": 8,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#perennial",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Tufted, non-rhizomatous or with short rhizomes",
+      "feature": 9,
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://data.rbg.vic.gov.au/cip/preview/image/public/33332?maxsize=1024",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#tufted-non-rhizomatous-or-with-short-rhizomes",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Sward forming by long creeping rhizome",
+      "feature": 9,
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://data.rbg.vic.gov.au/cip/preview/image/public/13946?maxsize=1024",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#sward-forming-by-long-creeping-rhizome",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Present",
+      "feature": 12,
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://data.rbg.vic.gov.au/cip/preview/image/public/33986?maxsize=1024",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#present",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Absent",
+      "feature": 12,
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://data.rbg.vic.gov.au/cip/preview/image/public/34034?maxsize=1024",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#absent",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Flat or chanelled",
+      "feature": 14,
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://data.rbg.vic.gov.au/cip/preview/image/public/41193?maxsize=1024",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#flat-or-channeled",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Terete",
+      "feature": 14,
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://data.rbg.vic.gov.au/cip/preview/image/public/33992?maxsize=1024",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#terete",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Continuous",
+      "feature": 16,
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://data.rbg.vic.gov.au/cip/preview/image/public/30760?maxsize=1024",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#continuous",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Not continuous",
+      "feature": 16,
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://data.rbg.vic.gov.au/cip/preview/image/public/33990?maxsize=1024",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#not-continuous",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Present",
+      "feature": 18,
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://data.rbg.vic.gov.au/cip/preview/image/public/41223?maxsize=1024",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#basal-bracts-present",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Absent",
+      "feature": 18,
+      "text": [
+        {
+          "caption": "Image",
+          "path": "https://data.rbg.vic.gov.au/cip/preview/image/public/41169?maxsize=1024",
+          "type": 2
+        },
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#basal-bracts-absent",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "3",
+      "feature": 20
+    },
+    {
+      "id": 30,
+      "name": "4",
+      "feature": 20
+    },
+    {
+      "id": 31,
+      "name": "5",
+      "feature": 20
+    },
+    {
+      "id": 32,
+      "name": "6",
+      "feature": 20
+    },
+    {
+      "id": 33,
+      "name": "Bisexual",
+      "feature": 22,
+      "text": [
+        {
+          "caption": "Information",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#bisexual",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "name": "Unisexual",
+      "feature": 22,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/pages/juncaceae#unisexual",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "name": "3",
+      "feature": 24
+    },
+    {
+      "id": 36,
+      "name": "more than 3",
+      "feature": 24
+    }
+  ],
+  "entities": [
+    {
+      "id": 1,
+      "name": "Juncus acuminatus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/53dc2ea6-ef4d-4b5d-b8af-e86dce44f5cc",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Juncus acutiflorus subsp. acutiflorus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/aa4296b3-4220-428c-be94-a9c08be1d580",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Juncus acutus subsp. acutus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/fc863586-86a3-43db-b081-d038f7abaf97",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Juncus alexandri subsp. alexandri",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/0b0b6adc-3717-413f-a3b3-6f237dff6f32",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Juncus amabilis",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/6f9216d9-9a20-48b0-8e85-fe4c81e62f09",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Juncus antarcticus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/1db5a19f-cbd9-47d9-b76d-d6d8eb299890",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Juncus aridicola",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/2d873245-4769-48a5-95c4-d4c87f068a7a",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Juncus articulatus subsp. articulatus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/0ad46503-cf6d-4e2c-bcdd-4b8045ec38d5",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Juncus australis",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/dd692e58-12ca-4ce0-a242-99ff851e02eb",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Juncus bassianus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/d6dcc846-8a6c-4aa7-a2a1-3094d8c0b872",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Juncus brevibracteus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/c8114352-3ff3-4de3-ae17-c479c6aad79f",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Juncus bufonius",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/d21e4e75-cb76-4a2f-a28c-306d8ecdb1e8",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Juncus bulbosus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/7667cccb-23b9-46f4-9a92-6b710948d635",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Juncus caespiticius",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/aa1f0ade-7b9a-41ef-956b-e447ebb27b99",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Juncus capillaceus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/5d2bfde0-2dc9-4f2c-b61b-2cc2ce02796d",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Juncus capitatus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/d86b975d-bca3-49b7-894f-65b2929670bb",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Juncus continuus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/9a6b1a9a-9be5-4686-bc33-018b4cf680ad",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Juncus dichotomus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/17436075-7c60-40e5-b52b-bfae96d87f0e",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Juncus effusus subsp. effusus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/00011470-34a1-45e8-bc11-7bd2befda11f",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Juncus ensifolius",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/2f7eaf63-2c54-44df-aa1d-d5902197170e",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Juncus falcatus subsp. falcatus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/2f8b0856-eb4e-4eb5-8e30-bc5956dfa9be",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Juncus filicaulis",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/08e93021-94af-4527-bc6c-d66be75c3a99",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Juncus flavidus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/4a2c2ad2-abb2-4297-af03-5263a857f733",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Juncus fockei",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/8f13a317-71c3-441e-92b3-0f6675f5cfe5",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Juncus fontanesii subsp. fontanesii",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/ff46eb9f-d303-4b2f-9572-22c0f8c94f4f",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Juncus gerardii subsp. gerardii",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/3aa105c5-f23f-4524-b8ed-d1c7cae24446",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Juncus gregiflorus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/f5908b70-9955-4560-98a1-6b4333a2b7b1",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Juncus holoschoenus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/cbe86db4-ad1f-4a6e-8fd5-0c371683a6a1",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Juncus homalocaulis",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/5c78343e-eb84-41e7-b57a-4d129b987b4e",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Juncus imbricatus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/c2cd0d75-e6cd-48d2-9f22-5a3309b746ef",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "name": "Juncus inflexus subsp. inflexus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/30b4efbe-cb9c-40e3-8991-c862ac453d19",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "name": "Juncus ingens",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/0ac153d5-bbb6-45bb-bb6d-0d89bb997bc9",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "name": "Juncus kraussii subsp. australiensis",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/6957e546-420c-4aa1-b106-f8e109c21cab",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "name": "Juncus microcephalus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/00aff557-48c3-47a9-9b4a-d8fa583e8524",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "name": "Juncus oxycarpus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/82419fcd-d89f-4c83-a27c-bfc7e7a1f54b",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "name": "Juncus pallescens",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/5aa91bff-7c7a-439c-9191-cad0dcb1711c",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "name": "Juncus pallidus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/7f5aacda-d46b-4f5e-b187-b6af0c43408d",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "name": "Juncus pauciflorus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/e0c1ce6a-70b5-4811-a011-196b8c1d6642",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "name": "Juncus phaeanthus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/2ca365b7-367e-4e6b-987b-6779a2581354",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "name": "Juncus planifolius",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/c52ee118-735f-478d-a9c5-b71874fd6bed",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "name": "Juncus prismatocarpus subsp. prismatocarpus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/096c7d5d-8985-4018-9877-bfcbc27ec61f",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "name": "Juncus procerus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/4bd8c199-0651-478b-8ac4-59ad95f78b27",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "name": "Juncus psammophilus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/00281f4b-d52f-4f58-b1cc-972a5d88719a",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "name": "Juncus radula",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/6e4b7933-724c-405c-8718-1e06c10a42e7",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "name": "Juncus remotiflorus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/bf0a938e-ca51-4e71-9ca0-3290919fc062",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "name": "Juncus revolutus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/82136440-232f-4c52-86d5-fa4a27c3f4e7",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "name": "Juncus sandwithii",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/b43cee4e-2f64-4430-93a0-7aaa60d64b75",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "name": "Juncus sarophorus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/607f4b29-ad7a-4419-8024-5c59a131b779",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "name": "Juncus semisolidus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/9564653e-df3a-4a3f-acb2-f3f6075faf4f",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "name": "Juncus subsecundus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/6a7d4c4a-bf2f-4691-af5a-dc1cf9818ea8",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "name": "Juncus tenuis",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/bba0be32-fc36-4477-9a94-4ea1b407de86",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "name": "Juncus thompsonianus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/38b375ff-d650-47f8-800f-adceb30055e9",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "name": "Juncus usitatus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/cb13d436-a7a7-442e-b02c-f5d026753a7b",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "name": "Juncus vaginatus",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/1699713a-3d56-4486-9bee-825e01c04374",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "name": "Luzula acutifolia subsp. acutifolia",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/542fd91d-c73f-4361-9c85-42e48af8b2e6",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "name": "Luzula alpestris",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/78ae4aeb-7af4-4b0d-bec2-aeb4f1932174",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "name": "Luzula atrata",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/26fc2edd-0551-4027-9945-885d59c8d5a3",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "name": "Luzula meridionalis var. densiflora",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/772d714e-176d-4f6d-99ca-a05ce9c2a55c",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "name": "Luzula meridionalis var. flaccida",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/665c4701-334d-45f8-b389-742cdaaa3676",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "name": "Luzula meridionalis var. meridionalis",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/73f2c221-d4ed-4102-ae5e-db0cd3c4c99b",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "name": "Luzula modesta",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/3576783a-d61d-42a0-942b-9182cef62122",
+          "type": 2
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "name": "Luzula novae-cambriae",
+      "type": 1,
+      "children": false,
+      "parent": 0,
+      "text": [
+        {
+          "caption": "Profile",
+          "path": "https://vicflora.rbg.vic.gov.au/flora/taxon/59a47e30-8567-45bc-9339-e1c5bcd55eb2",
+          "type": 2
+        }
+      ]
+    }
+  ],
+  "subsets": [],
+  "scores": {
+    "1": "IwBl5Sy0s34LrBwXQ/OQ",
+    "2": "AzCMZSJcunZ1o0j5MkA",
+    "3": "AzCMbV0lrrwNopiaWhZ0g",
+    "4": "AzCMZVzKJSqNjGtGqfaqRA",
+    "5": "AzCMZVzbpTZUgp41VfOGRA",
+    "6": "IwBl+UwqWrKTHOTGNRpmlA",
+    "7": "IwkBlMPYrzo1qZLaNfSQ",
+    "8": "AzCMZUrLpTY2rFFyNXJIg",
+    "9": "AzCMZUrbxTyOgmiJqTeU5A",
+    "10": "AzCMZUrbxfyOpBiLwsuM5A",
+    "11": "IwBm5NXDZirzkxKGuEA",
+    "12": "IwBlrDmnpSowcpq32SIA",
+    "13": "AzCMZVzbc6YKeKDIxJxIg",
+    "14": "AzCMZVw9pT5Ts2EGvoqIg",
+    "15": "AzCM9NIlKi4xM+NHQZiQ",
+    "16": "IwBm5NXCMnRUXJN5to1wg",
+    "17": "Aw14Iyl63Y3k0Q",
+    "18": "Iw14Ayl638MUA",
+    "19": "IwBm4yotxWbSfSClA",
+    "20": "AwRlwkrcMnQMnFrorFW4g",
+    "21": "IwgMuDwk0sbwbS4FtTDKRA",
+    "22": "AwiMuDwk0sbwbS4FtTDKRA",
+    "23": "AwkRlc2jY5YOpZUXqjGQ",
+    "24": "IwgM9YMyq6y3iR0HrdIA",
+    "25": "AzCM7MJVNqSRtK9zXcx3hA",
+    "26": "IzAM7MJVNqSRtK9zXcx3hA",
+    "27": "AwiMuD3NJuxWiRE7Okzmg",
+    "28": "IwgMuD3NJuxWiRE7Okzmg",
+    "29": "IwBhw1Isb1bjEh5JtjDydA",
+    "30": "AwiMuD0iZfYKY+SwtaoA",
+    "31": "AwiMY1wkd7jgbeLkpUA",
+    "32": "AwRh1MMqptwKU69buWIA",
+    "33": "Iw18ZoAxStzkA",
+    "34": "Aw18ZoIxStzkA",
+    "35": "Aw18ZXdCM8PkA",
+    "36": "Iw18ZXdAM8PkA"
+  },
+  "measures": {
+    "25": {
+      "1": [
+        "IwLgTADAdB7bwLxI+Q"
+      ],
+      "2": [
+        "IwLgzADAdB7bxjxI+Q"
+      ],
+      "3": [
+        "IwLgTADAdB7bwAc8RPkA"
+      ],
+      "4": [
+        "IwLgLArAdADO12AThrEzUyA"
+      ],
+      "5": [
+        "IwLmAYDpzKeArHMTpA"
+      ],
+      "6": [
+        "IwLgDAdArO0gbBMClA"
+      ],
+      "7": [
+        "IwLgLADAdB7bwCs8RPkA"
+      ],
+      "8": [
+        "IwLmAYDpzKYdjiR0g"
+      ],
+      "9": [
+        "IwLgrADAdB7bxIxI+Q"
+      ],
+      "10": [
+        "IwLgrADAdB7bwBM8RPkA"
+      ],
+      "11": [
+        "IwLgbADAdB7bAmArPEz5A"
+      ],
+      "12": [
+        "IwLmDoAYykBZKwVIA"
+      ],
+      "13": [
+        "IwLmDoAYykBZKwVIA"
+      ],
+      "14": [
+        "IwLgTAdADO0g7FOjpA"
+      ],
+      "15": [
+        "IwLgrAdADO0gLFOjpA"
+      ],
+      "16": [
+        "IwLmDoAYykCZKwVIA"
+      ],
+      "17": [
+        "IwLgzADAdB7bwAc8RPkA"
+      ],
+      "18": [
+        "IwLgTADAdB7bB2eIkyA"
+      ],
+      "19": [
+        "IwLgTADAdB7bwAc8RPkA"
+      ],
+      "20": [
+        "IwLgTADAdB7bB2eIkyA"
+      ],
+      "21": [
+        "IwLgTAdADO0grFOjpA"
+      ],
+      "22": [
+        "IwLmAYDpzKYVjiR0g"
+      ],
+      "23": [
+        "IwLgzADAdB7bwCs8RPkA"
+      ],
+      "24": [
+        "IwLgrAdADO0gbFOjpA"
+      ],
+      "25": [
+        "IwLgrAdADO3lcwKkA"
+      ],
+      "26": [
+        "IwLmAYDpzKYTjiR0g"
+      ],
+      "27": [
+        "IwLgzADAdB7bAmC8RPkA"
+      ],
+      "28": [
+        "IwLmAYDpzKYus5A"
+      ],
+      "29": [
+        "IwLgTAdADO0gLFOjpA"
+      ],
+      "30": [
+        "IwLmAYDpzKYTjiR0g"
+      ],
+      "31": [
+        "IwLgTADAdB7bAOeIkyA"
+      ],
+      "32": [
+        "IwLmAZwOnNJkA2etnXEA"
+      ],
+      "33": [
+        "IwLgTADAdB7bwCs8RPkA"
+      ],
+      "34": [
+        "IwLmAYDpzKeATHMTpA"
+      ],
+      "35": [
+        "IwLmAYDpzKYdjiR0g"
+      ],
+      "36": [
+        "IwLmAYDpzKYus5A"
+      ],
+      "37": [
+        "IwLgLADAdB7bAmArPEz5A"
+      ],
+      "38": [
+        "IwLmAYDpzKeC0yPEA"
+      ],
+      "39": [
+        "IwLgTADAdB7bxIxI+Q"
+      ],
+      "40": [
+        "IwLgTAdADO0g7FOjpA"
+      ],
+      "41": [
+        "IwLmAYDpzKYDjiR0g"
+      ],
+      "42": [
+        "IwLmAZwOnNJkBmetnXEA"
+      ],
+      "43": [
+        "IwLgbADAdB7bAmArPEz5A"
+      ],
+      "44": [
+        "IwLmAYDpzKYdjiR0g"
+      ],
+      "45": [
+        "IwLmAYDpzKYus5A"
+      ],
+      "46": [
+        "IwLmDoFYykGYAM4HyQoA"
+      ],
+      "47": [
+        "IwLmDoAYysFZbAZIA"
+      ],
+      "48": [
+        "IwLgrADAdB7bAmC8RPkA"
+      ],
+      "49": [
+        "IwLg7ADAdB7bAmC8RPkA"
+      ],
+      "50": [
+        "IwLmAYDpzKYus5A"
+      ],
+      "51": [
+        "IwLgrAdADO0gnFOjpA"
+      ],
+      "52": [
+        "IwLgDAdArO0lEz0UA"
+      ],
+      "53": [
+        "IwLgzADAdB7bwCs8RPkA"
+      ],
+      "54": [
+        "IwLgrADAdB7bAmC8RPkA"
+      ],
+      "55": [
+        "IwLgTAdADO3grHMipA"
+      ],
+      "56": [
+        "IwLgTAdADO0gzFOjpA"
+      ],
+      "57": [
+        "IwLgrAdADO0gTJGjpA"
+      ],
+      "58": [
+        "IwLgLAdADO0grFOjpA"
+      ],
+      "59": [
+        "IwLgLAdADO0grFOjpA"
+      ],
+      "60": [
+        "IwLgLAdADO0grFOjpA"
+      ],
+      "61": [
+        "IwLgLAdADO3lcwKkA"
+      ],
+      "62": [
+        "IwLgLAdADO3lcwKkA"
+      ]
+    },
+    "26": {
+      "1": [
+        "IwLgDAdAnO0gzBMClA"
+      ],
+      "2": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "3": [
+        "IwLgTAdADO0gLHRUg"
+      ],
+      "4": [
+        "IwLmDoFYykBZwAZ5KA"
+      ],
+      "5": [
+        "IwLmDoAYykCZwFZ5KA"
+      ],
+      "6": [
+        "IwLgDAdATO0sEz0UA"
+      ],
+      "7": [
+        "IwLmDoAYykDZYMkA"
+      ],
+      "8": [
+        "IwLgDAdAHO0sECs8lA"
+      ],
+      "9": [
+        "IwLmDoFYykBZwAZ5KA"
+      ],
+      "10": [
+        "IwLgDAdArO0gzHRUg"
+      ],
+      "11": [
+        "IwLgTAdADO0gbHRUg"
+      ],
+      "12": [
+        "IwLgDAdALO0sEz0UA"
+      ],
+      "13": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "14": [
+        "IwLmDoAYykFZYMkA"
+      ],
+      "15": [
+        "IwLgDAdATO2wrAoA"
+      ],
+      "16": [
+        "IwLgDAdATO2wrAoA"
+      ],
+      "17": [
+        "IwLmDoAYykBZYMkA"
+      ],
+      "18": [
+        "IwLgDAdA7O0sECs8lA"
+      ],
+      "19": [
+        "IwLmDoCYykBZwGZ5KA"
+      ],
+      "20": [
+        "IwLgTAdADO0gbHRUg"
+      ],
+      "21": [
+        "IwLgDAdA7O0gTBMClA"
+      ],
+      "22": [
+        "IwLgDAdArO0sEBM8lA"
+      ],
+      "23": [
+        "IwLmDoAYykGZwFZ5KA"
+      ],
+      "24": [
+        "IwLgDAdAnO0gTBMClA"
+      ],
+      "25": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "26": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "27": [
+        "IwLmDoAYykGZwFZ5KA"
+      ],
+      "28": [
+        "IwLmDoAYykCZwFZ5KA"
+      ],
+      "29": [
+        "IwLgDAdArO0scFSA"
+      ],
+      "30": [
+        "IwLgDAdA7O0sEBs8lA"
+      ],
+      "31": [
+        "IwLmDoFYykGZwAZ5KA"
+      ],
+      "32": [
+        "IwLgLAdADO0sU4OkA"
+      ],
+      "33": [
+        "IwLmDoA4ykBZwFZ5KA"
+      ],
+      "34": [
+        "IwLgDAdAnO0gLBMClA"
+      ],
+      "35": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "36": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "37": [
+        "IwLgTAdArO0gHBADA5Q"
+      ],
+      "38": [
+        "IwLgDAdALO0gzBMClA"
+      ],
+      "39": [
+        "IwLmDoFYykBZwAZ5KA"
+      ],
+      "40": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "41": [
+        "IwLmDoGYylPADHRQ"
+      ],
+      "42": [
+        "IwLgzAdADO0sU4OkA"
+      ],
+      "43": [
+        "IwLmDoFYykBZwAZ5KA"
+      ],
+      "44": [
+        "IwLgDAdArO0gTBA7A5Q"
+      ],
+      "45": [
+        "IwLgDAdArO0gTBA7A5Q"
+      ],
+      "46": [
+        "IwLgDAdALO0sEDM8lA"
+      ],
+      "47": [
+        "IwLgDAdAzO2wbAoA"
+      ],
+      "48": [
+        "IwLmDoAYykBZYMkA"
+      ],
+      "49": [
+        "IwLgzAdADO0gHBArA5Q"
+      ],
+      "50": [
+        "IwLgDAdArO0gTBAzA5Q"
+      ],
+      "51": [
+        "IwLgDAdAHO0sECs8lA"
+      ],
+      "52": [
+        "IwLgDAdAzO2wrAoA"
+      ],
+      "53": [
+        "IwLgDAdArO0gTBAzA5Q"
+      ],
+      "54": [
+        "IwLmDoFYylPADHRQ"
+      ],
+      "55": [
+        "IwLgDAdArO0scFSA"
+      ],
+      "56": [
+        "IwLgDAdArO0sFQOEA"
+      ],
+      "57": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "58": [
+        "IwLgDAdAzO0sECs8lA"
+      ],
+      "59": [
+        "IwLgDAdArO0sEBM8lA"
+      ],
+      "60": [
+        "IwLgDAdArO0scFSA"
+      ],
+      "61": [
+        "IwLgDAdArO0scFSA"
+      ],
+      "62": [
+        "IwLgDAdArO0scFSA"
+      ]
+    },
+    "27": {
+      "1": [
+        "IwLmDoAYykCZwDZ5KA"
+      ],
+      "2": [
+        "IwLmDoBYykCZwFZ5KA"
+      ],
+      "3": [
+        "IwLgTAdADO0gLHRUg"
+      ],
+      "6": [
+        "IwLmDoFYylPADHRQ"
+      ],
+      "8": [
+        "IwLgDAdArO0gTBMClA"
+      ],
+      "12": [
+        "IwLgDAdATO0scFSA"
+      ],
+      "13": [
+        "IwLgDAdAzO0sEBM8lA"
+      ],
+      "14": [
+        "IwLmDoAYykCZwFZ5KA"
+      ],
+      "15": [
+        "IwLgDAdATO2wbAoA"
+      ],
+      "16": [
+        "IwLgDAdATO2wrAoA"
+      ],
+      "18": [
+        "IwLgDAdArO0scFSA"
+      ],
+      "20": [
+        "IwLmDoFYykDZwAZ5KA"
+      ],
+      "21": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "24": [
+        "IwLgDAdAHO0gzBMClA"
+      ],
+      "25": [
+        "IwLgDAdAzO0sECs8lA"
+      ],
+      "26": [
+        "IwLgDAdArO0gTBMClA"
+      ],
+      "28": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "29": [
+        "IwLgDAdAzO0sEz0UA"
+      ],
+      "30": [
+        "IwLgDAdArO0gTHRUg"
+      ],
+      "33": [
+        "IwLmDoFYykBZYMkA"
+      ],
+      "34": [
+        "IwLgDAdA7O0gLBMClA"
+      ],
+      "35": [
+        "IwLgDAdArO0gzBMClA"
+      ],
+      "36": [
+        "IwLmDoAYykBZwFZ5KA"
+      ],
+      "40": [
+        "IwLmDoAYysO48g"
+      ],
+      "41": [
+        "IwLmDoAYykFZx3ooA"
+      ],
+      "46": [
+        "IwLgDAdALO0gTBMClA"
+      ],
+      "47": [
+        "IwLgDAdATO0sECs8lA"
+      ],
+      "51": [
+        "IwLgDAdArO0gTBMClA"
+      ],
+      "52": [
+        "IwLgDAdAzO0sEz0UA"
+      ],
+      "55": [
+        "IwLmDoAYykBZYMkA"
+      ],
+      "56": [
+        "IwLmDoAYykCZYMkA"
+      ],
+      "57": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "58": [
+        "IwLmDoFYylPADHRQ"
+      ],
+      "59": [
+        "IwLgTAdArO0gbBADA5Q"
+      ],
+      "60": [
+        "IwLmDoAYykFZYMkA"
+      ],
+      "61": [
+        "IwLgTAdADO0g7HRUg"
+      ],
+      "62": [
+        "IwLmDoFYykDZwAZ5KA"
+      ]
+    },
+    "28": {
+      "1": [
+        "IwLgnAdADO0sAOOjpA"
+      ],
+      "2": [
+        "IwLgzAdADO0sAmOjpA"
+      ],
+      "3": [
+        "IwLgLAdADO0sBmOjpA"
+      ],
+      "4": [
+        "IwLgzAdADO0sw4OkA"
+      ],
+      "5": [
+        "IwLmDoAYytN49JA"
+      ],
+      "6": [
+        "IwLgDAdAzO0sECs8lA"
+      ],
+      "7": [
+        "IwLgbAdADO0sAWOjpA"
+      ],
+      "8": [
+        "IwLgzAdADO0sAmOjpA"
+      ],
+      "9": [
+        "IwLgTAdADO0sAWOjpA"
+      ],
+      "10": [
+        "IwLgTAdADO0sBWOjpA"
+      ],
+      "11": [
+        "IwLgzAdADO0sU4OkA"
+      ],
+      "12": [
+        "IwLgTAdADO3lcwKkA"
+      ],
+      "13": [
+        "IwLgTAdADO0g7HRUg"
+      ],
+      "14": [
+        "IwLgTAdADO0grHRUg"
+      ],
+      "15": [
+        "IwLgDAdArO0scFSA"
+      ],
+      "16": [
+        "IwLmDoAYykCZYMkA"
+      ],
+      "17": [
+        "IwLgTAdADO0skYOkA"
+      ],
+      "18": [
+        "IwLgTAdADO0sU4OkA"
+      ],
+      "19": [
+        "IwLgTAdADO0g7HRUg"
+      ],
+      "20": [
+        "IwLgTAdADO0sAWOjpA"
+      ],
+      "21": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "22": [
+        "IwLgDAdA7O0gzBMClA"
+      ],
+      "23": [
+        "IwLgzAdADO0sB2OjpA"
+      ],
+      "24": [
+        "IwLgzAdADO0sAOOjpA"
+      ],
+      "25": [
+        "IwLmDoFYykCYAM4HyQoA"
+      ],
+      "26": [
+        "IwLgTAdADO0sA2OjpA"
+      ],
+      "27": [
+        "IwLmDoAYykFZYMkA"
+      ],
+      "28": [
+        "IwLgrAdADO0gTPOjpA"
+      ],
+      "29": [
+        "IwLgTAdADO0sw4OkA"
+      ],
+      "30": [
+        "IwLmDoAYykBZYMkA"
+      ],
+      "31": [
+        "IwLgTAdADO0g7HRUg"
+      ],
+      "32": [
+        "IwLg7AdADO0gzFOjpA"
+      ],
+      "33": [
+        "IwLgLAdADO0gTFOjpA"
+      ],
+      "34": [
+        "IwLgLAdADO0sAOOjpA"
+      ],
+      "35": [
+        "IwLmDoAYytN49JA"
+      ],
+      "36": [
+        "IwLgTAdADO3grHMipA"
+      ],
+      "37": [
+        "IwLgbAdADO0sAOOjpA"
+      ],
+      "38": [
+        "IwLgTAdADO0sU4OkA"
+      ],
+      "39": [
+        "IwLgTAdADO0sU4OkA"
+      ],
+      "40": [
+        "IwLgTAdADO0skYOkA"
+      ],
+      "41": [
+        "IwLgrAdADO0sB2OjpA"
+      ],
+      "42": [
+        "IwLgLAdADO0sBmOjpA"
+      ],
+      "43": [
+        "IwLgrAdADO0sU4OkA"
+      ],
+      "44": [
+        "IwLgLAdADO0sAmOjpA"
+      ],
+      "45": [
+        "IwLg7AdADO0sBOOjpA"
+      ],
+      "46": [
+        "IwLmDoAYykHZYMkA"
+      ],
+      "47": [
+        "IwLmDoAYykE5YMkA"
+      ],
+      "48": [
+        "IwLgbAdADO0sBWOjpA"
+      ],
+      "49": [
+        "IwLmAYDpzKYJgKzRE6Q"
+      ],
+      "50": [
+        "IwLmDoAYysGZbAZIA"
+      ],
+      "51": [
+        "IwLmDoAYykE5YMkA"
+      ],
+      "52": [
+        "IwLgDAdAzO2wHAoA"
+      ],
+      "53": [
+        "IwLgTAdADO0g7HRUg"
+      ],
+      "54": [
+        "IwLg7AdADO0skYOkA"
+      ],
+      "55": [
+        "IwLgDAdArO0gTHRUg"
+      ],
+      "56": [
+        "IwLgDAdArO0scFSA"
+      ],
+      "57": [
+        "IwLgDAdArO0scFSA"
+      ],
+      "58": [
+        "IwLgDAdArO0lEz0UA"
+      ],
+      "59": [
+        "IwLgDAdArO0g7BMClA"
+      ],
+      "60": [
+        "IwLgDAdArO0g7BMClA"
+      ],
+      "61": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "62": [
+        "IwLgDAdArO0lcFSA"
+      ]
+    },
+    "29": {
+      "1": [
+        "IwLgzAdADO0gnHRUg"
+      ],
+      "2": [
+        "IwLmDoFYysAZx3ooA"
+      ],
+      "3": [
+        "IwLgLAdADO0gTAVjk6Q"
+      ],
+      "4": [
+        "IwLgzAdADO3lcwKkA"
+      ],
+      "5": [
+        "IwLmAYDpzKYZntEjpA"
+      ],
+      "6": [
+        "IwLgDAdATO2wbAoA"
+      ],
+      "7": [
+        "IwLmAYDpzKYFjiR0g"
+      ],
+      "8": [
+        "IwLgDAdArO0gTBMClA"
+      ],
+      "9": [
+        "IwLgHAdADO0skYOkA"
+      ],
+      "10": [
+        "IwLgTAdADO0sBmOjpA"
+      ],
+      "11": [
+        "IwLgLAdADO0sA2OjpA"
+      ],
+      "12": [
+        "IwLgTAdArO0sB2CAGeTlA"
+      ],
+      "13": [
+        "IwLgDAdAbO0swJnosQ"
+      ],
+      "14": [
+        "IwLgTAdADO0sw4OkA"
+      ],
+      "15": [
+        "IwLmDoAYysCZbAZIA"
+      ],
+      "16": [
+        "IwLmDoAYykBZYMkA"
+      ],
+      "17": [
+        "IwLgLAdADO0gzFOjpA"
+      ],
+      "18": [
+        "IwLgTAdADO0sU4OkA"
+      ],
+      "19": [
+        "IwLmAYDpzKYZgOzRE6Q"
+      ],
+      "20": [
+        "IwLgHAdADO0gTAVjk6Q"
+      ],
+      "21": [
+        "IwLgDAdArO0gnBMClA"
+      ],
+      "22": [
+        "IwLgTAdArO0sAGCD5IUA"
+      ],
+      "23": [
+        "IwLgrAdADO0gzFOjpA"
+      ],
+      "24": [
+        "IwLgzAdADO0gTJGjpA"
+      ],
+      "25": [
+        "IwLmDoFYykA5wAZ5KA"
+      ],
+      "26": [
+        "IwLgDAdArO0gTANgmByxA"
+      ],
+      "27": [
+        "IwLgrAdADO0sBOOjpA"
+      ],
+      "28": [
+        "IwLgLAdADO0skYOkA"
+      ],
+      "29": [
+        "IwLgTAdADO0sBWOjpA"
+      ],
+      "30": [
+        "IwLgDAdA7O0lEz0UA"
+      ],
+      "31": [
+        "IwLgTAdADO3lcwKkA"
+      ],
+      "32": [
+        "IwLgTADAdB7bA2eIkyA"
+      ],
+      "33": [
+        "IwLgzAdADO0gLFOjpA"
+      ],
+      "34": [
+        "IwLmDoBYykDZwAZ5KA"
+      ],
+      "35": [
+        "IwLmDoAYytN49JA"
+      ],
+      "36": [
+        "IwLmDoAYytN49JA"
+      ],
+      "37": [
+        "IwLgbAdADO0gzAVjk6Q"
+      ],
+      "38": [
+        "IwLgbAdADO0gzAJjk6Q"
+      ],
+      "39": [
+        "IwLgLAdADO0gTFOjpA"
+      ],
+      "40": [
+        "IwLgDAdArO0skz0UA"
+      ],
+      "41": [
+        "IwLgzAdADO0sAWOjpA"
+      ],
+      "42": [
+        "IwLgnAdADO0skYOkA"
+      ],
+      "43": [
+        "IwLgHAdADO0gzAJjk6Q"
+      ],
+      "44": [
+        "IwLgnAdADO0gLFOjpA"
+      ],
+      "45": [
+        "IwLgzAdADO0gTFOjpA"
+      ],
+      "46": [
+        "IwLgDAdA7O0gbBMClA"
+      ],
+      "47": [
+        "IwLgDAdAbO0grBeClA"
+      ],
+      "48": [
+        "IwLmFYDoAYy2DM0YiTIA"
+      ],
+      "49": [
+        "IwLmDYDoAYy2AsBmGJkyA"
+      ],
+      "50": [
+        "IwLgrAdADO0gTFOjpA"
+      ],
+      "51": [
+        "IwLgrAdADO0gTFOjpA"
+      ],
+      "52": [
+        "IwLgDAdATO0lEz0UA"
+      ],
+      "53": [
+        "IwLmAYDpzKYJgBzRE6Q"
+      ],
+      "54": [
+        "IwLmwOgBjSYFitEjpA"
+      ],
+      "55": [
+        "IwLmDoAYykBZYMkA"
+      ],
+      "56": [
+        "IwLmDoAYykDZYMkA"
+      ],
+      "57": [
+        "IwLgDAdArO0gTHRUg"
+      ],
+      "58": [
+        "IwLmDoFYykE5wAZ5KA"
+      ],
+      "59": [
+        "IwLmDoAYykA5YMkA"
+      ],
+      "60": [
+        "IwLmDoAYykA5YMkA"
+      ],
+      "61": [
+        "IwLgDAdArO0gHBMClA"
+      ],
+      "62": [
+        "IwLgDAdArO0g7BMClA"
+      ]
+    },
+    "30": {
+      "1": [
+        "IwLgTAdArO0gzHRUg"
+      ],
+      "2": [
+        "IwLmDoFY3B2EBM4GKkA"
+      ],
+      "3": [
+        "IwLgTAdArO0gLBADA5Q"
+      ],
+      "4": [
+        "IwLmDoFYykCZwDZ5KA"
+      ],
+      "5": [
+        "IwLmDoFYykGZwAZ5KA"
+      ],
+      "6": [
+        "IwLgTAdArO0gLBADA5Q"
+      ],
+      "7": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "8": [
+        "IwLmDoFYykGZwAZ5KA"
+      ],
+      "9": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "10": [
+        "IwLmDoE4ykGZwAZ5KA"
+      ],
+      "11": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "12": [
+        "IwLgTAdArO0skAM8lA"
+      ],
+      "13": [
+        "IwLgTAdArO0gLBADA5Q"
+      ],
+      "14": [
+        "IwLgTAdADO0gzBArA5Q"
+      ],
+      "15": [
+        "IwLmDoFYykGZwAZ5KA"
+      ],
+      "16": [
+        "IwLmDoFYykDZwAZ5KA"
+      ],
+      "17": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "18": [
+        "IwLgTAdArO0gLBADA5Q"
+      ],
+      "19": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "20": [
+        "IwLgTAdADO0gzBAbA5Q"
+      ],
+      "21": [
+        "IwLgzAdADO0grBeClA"
+      ],
+      "22": [
+        "IwLmDoFYykGZwAZ5KA"
+      ],
+      "23": [
+        "IwLgTAdArO0gzHRUg"
+      ],
+      "24": [
+        "IwLgTAdArO0lEAM8lA"
+      ],
+      "25": [
+        "IwLgTAdADO0gLHRUg"
+      ],
+      "26": [
+        "IwLgTAdADO0gLHRUg"
+      ],
+      "27": [
+        "IwLmDoFYykGZwAZ5KA"
+      ],
+      "28": [
+        "IwLgTAdArO0lEAM8lA"
+      ],
+      "29": [
+        "IwLgzAdADO0gHBArA5Q"
+      ],
+      "30": [
+        "IwLgzAdADO0grBeClA"
+      ],
+      "31": [
+        "IwLgTAdArO0gLBADA5Q"
+      ],
+      "32": [
+        "IwLmDoFYykCZwDZ5KA"
+      ],
+      "33": [
+        "IwLgTAdArO0gzBADA5Q"
+      ],
+      "34": [
+        "IwLmDoFYylPADHRQ"
+      ],
+      "35": [
+        "IwLgTAdArO0gLHRUg"
+      ],
+      "36": [
+        "IwLgzAdADO0grHRUg"
+      ],
+      "37": [
+        "IwLgTAdArO0gzHRUg"
+      ],
+      "38": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "39": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "40": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "41": [
+        "IwLgTAdArO0gbBADA5Q"
+      ],
+      "42": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "43": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "44": [
+        "IwLgzAdADO0gLBArA5Q"
+      ],
+      "45": [
+        "IwLgTAdArO0gLBADA5Q"
+      ],
+      "46": [
+        "IwLgzAdArO0gbBADA5Q"
+      ],
+      "47": [
+        "IwLmDoFYykGZYMkA"
+      ],
+      "48": [
+        "IwLgTAdADO2wrAoA"
+      ],
+      "49": [
+        "IwLmDoFYykGZwAZ5KA"
+      ],
+      "50": [
+        "IwLgTAdADO0gLHRUg"
+      ],
+      "51": [
+        "IwLgTAdArO0lEAM8lA"
+      ],
+      "52": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "53": [
+        "IwLmDoAYykCZYMkA"
+      ],
+      "54": [
+        "IwLgTAdArO0gLBADA5Q"
+      ],
+      "55": [
+        "IwLgTAdArO0gzHRUg"
+      ],
+      "56": [
+        "IwLgTAdADO2wrAoA"
+      ],
+      "57": [
+        "IwLgTAdADO2wrAoA"
+      ],
+      "58": [
+        "IwLmDoE4ykCZwDZ5KA"
+      ],
+      "59": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "60": [
+        "IwLgTAdA7O0gzBeClA"
+      ],
+      "61": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "62": [
+        "IwLgTAdArO0gzHRUg"
+      ]
+    },
+    "31": {
+      "1": [
+        "IwLgDAdALO2w7AoA"
+      ],
+      "2": [
+        "IwLgDAdAHO0sEz0UA"
+      ],
+      "3": [
+        "IwLmDoCYylPADHRQ"
+      ],
+      "4": [
+        "IwLgDAdALO0sFQOEA"
+      ],
+      "5": [
+        "IwLgDAdALO2w7AoA"
+      ],
+      "6": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "7": [
+        "IwLgDAdALO0sEz0UA"
+      ],
+      "8": [
+        "IwLgDAdALO0sEz0UA"
+      ],
+      "9": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "10": [
+        "IwLgDAdAzO0sEz0UA"
+      ],
+      "11": [
+        "IwLgDAdALO0sEz0UA"
+      ],
+      "12": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "13": [
+        "IwLgDAdAzO2w7AoA"
+      ],
+      "14": [
+        "IwLgDAdALO2wHAoA"
+      ],
+      "15": [
+        "IwLgDAdATO2wbAoA"
+      ],
+      "16": [
+        "IwLgDAdATO2w7AoA"
+      ],
+      "17": [
+        "IwLgDAdALO0sEz0UA"
+      ],
+      "18": [
+        "IwLgDAdAzO2wbAoA"
+      ],
+      "19": [
+        "IwLgDAdAzO2wHAoA"
+      ],
+      "20": [
+        "IwLgDAdArO2w7AoA"
+      ],
+      "21": [
+        "IwLgDAdAHO0sEBs8lA"
+      ],
+      "22": [
+        "IwLgDAdALO2wHAoA"
+      ],
+      "23": [
+        "IwLgDAdAbO0sEBM8lA"
+      ],
+      "24": [
+        "IwLgDAdALO2wnAoA"
+      ],
+      "25": [
+        "IwLgDAdAHO0sECs8lA"
+      ],
+      "26": [
+        "IwLmDoAYykCZx3ooA"
+      ],
+      "27": [
+        "IwLgDAdAzO2w7AoA"
+      ],
+      "28": [
+        "IwLgDAdALO0sEz0UA"
+      ],
+      "29": [
+        "IwLgDAdA7O0sEDM8lA"
+      ],
+      "30": [
+        "IwLgDAdA7O0sEAs8lA"
+      ],
+      "31": [
+        "IwLgDAdA7O0sEz0UA"
+      ],
+      "32": [
+        "IwLgDAdA7O0sECs8lA"
+      ],
+      "33": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "34": [
+        "IwLgDAdAzO2w7AoA"
+      ],
+      "35": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "36": [
+        "IwLgDAdAzO2w7AoA"
+      ],
+      "37": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "38": [
+        "IwLgDAdAzO2wHAoA"
+      ],
+      "39": [
+        "IwLgDAdAzO2wbAoA"
+      ],
+      "40": [
+        "IwLgDAdAzO2wbAoA"
+      ],
+      "41": [
+        "IwLgDAdALO0sEz0UA"
+      ],
+      "42": [
+        "IwLgDAdAzO2wHAoA"
+      ],
+      "43": [
+        "IwLgDAdA7O0sEz0UA"
+      ],
+      "44": [
+        "IwLgDAdAbO0sFQOEA"
+      ],
+      "45": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "46": [
+        "IwLmDoAYykCZYMkA"
+      ],
+      "47": [
+        "IwLgDAdALO2w7AoA"
+      ],
+      "48": [
+        "IwLgDAdAzO2wnAoA"
+      ],
+      "49": [
+        "IwLgDAdALO0sEz0UA"
+      ],
+      "50": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "51": [
+        "IwLgDAdAzO2wbAoA"
+      ],
+      "52": [
+        "IwLgDAdArO2wHAoA"
+      ],
+      "53": [
+        "IwLgDAdAzO2w7AoA"
+      ],
+      "54": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "55": [
+        "IwLgDAdAHO0sEDM8lA"
+      ],
+      "56": [
+        "IwLgDAdALO2wbAoA"
+      ],
+      "57": [
+        "IwLgDAdALO2wHAoA"
+      ],
+      "58": [
+        "IwLgDAdAzO2w7AoA"
+      ],
+      "59": [
+        "IwLgDAdAzO0sECs8lA"
+      ],
+      "60": [
+        "IwLgDAdA7O0sEBs8lA"
+      ],
+      "61": [
+        "IwLgDAdArO0sEz0UA"
+      ],
+      "62": [
+        "IwLgDAdA7O0sEDM8lA"
+      ]
+    },
+    "32": {
+      "1": [
+        "IwLgTAdADO0gLHRUg"
+      ],
+      "2": [
+        "IwLgTAdArO0gzHRUg"
+      ],
+      "3": [
+        "IwLgLAdADO0gbHRUg"
+      ],
+      "4": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "5": [
+        "IwLmDoA4ykCZwFZ5KA"
+      ],
+      "6": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "7": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "8": [
+        "IwLgTAdArO0gLBADA5Q"
+      ],
+      "9": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "10": [
+        "IwLgTAdADO2wHAoA"
+      ],
+      "11": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "12": [
+        "IwLgTAdADO0gLHRUg"
+      ],
+      "13": [
+        "IwLgTAdALO0lEAM8lA"
+      ],
+      "14": [
+        "IwLmDoFYykGZYMkA"
+      ],
+      "15": [
+        "IwLmDoFYykGZYMkA"
+      ],
+      "16": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "17": [
+        "IwLmDoFYykGZwAZ5KA"
+      ],
+      "18": [
+        "IwLgTAdArO0gzHRUg"
+      ],
+      "19": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "20": [
+        "IwLgTAdArO0gzHRUg"
+      ],
+      "21": [
+        "IwLgzAdArO0lEAM8lA"
+      ],
+      "22": [
+        "IwLgTAdADO2wbAoA"
+      ],
+      "23": [
+        "IwLgTAdADO0gzBArA5Q"
+      ],
+      "24": [
+        "IwLgzAdADO0g7HRUg"
+      ],
+      "25": [
+        "IwLgzAdADO0grBeClA"
+      ],
+      "26": [
+        "IwLgTAdADO0gLHRUg"
+      ],
+      "27": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "28": [
+        "IwLgzAdADO0gLBArA5Q"
+      ],
+      "29": [
+        "IwLgzAdADO0gbBArA5Q"
+      ],
+      "30": [
+        "IwLgzAdArO0g7BADA5Q"
+      ],
+      "31": [
+        "IwLgTAdArO0gzBADA5Q"
+      ],
+      "32": [
+        "IwLmDoFYykCZwAZ5KA"
+      ],
+      "33": [
+        "IwLgTAdArO0gzBADA5Q"
+      ],
+      "34": [
+        "IwLmDoFYykBZwAZ5KA"
+      ],
+      "35": [
+        "IwLgTAdArO0lcFSA"
+      ],
+      "36": [
+        "IwLgTAdADO0gzBArA5Q"
+      ],
+      "37": [
+        "IwLgTAdArO0gzHRUg"
+      ],
+      "38": [
+        "IwLgTAdADO0gzBArA5Q"
+      ],
+      "39": [
+        "IwLgTAdADO2wbAoA"
+      ],
+      "40": [
+        "IwLmDoAYykGZYMkA"
+      ],
+      "41": [
+        "IwLgLAdADO0grHRUg"
+      ],
+      "42": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "43": [
+        "IwLmDoFYykCZwAZ5KA"
+      ],
+      "44": [
+        "IwLgTAdArO0gLBADA5Q"
+      ],
+      "45": [
+        "IwLgTAdArO0gLHRUg"
+      ],
+      "46": [
+        "IwLgzAdArO0lcFSA"
+      ],
+      "47": [
+        "IwLgTAdArO0gLBAbA5Q"
+      ],
+      "48": [
+        "IwLmDoFYykCZYMkA"
+      ],
+      "49": [
+        "IwLgTAdADO2wrAoA"
+      ],
+      "50": [
+        "IwLgTAdADO0gzBArA5Q"
+      ],
+      "51": [
+        "IwLgTAdADO0gLHRUg"
+      ],
+      "52": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "53": [
+        "IwLmDoFYykCZwAZ5KA"
+      ],
+      "54": [
+        "IwLgTAdADO0gzHRUg"
+      ],
+      "55": [
+        "IwLgTAdADO0gzBArA5Q"
+      ],
+      "56": [
+        "IwLmDoFYykGZwAZ5KA"
+      ],
+      "57": [
+        "IwLmDoFYykGZwAZ5KA"
+      ],
+      "58": [
+        "IwLmDoFYykGZYMkA"
+      ],
+      "59": [
+        "IwLmDoFYykGZYMkA"
+      ],
+      "60": [
+        "IwLmDoFYykGZYMkA"
+      ],
+      "61": [
+        "IwLgTAdADO0gzBArA5Q"
+      ],
+      "62": [
+        "IwLgTAdArO0gLBADA5Q"
+      ]
+    }
+  },
+  "dependencies": {},
+  "scopes": {
+    "27": "CwLgrCDsIJwgjABgfB15wEyZJgzLtHqnjnkQBwh5zA7AHCjATBXBxjJgFjBA"
+  },
+  "decompressedScores": {
+    "1": [
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "2": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    "3": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "4": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "5": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "6": [
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0
+    ],
+    "7": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0
+    ],
+    "8": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "9": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "10": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "11": [
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "12": [
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "13": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "14": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    "15": [
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "16": [
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "17": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "18": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "19": [
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "20": [
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "21": [
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "22": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "23": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "24": [
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "25": [
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "26": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "27": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "28": [
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "29": [
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "30": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "31": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "32": [
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "33": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "34": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "35": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "36": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "decompressedMeasures": {
+    "25": {
+      "1": [
+        1,
+        20,
+        20,
+        100,
+        100
+      ],
+      "2": [
+        1,
+        30,
+        30,
+        110,
+        110
+      ],
+      "3": [
+        1,
+        20,
+        20,
+        180,
+        180
+      ],
+      "4": [
+        1,
+        45,
+        45,
+        190,
+        190
+      ],
+      "5": [
+        1,
+        10,
+        10,
+        150,
+        150
+      ],
+      "6": [
+        1,
+        0.5,
+        0.5,
+        6,
+        6
+      ],
+      "7": [
+        1,
+        40,
+        40,
+        150,
+        150
+      ],
+      "8": [
+        1,
+        10,
+        10,
+        70,
+        70
+      ],
+      "9": [
+        1,
+        50,
+        50,
+        150,
+        150
+      ],
+      "10": [
+        1,
+        50,
+        50,
+        120,
+        120
+      ],
+      "11": [
+        1,
+        60,
+        60,
+        250,
+        250
+      ],
+      "12": [
+        1,
+        1,
+        1,
+        40,
+        40
+      ],
+      "13": [
+        1,
+        1,
+        1,
+        40,
+        40
+      ],
+      "14": [
+        1,
+        2,
+        2,
+        70,
+        70
+      ],
+      "15": [
+        1,
+        5,
+        5,
+        40,
+        40
+      ],
+      "16": [
+        1,
+        1,
+        1,
+        20,
+        20
+      ],
+      "17": [
+        1,
+        30,
+        30,
+        180,
+        180
+      ],
+      "18": [
+        1,
+        20,
+        20,
+        70,
+        70
+      ],
+      "19": [
+        1,
+        20,
+        20,
+        180,
+        180
+      ],
+      "20": [
+        1,
+        20,
+        20,
+        70,
+        70
+      ],
+      "21": [
+        1,
+        2,
+        2,
+        50,
+        50
+      ],
+      "22": [
+        1,
+        10,
+        10,
+        50,
+        50
+      ],
+      "23": [
+        1,
+        30,
+        30,
+        150,
+        150
+      ],
+      "24": [
+        1,
+        5,
+        5,
+        60,
+        60
+      ],
+      "25": [
+        1,
+        5,
+        5,
+        50,
+        50
+      ],
+      "26": [
+        1,
+        10,
+        10,
+        90,
+        90
+      ],
+      "27": [
+        1,
+        30,
+        30,
+        200,
+        200
+      ],
+      "28": [
+        1,
+        10,
+        10,
+        100,
+        100
+      ],
+      "29": [
+        1,
+        2,
+        2,
+        40,
+        40
+      ],
+      "30": [
+        1,
+        10,
+        10,
+        90,
+        90
+      ],
+      "31": [
+        1,
+        20,
+        20,
+        80,
+        80
+      ],
+      "32": [
+        1,
+        100,
+        100,
+        600,
+        600
+      ],
+      "33": [
+        1,
+        20,
+        20,
+        150,
+        150
+      ],
+      "34": [
+        1,
+        10,
+        10,
+        120,
+        120
+      ],
+      "35": [
+        1,
+        10,
+        10,
+        70,
+        70
+      ],
+      "36": [
+        1,
+        10,
+        10,
+        100,
+        100
+      ],
+      "37": [
+        1,
+        40,
+        40,
+        250,
+        250
+      ],
+      "38": [
+        1,
+        10,
+        10,
+        110,
+        110
+      ],
+      "39": [
+        1,
+        20,
+        20,
+        120,
+        120
+      ],
+      "40": [
+        1,
+        2,
+        2,
+        70,
+        70
+      ],
+      "41": [
+        1,
+        10,
+        10,
+        80,
+        80
+      ],
+      "42": [
+        1,
+        100,
+        100,
+        300,
+        300
+      ],
+      "43": [
+        1,
+        60,
+        60,
+        250,
+        250
+      ],
+      "44": [
+        1,
+        10,
+        10,
+        70,
+        70
+      ],
+      "45": [
+        1,
+        10,
+        10,
+        100,
+        100
+      ],
+      "46": [
+        1,
+        1.5,
+        1.5,
+        30,
+        30
+      ],
+      "47": [
+        1,
+        1,
+        1,
+        15,
+        15
+      ],
+      "48": [
+        1,
+        50,
+        50,
+        200,
+        200
+      ],
+      "49": [
+        1,
+        70,
+        70,
+        200,
+        200
+      ],
+      "50": [
+        1,
+        10,
+        10,
+        100,
+        100
+      ],
+      "51": [
+        1,
+        5,
+        5,
+        90,
+        90
+      ],
+      "52": [
+        1,
+        0.5,
+        0.5,
+        5,
+        5
+      ],
+      "53": [
+        1,
+        30,
+        30,
+        150,
+        150
+      ],
+      "54": [
+        1,
+        50,
+        50,
+        200,
+        200
+      ],
+      "55": [
+        1,
+        2,
+        2,
+        25,
+        25
+      ],
+      "56": [
+        1,
+        2,
+        2,
+        30,
+        30
+      ],
+      "57": [
+        1,
+        5,
+        5,
+        25,
+        25
+      ],
+      "58": [
+        1,
+        4,
+        4,
+        50,
+        50
+      ],
+      "59": [
+        1,
+        4,
+        4,
+        50,
+        50
+      ],
+      "60": [
+        1,
+        4,
+        4,
+        50,
+        50
+      ],
+      "61": [
+        1,
+        4,
+        4,
+        40,
+        40
+      ],
+      "62": [
+        1,
+        4,
+        4,
+        40,
+        40
+      ]
+    },
+    "26": {
+      "1": [
+        1,
+        0.9,
+        0.9,
+        3,
+        3
+      ],
+      "2": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "3": [
+        1,
+        2,
+        2,
+        4,
+        4
+      ],
+      "4": [
+        1,
+        1.5,
+        1.5,
+        4,
+        4
+      ],
+      "5": [
+        1,
+        1,
+        1,
+        2.5,
+        2.5
+      ],
+      "6": [
+        1,
+        0.2,
+        0.2,
+        1,
+        1
+      ],
+      "7": [
+        1,
+        1,
+        1,
+        6,
+        6
+      ],
+      "8": [
+        1,
+        0.8,
+        0.8,
+        1.5,
+        1.5
+      ],
+      "9": [
+        1,
+        1.5,
+        1.5,
+        4,
+        4
+      ],
+      "10": [
+        1,
+        0.5,
+        0.5,
+        3.5,
+        3.5
+      ],
+      "11": [
+        1,
+        2,
+        2,
+        6,
+        6
+      ],
+      "12": [
+        1,
+        0.4,
+        0.4,
+        1,
+        1
+      ],
+      "13": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "14": [
+        1,
+        1,
+        1,
+        5,
+        5
+      ],
+      "15": [
+        1,
+        0.2,
+        0.2,
+        0.5,
+        0.5
+      ],
+      "16": [
+        1,
+        0.2,
+        0.2,
+        0.5,
+        0.5
+      ],
+      "17": [
+        1,
+        1,
+        1,
+        4,
+        4
+      ],
+      "18": [
+        1,
+        0.7,
+        0.7,
+        1.5,
+        1.5
+      ],
+      "19": [
+        1,
+        1.2,
+        1.2,
+        4.3,
+        4.3
+      ],
+      "20": [
+        1,
+        2,
+        2,
+        6,
+        6
+      ],
+      "21": [
+        1,
+        0.7,
+        0.7,
+        2,
+        2
+      ],
+      "22": [
+        1,
+        0.5,
+        0.5,
+        1.2,
+        1.2
+      ],
+      "23": [
+        1,
+        1,
+        1,
+        3.5,
+        3.5
+      ],
+      "24": [
+        1,
+        0.9,
+        0.9,
+        2,
+        2
+      ],
+      "25": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "26": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "27": [
+        1,
+        1,
+        1,
+        3.5,
+        3.5
+      ],
+      "28": [
+        1,
+        1,
+        1,
+        2.5,
+        2.5
+      ],
+      "29": [
+        1,
+        0.5,
+        0.5,
+        1.5,
+        1.5
+      ],
+      "30": [
+        1,
+        0.7,
+        0.7,
+        1.6,
+        1.6
+      ],
+      "31": [
+        1,
+        1.5,
+        1.5,
+        3,
+        3
+      ],
+      "32": [
+        1,
+        4,
+        4,
+        10,
+        10
+      ],
+      "33": [
+        1,
+        1.8,
+        1.8,
+        4.5,
+        4.5
+      ],
+      "34": [
+        1,
+        0.9,
+        0.9,
+        4,
+        4
+      ],
+      "35": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "36": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "37": [
+        1,
+        2.5,
+        2.5,
+        8,
+        8
+      ],
+      "38": [
+        1,
+        0.4,
+        0.4,
+        3,
+        3
+      ],
+      "39": [
+        1,
+        1.5,
+        1.5,
+        4,
+        4
+      ],
+      "40": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "41": [
+        1,
+        1.3,
+        1.3,
+        3,
+        3
+      ],
+      "42": [
+        1,
+        3,
+        3,
+        10,
+        10
+      ],
+      "43": [
+        1,
+        1.5,
+        1.5,
+        4,
+        4
+      ],
+      "44": [
+        1,
+        0.5,
+        0.5,
+        2.7,
+        2.7
+      ],
+      "45": [
+        1,
+        0.5,
+        0.5,
+        2.7,
+        2.7
+      ],
+      "46": [
+        1,
+        0.4,
+        0.4,
+        1.3,
+        1.3
+      ],
+      "47": [
+        1,
+        0.3,
+        0.3,
+        0.6,
+        0.6
+      ],
+      "48": [
+        1,
+        1,
+        1,
+        4,
+        4
+      ],
+      "49": [
+        1,
+        3,
+        3,
+        8.5,
+        8.5
+      ],
+      "50": [
+        1,
+        0.5,
+        0.5,
+        2.3,
+        2.3
+      ],
+      "51": [
+        1,
+        0.8,
+        0.8,
+        1.5,
+        1.5
+      ],
+      "52": [
+        1,
+        0.3,
+        0.3,
+        0.5,
+        0.5
+      ],
+      "53": [
+        1,
+        0.5,
+        0.5,
+        2.3,
+        2.3
+      ],
+      "54": [
+        1,
+        1.5,
+        1.5,
+        5,
+        5
+      ],
+      "55": [
+        1,
+        0.5,
+        0.5,
+        1.5,
+        1.5
+      ],
+      "56": [
+        1,
+        0.5,
+        0.5,
+        1.1,
+        1.1
+      ],
+      "57": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "58": [
+        1,
+        0.3,
+        0.3,
+        1.5,
+        1.5
+      ],
+      "59": [
+        1,
+        0.5,
+        0.5,
+        1.2,
+        1.2
+      ],
+      "60": [
+        1,
+        0.5,
+        0.5,
+        1.5,
+        1.5
+      ],
+      "61": [
+        1,
+        0.5,
+        0.5,
+        1.5,
+        1.5
+      ],
+      "62": [
+        1,
+        0.5,
+        0.5,
+        1.5,
+        1.5
+      ]
+    },
+    "27": {
+      "1": [
+        1,
+        1,
+        1,
+        2.6,
+        2.6
+      ],
+      "2": [
+        1,
+        1.4,
+        1.4,
+        2.5,
+        2.5
+      ],
+      "3": [
+        1,
+        2,
+        2,
+        4,
+        4
+      ],
+      "6": [
+        1,
+        1.5,
+        1.5,
+        5,
+        5
+      ],
+      "8": [
+        1,
+        0.5,
+        0.5,
+        2,
+        2
+      ],
+      "12": [
+        1,
+        0.2,
+        0.2,
+        1.2,
+        1.2
+      ],
+      "13": [
+        1,
+        0.3,
+        0.3,
+        1.2,
+        1.2
+      ],
+      "14": [
+        1,
+        1,
+        1,
+        2.5,
+        2.5
+      ],
+      "15": [
+        1,
+        0.2,
+        0.2,
+        0.6,
+        0.6
+      ],
+      "16": [
+        1,
+        0.2,
+        0.2,
+        0.5,
+        0.5
+      ],
+      "18": [
+        1,
+        0.5,
+        0.5,
+        1.5,
+        1.5
+      ],
+      "20": [
+        1,
+        1.5,
+        1.5,
+        6,
+        6
+      ],
+      "21": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "24": [
+        1,
+        0.8,
+        0.8,
+        3,
+        3
+      ],
+      "25": [
+        1,
+        0.3,
+        0.3,
+        1.5,
+        1.5
+      ],
+      "26": [
+        1,
+        0.5,
+        0.5,
+        2,
+        2
+      ],
+      "28": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "29": [
+        1,
+        0.3,
+        0.3,
+        1,
+        1
+      ],
+      "30": [
+        1,
+        0.5,
+        0.5,
+        2.5,
+        2.5
+      ],
+      "33": [
+        1,
+        1.5,
+        1.5,
+        4.5,
+        4.5
+      ],
+      "34": [
+        1,
+        0.7,
+        0.7,
+        4,
+        4
+      ],
+      "35": [
+        1,
+        0.5,
+        0.5,
+        3,
+        3
+      ],
+      "36": [
+        1,
+        1,
+        1,
+        4.5,
+        4.5
+      ],
+      "40": [
+        1,
+        1,
+        1,
+        11,
+        11
+      ],
+      "41": [
+        1,
+        1,
+        1,
+        5.5,
+        5.5
+      ],
+      "46": [
+        1,
+        0.4,
+        0.4,
+        2,
+        2
+      ],
+      "47": [
+        1,
+        0.2,
+        0.2,
+        1.5,
+        1.5
+      ],
+      "51": [
+        1,
+        0.5,
+        0.5,
+        2,
+        2
+      ],
+      "52": [
+        1,
+        0.3,
+        0.3,
+        1,
+        1
+      ],
+      "55": [
+        1,
+        1,
+        1,
+        4,
+        4
+      ],
+      "56": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ],
+      "57": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "58": [
+        1,
+        1.5,
+        1.5,
+        5,
+        5
+      ],
+      "59": [
+        1,
+        2.5,
+        2.5,
+        6,
+        6
+      ],
+      "60": [
+        1,
+        1,
+        1,
+        5,
+        5
+      ],
+      "61": [
+        1,
+        2,
+        2,
+        7,
+        7
+      ],
+      "62": [
+        1,
+        1.5,
+        1.5,
+        6,
+        6
+      ]
+    },
+    "28": {
+      "1": [
+        1,
+        9,
+        9,
+        18,
+        18
+      ],
+      "2": [
+        1,
+        3,
+        3,
+        12,
+        12
+      ],
+      "3": [
+        1,
+        4,
+        4,
+        13,
+        13
+      ],
+      "4": [
+        1,
+        3,
+        3,
+        11,
+        11
+      ],
+      "5": [
+        1,
+        1,
+        1,
+        10,
+        10
+      ],
+      "6": [
+        1,
+        0.3,
+        0.3,
+        1.5,
+        1.5
+      ],
+      "7": [
+        1,
+        6,
+        6,
+        14,
+        14
+      ],
+      "8": [
+        1,
+        3,
+        3,
+        12,
+        12
+      ],
+      "9": [
+        1,
+        2,
+        2,
+        14,
+        14
+      ],
+      "10": [
+        1,
+        2,
+        2,
+        15,
+        15
+      ],
+      "11": [
+        1,
+        3,
+        3,
+        10,
+        10
+      ],
+      "12": [
+        1,
+        2,
+        2,
+        20,
+        20
+      ],
+      "13": [
+        1,
+        2,
+        2,
+        7,
+        7
+      ],
+      "14": [
+        1,
+        2,
+        2,
+        5,
+        5
+      ],
+      "15": [
+        1,
+        0.5,
+        0.5,
+        1.5,
+        1.5
+      ],
+      "16": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ],
+      "17": [
+        1,
+        2,
+        2,
+        12,
+        12
+      ],
+      "18": [
+        1,
+        2,
+        2,
+        10,
+        10
+      ],
+      "19": [
+        1,
+        2,
+        2,
+        7,
+        7
+      ],
+      "20": [
+        1,
+        2,
+        2,
+        14,
+        14
+      ],
+      "21": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "22": [
+        1,
+        0.7,
+        0.7,
+        3,
+        3
+      ],
+      "23": [
+        1,
+        3,
+        3,
+        17,
+        17
+      ],
+      "24": [
+        1,
+        3,
+        3,
+        18,
+        18
+      ],
+      "25": [
+        1,
+        1.5,
+        1.5,
+        20,
+        20
+      ],
+      "26": [
+        1,
+        2,
+        2,
+        16,
+        16
+      ],
+      "27": [
+        1,
+        1,
+        1,
+        5,
+        5
+      ],
+      "28": [
+        1,
+        5,
+        5,
+        22,
+        22
+      ],
+      "29": [
+        1,
+        2,
+        2,
+        11,
+        11
+      ],
+      "30": [
+        1,
+        1,
+        1,
+        4,
+        4
+      ],
+      "31": [
+        1,
+        2,
+        2,
+        7,
+        7
+      ],
+      "32": [
+        1,
+        7,
+        7,
+        30,
+        30
+      ],
+      "33": [
+        1,
+        4,
+        4,
+        20,
+        20
+      ],
+      "34": [
+        1,
+        4,
+        4,
+        18,
+        18
+      ],
+      "35": [
+        1,
+        1,
+        1,
+        10,
+        10
+      ],
+      "36": [
+        1,
+        2,
+        2,
+        25,
+        25
+      ],
+      "37": [
+        1,
+        6,
+        6,
+        18,
+        18
+      ],
+      "38": [
+        1,
+        2,
+        2,
+        10,
+        10
+      ],
+      "39": [
+        1,
+        2,
+        2,
+        10,
+        10
+      ],
+      "40": [
+        1,
+        2,
+        2,
+        12,
+        12
+      ],
+      "41": [
+        1,
+        5,
+        5,
+        17,
+        17
+      ],
+      "42": [
+        1,
+        4,
+        4,
+        13,
+        13
+      ],
+      "43": [
+        1,
+        5,
+        5,
+        10,
+        10
+      ],
+      "44": [
+        1,
+        4,
+        4,
+        12,
+        12
+      ],
+      "45": [
+        1,
+        7,
+        7,
+        19,
+        19
+      ],
+      "46": [
+        1,
+        1,
+        1,
+        7,
+        7
+      ],
+      "47": [
+        1,
+        1,
+        1,
+        9,
+        9
+      ],
+      "48": [
+        1,
+        6,
+        6,
+        15,
+        15
+      ],
+      "49": [
+        1,
+        10,
+        10,
+        25,
+        25
+      ],
+      "50": [
+        1,
+        1,
+        1,
+        13,
+        13
+      ],
+      "51": [
+        1,
+        1,
+        1,
+        9,
+        9
+      ],
+      "52": [
+        1,
+        0.3,
+        0.3,
+        0.8,
+        0.8
+      ],
+      "53": [
+        1,
+        2,
+        2,
+        7,
+        7
+      ],
+      "54": [
+        1,
+        7,
+        7,
+        17,
+        17
+      ],
+      "55": [
+        1,
+        0.5,
+        0.5,
+        2.5,
+        2.5
+      ],
+      "56": [
+        1,
+        0.5,
+        0.5,
+        1.5,
+        1.5
+      ],
+      "57": [
+        1,
+        0.5,
+        0.5,
+        1.5,
+        1.5
+      ],
+      "58": [
+        1,
+        0.5,
+        0.5,
+        5,
+        5
+      ],
+      "59": [
+        1,
+        0.5,
+        0.5,
+        7,
+        7
+      ],
+      "60": [
+        1,
+        0.5,
+        0.5,
+        7,
+        7
+      ],
+      "61": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "62": [
+        1,
+        0.5,
+        0.5,
+        5.5,
+        5.5
+      ]
+    },
+    "29": {
+      "1": [
+        1,
+        3,
+        3,
+        9,
+        9
+      ],
+      "2": [
+        1,
+        1.5,
+        1.5,
+        10,
+        10
+      ],
+      "3": [
+        1,
+        4,
+        4,
+        25,
+        25
+      ],
+      "4": [
+        1,
+        3,
+        3,
+        30,
+        30
+      ],
+      "5": [
+        1,
+        10,
+        10,
+        33,
+        33
+      ],
+      "6": [
+        1,
+        0.2,
+        0.2,
+        0.6,
+        0.6
+      ],
+      "7": [
+        1,
+        10,
+        10,
+        40,
+        40
+      ],
+      "8": [
+        1,
+        0.5,
+        0.5,
+        2,
+        2
+      ],
+      "9": [
+        1,
+        8,
+        8,
+        18,
+        18
+      ],
+      "10": [
+        1,
+        2,
+        2,
+        13,
+        13
+      ],
+      "11": [
+        1,
+        4,
+        4,
+        16,
+        16
+      ],
+      "12": [
+        1,
+        2.5,
+        2.5,
+        17,
+        17
+      ],
+      "13": [
+        1,
+        0.6,
+        0.6,
+        11,
+        11
+      ],
+      "14": [
+        1,
+        2,
+        2,
+        11,
+        11
+      ],
+      "15": [
+        1,
+        1,
+        1,
+        12,
+        12
+      ],
+      "16": [
+        1,
+        1,
+        1,
+        4,
+        4
+      ],
+      "17": [
+        1,
+        4,
+        4,
+        30,
+        30
+      ],
+      "18": [
+        1,
+        2,
+        2,
+        10,
+        10
+      ],
+      "19": [
+        1,
+        10,
+        10,
+        37,
+        37
+      ],
+      "20": [
+        1,
+        8,
+        8,
+        25,
+        25
+      ],
+      "21": [
+        1,
+        0.5,
+        0.5,
+        9,
+        9
+      ],
+      "22": [
+        1,
+        2.5,
+        2.5,
+        10,
+        10
+      ],
+      "23": [
+        1,
+        5,
+        5,
+        30,
+        30
+      ],
+      "24": [
+        1,
+        3,
+        3,
+        23,
+        23
+      ],
+      "25": [
+        1,
+        1.5,
+        1.5,
+        8,
+        8
+      ],
+      "26": [
+        1,
+        0.5,
+        0.5,
+        26,
+        26
+      ],
+      "27": [
+        1,
+        5,
+        5,
+        19,
+        19
+      ],
+      "28": [
+        1,
+        4,
+        4,
+        14,
+        14
+      ],
+      "29": [
+        1,
+        2,
+        2,
+        15,
+        15
+      ],
+      "30": [
+        1,
+        0.7,
+        0.7,
+        7,
+        7
+      ],
+      "31": [
+        1,
+        2,
+        2,
+        20,
+        20
+      ],
+      "32": [
+        1,
+        20,
+        20,
+        60,
+        60
+      ],
+      "33": [
+        1,
+        3,
+        3,
+        40,
+        40
+      ],
+      "34": [
+        1,
+        1.4,
+        1.4,
+        6,
+        6
+      ],
+      "35": [
+        1,
+        1,
+        1,
+        10,
+        10
+      ],
+      "36": [
+        1,
+        1,
+        1,
+        10,
+        10
+      ],
+      "37": [
+        1,
+        6,
+        6,
+        35,
+        35
+      ],
+      "38": [
+        1,
+        6,
+        6,
+        32,
+        32
+      ],
+      "39": [
+        1,
+        4,
+        4,
+        20,
+        20
+      ],
+      "40": [
+        1,
+        0.5,
+        0.5,
+        10,
+        10
+      ],
+      "41": [
+        1,
+        3,
+        3,
+        14,
+        14
+      ],
+      "42": [
+        1,
+        9,
+        9,
+        19,
+        19
+      ],
+      "43": [
+        1,
+        8,
+        8,
+        32,
+        32
+      ],
+      "44": [
+        1,
+        9,
+        9,
+        40,
+        40
+      ],
+      "45": [
+        1,
+        3,
+        3,
+        20,
+        20
+      ],
+      "46": [
+        1,
+        0.7,
+        0.7,
+        6,
+        6
+      ],
+      "47": [
+        1,
+        0.6,
+        0.6,
+        5.5,
+        5.5
+      ],
+      "48": [
+        1,
+        15,
+        15,
+        30,
+        30
+      ],
+      "49": [
+        1,
+        16,
+        16,
+        43,
+        43
+      ],
+      "50": [
+        1,
+        5,
+        5,
+        20,
+        20
+      ],
+      "51": [
+        1,
+        5,
+        5,
+        20,
+        20
+      ],
+      "52": [
+        1,
+        0.2,
+        0.2,
+        2,
+        2
+      ],
+      "53": [
+        1,
+        10,
+        10,
+        28,
+        28
+      ],
+      "54": [
+        1,
+        11,
+        11,
+        40,
+        40
+      ],
+      "55": [
+        1,
+        1,
+        1,
+        4,
+        4
+      ],
+      "56": [
+        1,
+        1,
+        1,
+        6,
+        6
+      ],
+      "57": [
+        1,
+        0.5,
+        0.5,
+        2.5,
+        2.5
+      ],
+      "58": [
+        1,
+        1.5,
+        1.5,
+        9,
+        9
+      ],
+      "59": [
+        1,
+        1,
+        1,
+        8,
+        8
+      ],
+      "60": [
+        1,
+        1,
+        1,
+        8,
+        8
+      ],
+      "61": [
+        1,
+        0.5,
+        0.5,
+        8,
+        8
+      ],
+      "62": [
+        1,
+        0.5,
+        0.5,
+        7,
+        7
+      ]
+    },
+    "30": {
+      "1": [
+        1,
+        2.5,
+        2.5,
+        3.5,
+        3.5
+      ],
+      "2": [
+        1,
+        1.5,
+        1.7,
+        2.2,
+        2.5
+      ],
+      "3": [
+        1,
+        2.5,
+        2.5,
+        4,
+        4
+      ],
+      "4": [
+        1,
+        1.5,
+        1.5,
+        2.6,
+        2.6
+      ],
+      "5": [
+        1,
+        1.5,
+        1.5,
+        3,
+        3
+      ],
+      "6": [
+        1,
+        2.5,
+        2.5,
+        4,
+        4
+      ],
+      "7": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "8": [
+        1,
+        1.5,
+        1.5,
+        3,
+        3
+      ],
+      "9": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "10": [
+        1,
+        1.9,
+        1.9,
+        3,
+        3
+      ],
+      "11": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "12": [
+        1,
+        2.5,
+        2.5,
+        12,
+        12
+      ],
+      "13": [
+        1,
+        2.5,
+        2.5,
+        4,
+        4
+      ],
+      "14": [
+        1,
+        2,
+        2,
+        3.5,
+        3.5
+      ],
+      "15": [
+        1,
+        1.5,
+        1.5,
+        3,
+        3
+      ],
+      "16": [
+        1,
+        1.5,
+        1.5,
+        6,
+        6
+      ],
+      "17": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "18": [
+        1,
+        2.5,
+        2.5,
+        4,
+        4
+      ],
+      "19": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "20": [
+        1,
+        2,
+        2,
+        3.6,
+        3.6
+      ],
+      "21": [
+        1,
+        3,
+        3,
+        5.5,
+        5.5
+      ],
+      "22": [
+        1,
+        1.5,
+        1.5,
+        3,
+        3
+      ],
+      "23": [
+        1,
+        2.5,
+        2.5,
+        3.5,
+        3.5
+      ],
+      "24": [
+        1,
+        2.5,
+        2.5,
+        5,
+        5
+      ],
+      "25": [
+        1,
+        2,
+        2,
+        4,
+        4
+      ],
+      "26": [
+        1,
+        2,
+        2,
+        4,
+        4
+      ],
+      "27": [
+        1,
+        1.5,
+        1.5,
+        3,
+        3
+      ],
+      "28": [
+        1,
+        2.5,
+        2.5,
+        5,
+        5
+      ],
+      "29": [
+        1,
+        3,
+        3,
+        8.5,
+        8.5
+      ],
+      "30": [
+        1,
+        3,
+        3,
+        5.5,
+        5.5
+      ],
+      "31": [
+        1,
+        2.5,
+        2.5,
+        4,
+        4
+      ],
+      "32": [
+        1,
+        1.5,
+        1.5,
+        2.6,
+        2.6
+      ],
+      "33": [
+        1,
+        2.5,
+        2.5,
+        3,
+        3
+      ],
+      "34": [
+        1,
+        1.5,
+        1.5,
+        5,
+        5
+      ],
+      "35": [
+        1,
+        2.5,
+        2.5,
+        4.5,
+        4.5
+      ],
+      "36": [
+        1,
+        3,
+        3,
+        5,
+        5
+      ],
+      "37": [
+        1,
+        2.5,
+        2.5,
+        3.5,
+        3.5
+      ],
+      "38": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "39": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "40": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "41": [
+        1,
+        2.5,
+        2.5,
+        6,
+        6
+      ],
+      "42": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "43": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "44": [
+        1,
+        3,
+        3,
+        4.5,
+        4.5
+      ],
+      "45": [
+        1,
+        2.5,
+        2.5,
+        4,
+        4
+      ],
+      "46": [
+        1,
+        3.5,
+        3.5,
+        6,
+        6
+      ],
+      "47": [
+        1,
+        1.5,
+        1.5,
+        3.5,
+        3.5
+      ],
+      "48": [
+        1,
+        2,
+        2,
+        2.5,
+        2.5
+      ],
+      "49": [
+        1,
+        1.5,
+        1.5,
+        3,
+        3
+      ],
+      "50": [
+        1,
+        2,
+        2,
+        4,
+        4
+      ],
+      "51": [
+        1,
+        2.5,
+        2.5,
+        5,
+        5
+      ],
+      "52": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "53": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ],
+      "54": [
+        1,
+        2.5,
+        2.5,
+        4,
+        4
+      ],
+      "55": [
+        1,
+        2.5,
+        2.5,
+        3.5,
+        3.5
+      ],
+      "56": [
+        1,
+        2,
+        2,
+        2.5,
+        2.5
+      ],
+      "57": [
+        1,
+        2,
+        2,
+        2.5,
+        2.5
+      ],
+      "58": [
+        1,
+        1.9,
+        1.9,
+        2.6,
+        2.6
+      ],
+      "59": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "60": [
+        1,
+        2.7,
+        2.7,
+        3.3,
+        3.3
+      ],
+      "61": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "62": [
+        1,
+        2.5,
+        2.5,
+        3.5,
+        3.5
+      ]
+    },
+    "31": {
+      "1": [
+        1,
+        0.4,
+        0.4,
+        0.7,
+        0.7
+      ],
+      "2": [
+        1,
+        0.8,
+        0.8,
+        1,
+        1
+      ],
+      "3": [
+        1,
+        1.2,
+        1.2,
+        2,
+        2
+      ],
+      "4": [
+        1,
+        0.4,
+        0.4,
+        1.1,
+        1.1
+      ],
+      "5": [
+        1,
+        0.4,
+        0.4,
+        0.7,
+        0.7
+      ],
+      "6": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "7": [
+        1,
+        0.4,
+        0.4,
+        1,
+        1
+      ],
+      "8": [
+        1,
+        0.4,
+        0.4,
+        1,
+        1
+      ],
+      "9": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "10": [
+        1,
+        0.3,
+        0.3,
+        1,
+        1
+      ],
+      "11": [
+        1,
+        0.4,
+        0.4,
+        1,
+        1
+      ],
+      "12": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "13": [
+        1,
+        0.3,
+        0.3,
+        0.7,
+        0.7
+      ],
+      "14": [
+        1,
+        0.4,
+        0.4,
+        0.8,
+        0.8
+      ],
+      "15": [
+        1,
+        0.2,
+        0.2,
+        0.6,
+        0.6
+      ],
+      "16": [
+        1,
+        0.2,
+        0.2,
+        0.7,
+        0.7
+      ],
+      "17": [
+        1,
+        0.4,
+        0.4,
+        1,
+        1
+      ],
+      "18": [
+        1,
+        0.3,
+        0.3,
+        0.6,
+        0.6
+      ],
+      "19": [
+        1,
+        0.3,
+        0.3,
+        0.8,
+        0.8
+      ],
+      "20": [
+        1,
+        0.5,
+        0.5,
+        0.7,
+        0.7
+      ],
+      "21": [
+        1,
+        0.8,
+        0.8,
+        1.6,
+        1.6
+      ],
+      "22": [
+        1,
+        0.4,
+        0.4,
+        0.8,
+        0.8
+      ],
+      "23": [
+        1,
+        0.6,
+        0.6,
+        1.2,
+        1.2
+      ],
+      "24": [
+        1,
+        0.4,
+        0.4,
+        0.9,
+        0.9
+      ],
+      "25": [
+        1,
+        0.8,
+        0.8,
+        1.5,
+        1.5
+      ],
+      "26": [
+        1,
+        1,
+        1,
+        2.2,
+        2.2
+      ],
+      "27": [
+        1,
+        0.3,
+        0.3,
+        0.7,
+        0.7
+      ],
+      "28": [
+        1,
+        0.4,
+        0.4,
+        1,
+        1
+      ],
+      "29": [
+        1,
+        0.7,
+        0.7,
+        1.3,
+        1.3
+      ],
+      "30": [
+        1,
+        0.7,
+        0.7,
+        1.4,
+        1.4
+      ],
+      "31": [
+        1,
+        0.7,
+        0.7,
+        1,
+        1
+      ],
+      "32": [
+        1,
+        0.7,
+        0.7,
+        1.5,
+        1.5
+      ],
+      "33": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "34": [
+        1,
+        0.3,
+        0.3,
+        0.7,
+        0.7
+      ],
+      "35": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "36": [
+        1,
+        0.3,
+        0.3,
+        0.7,
+        0.7
+      ],
+      "37": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "38": [
+        1,
+        0.3,
+        0.3,
+        0.8,
+        0.8
+      ],
+      "39": [
+        1,
+        0.3,
+        0.3,
+        0.6,
+        0.6
+      ],
+      "40": [
+        1,
+        0.3,
+        0.3,
+        0.6,
+        0.6
+      ],
+      "41": [
+        1,
+        0.4,
+        0.4,
+        1,
+        1
+      ],
+      "42": [
+        1,
+        0.3,
+        0.3,
+        0.8,
+        0.8
+      ],
+      "43": [
+        1,
+        0.7,
+        0.7,
+        1,
+        1
+      ],
+      "44": [
+        1,
+        0.6,
+        0.6,
+        1.1,
+        1.1
+      ],
+      "45": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "46": [
+        1,
+        1,
+        1,
+        2,
+        2
+      ],
+      "47": [
+        1,
+        0.4,
+        0.4,
+        0.7,
+        0.7
+      ],
+      "48": [
+        1,
+        0.3,
+        0.3,
+        0.9,
+        0.9
+      ],
+      "49": [
+        1,
+        0.4,
+        0.4,
+        1,
+        1
+      ],
+      "50": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "51": [
+        1,
+        0.3,
+        0.3,
+        0.6,
+        0.6
+      ],
+      "52": [
+        1,
+        0.5,
+        0.5,
+        0.8,
+        0.8
+      ],
+      "53": [
+        1,
+        0.3,
+        0.3,
+        0.7,
+        0.7
+      ],
+      "54": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "55": [
+        1,
+        0.8,
+        0.8,
+        1.3,
+        1.3
+      ],
+      "56": [
+        1,
+        0.4,
+        0.4,
+        0.6,
+        0.6
+      ],
+      "57": [
+        1,
+        0.4,
+        0.4,
+        0.8,
+        0.8
+      ],
+      "58": [
+        1,
+        0.3,
+        0.3,
+        0.7,
+        0.7
+      ],
+      "59": [
+        1,
+        0.3,
+        0.3,
+        1.5,
+        1.5
+      ],
+      "60": [
+        1,
+        0.7,
+        0.7,
+        1.6,
+        1.6
+      ],
+      "61": [
+        1,
+        0.5,
+        0.5,
+        1,
+        1
+      ],
+      "62": [
+        1,
+        0.7,
+        0.7,
+        1.3,
+        1.3
+      ]
+    },
+    "32": {
+      "1": [
+        1,
+        2,
+        2,
+        4,
+        4
+      ],
+      "2": [
+        1,
+        2.5,
+        2.5,
+        3.5,
+        3.5
+      ],
+      "3": [
+        1,
+        4,
+        4,
+        6,
+        6
+      ],
+      "4": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "5": [
+        1,
+        1.8,
+        1.8,
+        2.5,
+        2.5
+      ],
+      "6": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "7": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "8": [
+        1,
+        2.5,
+        2.5,
+        4,
+        4
+      ],
+      "9": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "10": [
+        1,
+        2,
+        2,
+        2.8,
+        2.8
+      ],
+      "11": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "12": [
+        1,
+        2,
+        2,
+        4,
+        4
+      ],
+      "13": [
+        1,
+        2.4,
+        2.4,
+        4,
+        4
+      ],
+      "14": [
+        1,
+        1.5,
+        1.5,
+        3.5,
+        3.5
+      ],
+      "15": [
+        1,
+        1.5,
+        1.5,
+        3.5,
+        3.5
+      ],
+      "16": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "17": [
+        1,
+        1.5,
+        1.5,
+        3,
+        3
+      ],
+      "18": [
+        1,
+        2.5,
+        2.5,
+        3.5,
+        3.5
+      ],
+      "19": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "20": [
+        1,
+        2.5,
+        2.5,
+        3.5,
+        3.5
+      ],
+      "21": [
+        1,
+        3.5,
+        3.5,
+        5,
+        5
+      ],
+      "22": [
+        1,
+        2,
+        2,
+        2.6,
+        2.6
+      ],
+      "23": [
+        1,
+        2,
+        2,
+        3.5,
+        3.5
+      ],
+      "24": [
+        1,
+        3,
+        3,
+        7,
+        7
+      ],
+      "25": [
+        1,
+        3,
+        3,
+        5.5,
+        5.5
+      ],
+      "26": [
+        1,
+        2,
+        2,
+        4,
+        4
+      ],
+      "27": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "28": [
+        1,
+        3,
+        3,
+        4.5,
+        4.5
+      ],
+      "29": [
+        1,
+        3,
+        3,
+        6.5,
+        6.5
+      ],
+      "30": [
+        1,
+        3.5,
+        3.5,
+        7,
+        7
+      ],
+      "31": [
+        1,
+        2.5,
+        2.5,
+        3,
+        3
+      ],
+      "32": [
+        1,
+        1.5,
+        1.5,
+        2,
+        2
+      ],
+      "33": [
+        1,
+        2.5,
+        2.5,
+        3,
+        3
+      ],
+      "34": [
+        1,
+        1.5,
+        1.5,
+        4,
+        4
+      ],
+      "35": [
+        1,
+        2.5,
+        2.5,
+        5.5,
+        5.5
+      ],
+      "36": [
+        1,
+        2,
+        2,
+        3.5,
+        3.5
+      ],
+      "37": [
+        1,
+        2.5,
+        2.5,
+        3.5,
+        3.5
+      ],
+      "38": [
+        1,
+        2,
+        2,
+        3.5,
+        3.5
+      ],
+      "39": [
+        1,
+        2,
+        2,
+        2.6,
+        2.6
+      ],
+      "40": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ],
+      "41": [
+        1,
+        4,
+        4,
+        5,
+        5
+      ],
+      "42": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "43": [
+        1,
+        1.5,
+        1.5,
+        2,
+        2
+      ],
+      "44": [
+        1,
+        2.5,
+        2.5,
+        4,
+        4
+      ],
+      "45": [
+        1,
+        2.5,
+        2.5,
+        4.5,
+        4.5
+      ],
+      "46": [
+        1,
+        3.5,
+        3.5,
+        5.5,
+        5.5
+      ],
+      "47": [
+        1,
+        2.5,
+        2.5,
+        4.6,
+        4.6
+      ],
+      "48": [
+        1,
+        1.5,
+        1.5,
+        2.5,
+        2.5
+      ],
+      "49": [
+        1,
+        2,
+        2,
+        2.5,
+        2.5
+      ],
+      "50": [
+        1,
+        2,
+        2,
+        3.5,
+        3.5
+      ],
+      "51": [
+        1,
+        2,
+        2,
+        4,
+        4
+      ],
+      "52": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "53": [
+        1,
+        1.5,
+        1.5,
+        2,
+        2
+      ],
+      "54": [
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "55": [
+        1,
+        2,
+        2,
+        3.5,
+        3.5
+      ],
+      "56": [
+        1,
+        1.5,
+        1.5,
+        3,
+        3
+      ],
+      "57": [
+        1,
+        1.5,
+        1.5,
+        3,
+        3
+      ],
+      "58": [
+        1,
+        1.5,
+        1.5,
+        3.5,
+        3.5
+      ],
+      "59": [
+        1,
+        1.5,
+        1.5,
+        3.5,
+        3.5
+      ],
+      "60": [
+        1,
+        1.5,
+        1.5,
+        3.5,
+        3.5
+      ],
+      "61": [
+        1,
+        2,
+        2,
+        3.5,
+        3.5
+      ],
+      "62": [
+        1,
+        2.5,
+        2.5,
+        4,
+        4
+      ]
+    }
+  },
+  "metadata": {
+    "id": "d2a3243e-22e9-41cc-85f2-46b5c4799629",
+    "downloadedAt": "2025-09-18T09:21:02.296Z",
+    "originalLocation": "https://vicflora-cdn.rbg.vic.gov.au/lucid-keys/juncaceae.js"
+  },
+  "graphqlMetadata": {
+    "id": "d2a3243e-22e9-41cc-85f2-46b5c4799629",
+    "title": "Multi-access key to the Juncaceae of Victoria",
+    "description": "",
+    "characters": [
+      {
+        "id": "092d2526-ca8d-432e-9865-d3d5e5cd656d",
+        "name": "Natural Region",
+        "type": 1,
+        "characterType": "UNORDERED",
+        "description": null,
+        "states": [
+          {
+            "id": "71244397-5aec-4cd8-8f0d-82e1ae0eb8df",
+            "name": "Murray Mallee",
+            "description": null
+          },
+          {
+            "id": "9d5a45e9-8be5-4878-bb5d-238b62d59a37",
+            "name": "Lowan Mallee",
+            "description": null
+          },
+          {
+            "id": "85853960-a1fa-4a62-84f7-62408dc71fc6",
+            "name": "Wimmera",
+            "description": null
+          },
+          {
+            "id": "56a03d7b-74f5-44c2-a0cf-25ca6607abda",
+            "name": "Wannon",
+            "description": null
+          },
+          {
+            "id": "d7971ca0-1399-4245-8197-d52c4fc348be",
+            "name": "Grampians",
+            "description": null
+          },
+          {
+            "id": "350eb7ec-1ac0-4032-9895-071b1e42caa1",
+            "name": "Riverina",
+            "description": null
+          },
+          {
+            "id": "d9bf948f-7d48-478f-a8c0-5cfe8c76ed64",
+            "name": "Midlands",
+            "description": null
+          },
+          {
+            "id": "1608d715-c5f9-498a-bdb5-9d3bcc122275",
+            "name": "Victorian Volcanic Plain",
+            "description": null
+          },
+          {
+            "id": "3d35b6b7-d4f2-4dbe-97b5-86eb4ad3c253",
+            "name": "Otway Plain",
+            "description": null
+          },
+          {
+            "id": "285427bb-c996-47d7-9704-d5ca6dbc0eba",
+            "name": "Otway Ranges",
+            "description": null
+          },
+          {
+            "id": "e841f170-48ff-40fc-bb8f-809a39e9421d",
+            "name": "Eastern Highlands",
+            "description": null
+          },
+          {
+            "id": "c341aec8-453a-428a-8d4b-07668fe47a40",
+            "name": "Gippsland Plain",
+            "description": null
+          },
+          {
+            "id": "72d07cd2-3ca9-4978-9db2-1b2f42a14ce2",
+            "name": "Gippsland Highlands",
+            "description": null
+          },
+          {
+            "id": "ca0a1fa8-980f-46c1-9961-e7e2e97007ce",
+            "name": "Wilsons Promontory",
+            "description": null
+          },
+          {
+            "id": "9b7e2138-14e3-4f44-94d6-44f07f4319b0",
+            "name": "Snowfields",
+            "description": null
+          },
+          {
+            "id": "36354d96-13b8-41c5-a2b9-17d8d3807eb2",
+            "name": "East Gippsland",
+            "description": null
+          }
+        ]
+      },
+      {
+        "id": "50d38a18-eed2-4e60-ad69-5700708e3947",
+        "name": "Longevity",
+        "type": 1,
+        "characterType": "UNORDERED",
+        "description": null,
+        "states": [
+          {
+            "id": "ae0a60d5-3fd4-4bbb-b6e5-dddc742aa2c9",
+            "name": "Annual",
+            "description": null
+          },
+          {
+            "id": "19a8d10d-7661-4a23-853f-ffc4cc9eaf72",
+            "name": "Perennial",
+            "description": null
+          }
+        ]
+      },
+      {
+        "id": "91cc621d-2719-46dc-8c90-cd6bcd9bd9f7",
+        "name": "Growth form",
+        "type": 1,
+        "characterType": "UNORDERED",
+        "description": null,
+        "states": [
+          {
+            "id": "f2f11991-7536-4236-8a74-cdd7592c5bfe",
+            "name": "Tufted, non-rhizomatous or with short rhizomes",
+            "description": null
+          },
+          {
+            "id": "294fd956-1ae6-451e-b879-7c3da71009cd",
+            "name": "Sward forming by long creeping rhizome",
+            "description": null
+          }
+        ]
+      },
+      {
+        "id": "04c53725-2e06-4a96-9dbd-a3e817466f50",
+        "name": "Height",
+        "type": 0,
+        "characterType": "NUMERIC",
+        "description": null,
+        "states": []
+      },
+      {
+        "id": "e68a427a-e961-4926-90d3-ff3d24abd346",
+        "name": "Diameter",
+        "type": 0,
+        "characterType": "NUMERIC",
+        "description": null,
+        "states": []
+      },
+      {
+        "id": "48c1caaf-b907-4031-9756-496db9baf3e4",
+        "name": "Blade presence",
+        "type": 1,
+        "characterType": "UNORDERED",
+        "description": null,
+        "states": [
+          {
+            "id": "fb0b0687-a27c-4afe-805a-0585882e7aeb",
+            "name": "Present",
+            "description": null
+          },
+          {
+            "id": "ba79ec39-87eb-42ce-9c4e-f3b150720f5b",
+            "name": "Absent",
+            "description": null
+          }
+        ]
+      },
+      {
+        "id": "95d6d111-0925-4231-9643-8a6d4fb0e4ce",
+        "name": "Width",
+        "type": 0,
+        "characterType": "NUMERIC",
+        "description": null,
+        "states": []
+      },
+      {
+        "id": "4b060267-34fe-453d-8a11-bcf27ea13aca",
+        "name": "Blade cross section",
+        "type": 1,
+        "characterType": "UNORDERED",
+        "description": null,
+        "states": [
+          {
+            "id": "4d1f7854-3553-48f0-8ebf-bb81a533c834",
+            "name": "Flat or chanelled",
+            "description": null
+          },
+          {
+            "id": "d061b81a-2074-4e53-87ce-8c00d04d85a9",
+            "name": "Terete",
+            "description": null
+          }
+        ]
+      },
+      {
+        "id": "f4736c98-c763-4abb-991b-33b463423766",
+        "name": "Inflorescence length",
+        "type": 0,
+        "characterType": "NUMERIC",
+        "description": null,
+        "states": []
+      },
+      {
+        "id": "2994b0fd-1416-41cf-93e6-d1e13202ed6f",
+        "name": "Primary bract continuation of culm",
+        "type": 1,
+        "characterType": "UNORDERED",
+        "description": null,
+        "states": [
+          {
+            "id": "1333051c-706e-4c4b-aeda-d359e9071007",
+            "name": "Continuous",
+            "description": null
+          },
+          {
+            "id": "188ae96a-b39e-42bf-80fd-f6f7c5761904",
+            "name": "Not continuous",
+            "description": null
+          }
+        ]
+      },
+      {
+        "id": "4c493a0e-6b35-4eb7-b978-ec6975444dfc",
+        "name": "Primary bract length",
+        "type": 0,
+        "characterType": "NUMERIC",
+        "description": null,
+        "states": []
+      },
+      {
+        "id": "262ecf20-f85b-41f7-8664-7a951c08cb47",
+        "name": "Basal bracts",
+        "type": 1,
+        "characterType": "UNORDERED",
+        "description": null,
+        "states": [
+          {
+            "id": "be71fa81-a165-45da-a494-cdb11ea58170",
+            "name": "Present",
+            "description": null
+          },
+          {
+            "id": "2a959e11-3136-4279-a344-ef6ac24205ef",
+            "name": "Absent",
+            "description": null
+          }
+        ]
+      },
+      {
+        "id": "6f266d50-48bb-48db-9b3d-cca7c4880857",
+        "name": "Tepal length",
+        "type": 0,
+        "characterType": "NUMERIC",
+        "description": null,
+        "states": []
+      },
+      {
+        "id": "7c1293e2-e9c6-43b7-8ad5-e59a4fe0255e",
+        "name": "Stamen number",
+        "type": 1,
+        "characterType": "UNORDERED",
+        "description": null,
+        "states": [
+          {
+            "id": "099ca771-0846-47ba-b87b-700403e314d7",
+            "name": "3",
+            "description": null
+          },
+          {
+            "id": "647f3a1b-890b-48d8-ac98-3be610daba85",
+            "name": "4",
+            "description": null
+          },
+          {
+            "id": "422fcce5-a3e2-431c-aa1e-d19b17001435",
+            "name": "5",
+            "description": null
+          },
+          {
+            "id": "39c60abb-9c1f-4420-a903-5fbdbdd2d92e",
+            "name": "6",
+            "description": null
+          }
+        ]
+      },
+      {
+        "id": "1cfbe2da-f419-4396-b599-1e24918cdb73",
+        "name": "Anther length",
+        "type": 0,
+        "characterType": "NUMERIC",
+        "description": null,
+        "states": []
+      },
+      {
+        "id": "ab5e19bf-1b18-43d1-af3d-d86e7eb06cdd",
+        "name": "Sexuality",
+        "type": 1,
+        "characterType": "UNORDERED",
+        "description": null,
+        "states": [
+          {
+            "id": "831c8c53-5123-4568-aefe-e6cb67aae155",
+            "name": "Bisexual",
+            "description": null
+          },
+          {
+            "id": "fbe3621d-fe9a-46c2-b0fc-b7cd0ac4d5b4",
+            "name": "Unisexual",
+            "description": null
+          }
+        ]
+      },
+      {
+        "id": "d2608f85-7ab2-40fa-898f-3c6695778825",
+        "name": "Capsule length",
+        "type": 0,
+        "characterType": "NUMERIC",
+        "description": null,
+        "states": []
+      },
+      {
+        "id": "d1aef272-328c-42c3-90bf-e67a66a38aa5",
+        "name": "Seeds per capsule",
+        "type": 1,
+        "characterType": "UNORDERED",
+        "description": null,
+        "states": [
+          {
+            "id": "c8e0d9d8-acfe-464a-8f61-c6078f02da00",
+            "name": "3",
+            "description": null
+          },
+          {
+            "id": "cd65b543-856f-40e0-97ba-8c5f29cc1253",
+            "name": "more than 3",
+            "description": null
+          }
+        ]
+      }
+    ]
+  }
+}

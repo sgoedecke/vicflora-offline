@@ -1,0 +1,110 @@
+Character ID,Character Name,Character Type,Parent ID,State ID,State Name,State Description
+1,Occurrence,grouping,,,,
+2,Plant,grouping,,,,
+3,Root,grouping,,,,
+4,Stem,grouping,,,,
+5,Leaf,grouping,,,,
+6,Flower,grouping,,,,
+7,Fruit,grouping,,,,
+8,Seed,grouping,,,,
+9,Bioregion,discrete,1,1,Riverina,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/riverina","type":2}]
+9,Bioregion,discrete,1,2,Murray Mallee,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/murray-mallee","type":2}]
+9,Bioregion,discrete,1,3,Lowan Mallee,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/lowan-mallee","type":2}]
+9,Bioregion,discrete,1,4,Wimmera,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/wimmera","type":2}]
+9,Bioregion,discrete,1,5,Wannon,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/wannon","type":2}]
+9,Bioregion,discrete,1,6,Grampians,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/grampians","type":2}]
+9,Bioregion,discrete,1,7,Midlands,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/midlands","type":2}]
+9,Bioregion,discrete,1,8,Victorian Volcanic Plain,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/victorian-volcanic-plain","type":2}]
+9,Bioregion,discrete,1,9,Otway Plain,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/otway-plain","type":2}]
+9,Bioregion,discrete,1,10,Gippsland Plain,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/gippsland-plain","type":2}]
+9,Bioregion,discrete,1,11,Otway Range,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/otway-range","type":2}]
+9,Bioregion,discrete,1,12,Gippsland Highlands,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/gippsland-highlands","type":2}]
+9,Bioregion,discrete,1,13,Eastern Highlands,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/eastern-highlands","type":2}]
+9,Bioregion,discrete,1,14,East Gippsland,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/east-gippsland","type":2}]
+9,Bioregion,discrete,1,15,Snowfields,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/snowfields","type":2}]
+9,Bioregion,discrete,1,16,Wilsons Promontory,[{"path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/wilsons-promontory","type":2}]
+10,Habit,discrete,2,17,Annual,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#annual","type":2}]
+10,Habit,discrete,2,18,Herbaceous perennial,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#herbaceous-perennial","type":2}]
+10,Habit,discrete,2,19,Woody perennial,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#woody-perennial","type":2}]
+11,Maximum height,discrete,2,20,<60 cm,
+11,Maximum height,discrete,2,21,<120 cm,
+11,Maximum height,discrete,2,22,>120 cm,
+12,Root type,discrete,3,23,Stolon/rhizome,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3258?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#stolonrhizome","type":2}]
+12,Root type,discrete,3,24,Taproot/network,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#taprootnetwork","type":2}]
+13,Stem indumentum,discrete,4,25,Stems glabrous,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#stems-glabrous","type":2}]
+13,Stem indumentum,discrete,4,26,Stems with simple hairs,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#stems-with-simple-hairs","type":2}]
+13,Stem indumentum,discrete,4,27,Stems papillate/glandular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3334?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#stems-papillateglandular","type":2}]
+13,Stem indumentum,discrete,4,28,Stems tuberculate/scabrid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3192?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#stems-tubersulatescabrid","type":2}]
+13,Stem indumentum,discrete,4,29,Stems with bristles,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3306?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#stems-with-bristles","type":2}]
+13,Stem indumentum,discrete,4,30,Stems with branching/medifixed/stellate hairs,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3322?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#stems-with-branchingmedifixedstellate-hairs","type":2}]
+14,Leaf length,numeric,5,,,
+15,Leaf dissection,discrete,5,31,Entire,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/13852?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#entire","type":2}]
+15,Leaf dissection,discrete,5,32,Small teeth/lobes,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/140224?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#small-teethlobes","type":2}]
+15,Leaf dissection,discrete,5,33,Lobed/toothed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/137876?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#lobedtoothed","type":2}]
+15,Leaf dissection,discrete,5,34,Pinnately-lobed/pinnate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/126594?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#pinnately-lobedpinnate","type":2}]
+15,Leaf dissection,discrete,5,35,2- or more times divided,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/14008?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#2--or-more-times-divided","type":2}]
+16,Leaf attachment,discrete,5,36,Sessile and stem-clasping,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/137876?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#sessile-and-stem-clasping","type":2}]
+16,Leaf attachment,discrete,5,37,Sessile/subsessile, not stem-clasping,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/30140?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#sessilesubsessile-not-stem-clasping","type":2}]
+16,Leaf attachment,discrete,5,38,Petiolate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/135351?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#petiolate","type":2}]
+17,Leaf indumentum,discrete,5,39,Leaves glabrous,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#leaves-glabrous","type":2}]
+17,Leaf indumentum,discrete,5,40,Leaves with simple hairs,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#leaves-with-simple-hairs","type":2}]
+17,Leaf indumentum,discrete,5,41,Leaves papilate,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#leaves-papillate","type":2}]
+17,Leaf indumentum,discrete,5,42,Leaves tuberculate/scabrid,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#leaves-tuberculatescabrid","type":2}]
+17,Leaf indumentum,discrete,5,43,Leaves with bristles,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#leaves-with-bristles","type":2}]
+17,Leaf indumentum,discrete,5,44,Leaves with branching/medifixed/stellate hairs,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#leaves-with-branchingmedifixedstellate-hairs","type":2}]
+18,Sepal,grouping,6,,,
+19,Petal,grouping,6,,,
+20,Stamens,grouping,6,,,
+21,Fruit length,numeric,7,,,
+22,Fruit width,numeric,7,,,
+23,Fruit shape,discrete,7,45,Fruit linear,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11550?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruit-linear","type":2}]
+23,Fruit shape,discrete,7,46,Fruit narrow elliptic to spherical,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3210?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruit-narrow-elliptic-to-spherical","type":2}]
+23,Fruit shape,discrete,7,47,Fruit reniform/cordate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3224?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruit-reniformcordate","type":2}]
+23,Fruit shape,discrete,7,48,Fruit obovoid/obtriangular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/138054?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruit-obovoidobtriangular","type":2}]
+24,Fruit architecture,discrete,7,49,Compressed or flattened,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23606?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#compressed-or-flattened","type":2}]
+24,Fruit architecture,discrete,7,50,Terete or quadrangular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/23636?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#terete-or-quadrangular","type":2}]
+25,Fruit orientation,discrete,7,51,Spreading or ascending,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/137878?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#spreading-or-ascending","type":2}]
+25,Fruit orientation,discrete,7,52,Appressed to stem,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/42829?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#appressed-to-stem","type":2}]
+25,Fruit orientation,discrete,7,53,Pendent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3324?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#pendent","type":2}]
+26,Fruit indumentum,discrete,7,54,Fruits glabrous,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruits-glabrous","type":2}]
+26,Fruit indumentum,discrete,7,55,Fruits hairy,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruits-hairy","type":2}]
+27,Fruit margins,discrete,7,56,Fruits winged,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3204?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruits-winged","type":2}]
+27,Fruit margins,discrete,7,57,Fruits not winged,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruits-not-winged","type":2}]
+28,Fruit apex,discrete,7,58,Fruit notched,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3190?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruit-notched","type":2}]
+28,Fruit apex,discrete,7,59,Fruit deeply bifid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3212?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruit-deeply-bifid","type":2}]
+28,Fruit apex,discrete,7,60,Fruit rounded or pointed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11550?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruit-roundedpointed","type":2}]
+28,Fruit apex,discrete,7,61,Fruit beaked,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/137874?maxsize=2048","type":2},{"path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#fruit-beaked","type":2}]
+29,Fruit dehiscence,discrete,7,62,Dehiscent by valves,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/137874?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#dehiscent-by-valves","type":2}]
+29,Fruit dehiscence,discrete,7,63,Breaking into segments,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36801?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#breaking-into-segments","type":2}]
+29,Fruit dehiscence,discrete,7,64,Indehiscent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#indehiscent","type":2}]
+30,Septum position,discrete,7,65,Broadest part of fruit or fruit terete,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11550?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#broadest-part-of-fruit-or-fruit-terete","type":2}]
+30,Septum position,discrete,7,66,Narrowest part of fruit,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/138054?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#narrowest-part-of-fruit","type":2}]
+31,Fruit venation,discrete,7,67,Veins inconspicuous,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#veins-inconspicuous","type":2}]
+31,Fruit venation,discrete,7,68,1 prominent vein,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#1-prominent-vein","type":2}]
+31,Fruit venation,discrete,7,69,> 1 prominent vein,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/135356?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#-1-prominent-vein","type":2}]
+32,Fruit constriction,discrete,7,70,Not constricted between seeds,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11550?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#not-constricted-between-seeds","type":2}]
+32,Fruit constriction,discrete,7,71,Strongly constricted between seeds,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/137874?maxsize=2048","type":2},{"path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#strongly-constricted-between-seeds","type":2}]
+33,Pedicel,grouping,7,,,
+34,Number of seeds per fruit,discrete,8,72,1 or 2,
+34,Number of seeds per fruit,discrete,8,73,3 or more,
+35,Seed position,discrete,8,74,1 row per locule,
+35,Seed position,discrete,8,75,2 rows per locule,
+36,Sepal length,numeric,18,,,
+37,Petal length,numeric,19,,,
+38,Petal colour,discrete,19,76,White/cream,
+38,Petal colour,discrete,19,77,Green/brown,
+38,Petal colour,discrete,19,78,Yellow,
+38,Petal colour,discrete,19,79,Pink/blue/purple/mauve,
+39,Petal venation,discrete,19,80,Venation dark or contrastingly coloured,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/10086?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#venation-dark-or-contrastingly-coloured","type":2}]
+39,Petal venation,discrete,19,81,Venation not in contrast to colour of petal lamina,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#venation-not-in-contrast-to-colour-of-petal-lamina","type":2}]
+40,Petal apex,discrete,19,82,Petals rounded/notched,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/35791?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#petals-roundednotched","type":2}]
+40,Petal apex,discrete,19,83,Petals bifid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/142370?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#petals-bifid","type":2}]
+40,Petal apex,discrete,19,84,Petals tapered to a point,[{"caption":"Image 1","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/3242?maxsize=2048","type":2},{"caption":"Image 2","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/18484?maxsize=2048","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#petals-tapered-to-a-point","type":2}]
+41,Stamen number,discrete,20,85,2,
+41,Stamen number,discrete,20,86,4,
+41,Stamen number,discrete,20,87,6,
+42,Pedicel length,discrete,33,88,Shorter than fruit,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#shorter-than-fruit","type":2}]
+42,Pedicel length,discrete,33,89,Equal length to fruit,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#equal-length-to-fruit","type":2}]
+42,Pedicel length,discrete,33,90,Longer than fruit,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#longer-than-fruit","type":2}]
+43,Pedicel indumentum,discrete,33,91,Pedicel glabrous,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#pedicelglabrous","type":2}]
+43,Pedicel indumentum,discrete,33,92,Pedicel hairy,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/brassicaceae#pedicel-hairy","type":2}]

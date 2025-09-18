@@ -1,0 +1,59 @@
+Character ID,Character Name,Character Type,Parent ID,State ID,State Name,State Description
+1,Natural Region,discrete,,1,Murray Mallee,
+1,Natural Region,discrete,,2,Lowan Mallee,
+1,Natural Region,discrete,,3,Wimmera,
+1,Natural Region,discrete,,4,Wannon,
+1,Natural Region,discrete,,5,Grampians,
+1,Natural Region,discrete,,6,Riverina,
+1,Natural Region,discrete,,7,Midlands,
+1,Natural Region,discrete,,8,Victorian Volcanic Plain,
+1,Natural Region,discrete,,9,Otway Plain,
+1,Natural Region,discrete,,10,Otway Ranges,
+1,Natural Region,discrete,,11,Eastern Highlands,
+1,Natural Region,discrete,,12,Gippsland Plain,
+1,Natural Region,discrete,,13,Gippsland Highlands,
+1,Natural Region,discrete,,14,Wilsons Promontory,
+1,Natural Region,discrete,,15,Snowfields,
+1,Natural Region,discrete,,16,East Gippsland,
+2,Plant,grouping,,,,
+3,Culm,grouping,,,,
+4,Leaf,grouping,,,,
+5,Inflorescence,grouping,,,,
+6,Flower,grouping,,,,
+7,Fruit,grouping,,,,
+8,Longevity,discrete,2,17,Annual,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#annual","type":2}]
+8,Longevity,discrete,2,18,Perennial,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#perennial","type":2}]
+9,Growth form,discrete,2,19,Tufted, non-rhizomatous or with short rhizomes,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/33332?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#tufted-non-rhizomatous-or-with-short-rhizomes","type":2}]
+9,Growth form,discrete,2,20,Sward forming by long creeping rhizome,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/13946?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#sward-forming-by-long-creeping-rhizome","type":2}]
+10,Height,grouping,3,,,
+11,Diameter,grouping,3,,,
+12,Blade presence,discrete,4,21,Present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/33986?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#present","type":2}]
+12,Blade presence,discrete,4,22,Absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34034?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#absent","type":2}]
+13,Width,grouping,4,,,
+14,Blade cross section,discrete,4,23,Flat or chanelled,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41193?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#flat-or-channeled","type":2}]
+14,Blade cross section,discrete,4,24,Terete,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/33992?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#terete","type":2}]
+15,Inflorescence length,grouping,5,,,
+16,Primary bract continuation of culm,discrete,5,25,Continuous,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/30760?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#continuous","type":2}]
+16,Primary bract continuation of culm,discrete,5,26,Not continuous,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/33990?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#not-continuous","type":2}]
+17,Primary bract length,grouping,5,,,
+18,Basal bracts,discrete,6,27,Present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41223?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#basal-bracts-present","type":2}]
+18,Basal bracts,discrete,6,28,Absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/41169?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#basal-bracts-absent","type":2}]
+19,Tepal length,grouping,6,,,
+20,Stamen number,discrete,6,29,3,
+20,Stamen number,discrete,6,30,4,
+20,Stamen number,discrete,6,31,5,
+20,Stamen number,discrete,6,32,6,
+21,Anther length,grouping,6,,,
+22,Sexuality,discrete,6,33,Bisexual,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#bisexual","type":2}]
+22,Sexuality,discrete,6,34,Unisexual,[{"caption":"Profile","path":"https://vicflora.rbg.vic.gov.au/pages/juncaceae#unisexual","type":2}]
+23,Capsule length,grouping,7,,,
+24,Seeds per capsule,discrete,7,35,3,
+24,Seeds per capsule,discrete,7,36,more than 3,
+25,cm,numeric,10,,,
+26,mm,numeric,11,,,
+27,mm,numeric,13,,,
+28,cm,numeric,15,,,
+29,cm,numeric,17,,,
+30,mm,numeric,19,,,
+31,mm,numeric,21,,,
+32,mm,numeric,23,,,
