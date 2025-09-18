@@ -38,3 +38,15 @@ npm run key:dichotomous
 - `keybase-data/`: raw KeyBase JSON exports, one file per key ID.
 
 Keep both folders if you want the CLIs to function without an internet connection.
+
+## 3. Progressive Web App (PWA)
+
+```bash
+npm run build:web
+```
+
+- Open the generated `web/public/index.html` (or host the folder).
+- The app will prompt the browser to cache assets for offline use. On iOS, use “Add to Home Screen”.
+- Adjust `web/web-config.json` before building to choose which keys ship with the bundle.
+- Deploying via Netlify? The provided `netlify.toml` already points Netlify at the correct
+  build command and publish directory—just hook up the repo and deploy.

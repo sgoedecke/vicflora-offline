@@ -52,6 +52,18 @@ The downloader:
 
 > Tip: open `keybase-list.html` in a browser, copy the key list HTML from KeyBase, and paste it into the file before running the downloader.
 
+### 3. Offline web app / PWA bundle
+
+```bash
+npm run build:web
+```
+
+This script gathers the keys referenced in `web/web-config.json` and produces
+`web/public/data/*.json`. The `web/public/` folder is a self-contained static
+site: host it from any HTTP server (or share the files directly) and the app will
+install as a PWA, caching everything for offline use. Update `web/web-config.json`
+to include the key IDs or filenames you want bundled, then rerun the script.
+
 ## Offline CLI usage
 
 After scraping, you can run either CLI completely offline:
@@ -63,6 +75,24 @@ npm run key:dichotomous # dichotomous key navigation
 
 - `keying-cli-simple.js` lists the `key-*-complete.json` files in `vicflora-data/` and guides you through choosing character states until a small taxon set remains.
 - `keybase-cli.js` starts at VicFlora key 1903 (“Key to the main groups of plants in Victoria”) and follows each `to_key` link automatically so you can progress through linked dichotomous keys without re-selecting them manually.
+
+### Offline web app
+
+- Host `web/public` (for example with `npx http-server web/public`) or open
+  `index.html` directly. The service worker precaches the bundle so you can add it
+  to your phone’s home screen and keep using it without connectivity.
+- Edit `web/web-config.json` if you want to shrink or expand the bundled keys.
+
+### Deploying to Netlify
+
+Netlify can build and host the PWA directly from this repository. The included
+`netlify.toml` config runs `npm run build:web` and publishes `web/public`. To deploy:
+
+1. Push the repo to GitHub/GitLab/Bitbucket.
+2. In Netlify, create a new site from git and select this repo.
+3. Leave the build command (`npm run build:web`) and publish directory (`web/public`) as
+   configured.
+4. Deploy. Netlify will regenerate the data bundle during each build.
 
 ## Keeping Data Fresh
 

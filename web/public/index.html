@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VicFlora Offline Keys</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>VicFlora Offline Keys</h1>
+      <p>Multi-access and dichotomous keys packaged for offline browsing.</p>
+      <nav>
+        <button data-view="dichotomous" class="active">Dichotomous Keys</button>
+        <button data-view="multi">Multi-Access Keys</button>
+        <button data-view="about">About</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="status" aria-live="polite"></section>
+
+      <section id="view-dichotomous" class="view visible">
+        <div class="panel">
+          <h2>Dichotomous Keys</h2>
+          <div class="controls">
+            <label>
+              Select key:
+              <select id="dichotomous-key-select"></select>
+            </label>
+            <button id="dichotomous-restart" class="secondary">Restart</button>
+            <button id="dichotomous-back" class="secondary">Back</button>
+          </div>
+          <div id="dichotomous-header" class="panel-info"></div>
+          <div id="dichotomous-options" class="card-list"></div>
+          <div id="dichotomous-result" class="result"></div>
+        </div>
+      </section>
+
+      <section id="view-multi" class="view">
+        <div class="panel">
+          <h2>Multi-Access Keys</h2>
+          <div class="controls">
+            <label>
+              Select key:
+              <select id="multi-key-select"></select>
+            </label>
+            <button id="multi-reset" class="secondary">Reset selections</button>
+          </div>
+          <div id="multi-summary" class="panel-info"></div>
+          <div class="split">
+            <div class="card">
+              <h3>Characters</h3>
+              <div id="multi-characters" class="card-list"></div>
+            </div>
+            <div class="card">
+              <h3>States</h3>
+              <div id="multi-states" class="card-list"></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Selections</h3>
+            <ul id="multi-selections"></ul>
+          </div>
+          <div class="card">
+            <h3>Remaining Taxa</h3>
+            <div id="multi-remaining"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-about" class="view">
+        <div class="panel">
+          <h2>About</h2>
+          <p>
+            This static web app bundles selected VicFlora dichotomous and multi-access keys and installs
+            as a Progressive Web App (PWA) so you can use it completely offline. Use the CLI scripts in the
+            repository to rebuild <code>web/public/data</code> with the keys you need, then host or share the
+            contents of <code>web/public</code>.
+          </p>
+          <p>
+            On iOS, open this page in Safari, tap the share button, and choose “Add to Home Screen” to keep
+            it available offline with a native-like experience.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,346 @@
+import { createNavigatorFromData } from './modules/dichotomous.js';
+import { MultiAccessSession, listMultiKeys } from './modules/multiaccess.js';
+
+const statusEl = document.querySelector('#status');
+const viewButtons = document.querySelectorAll('header nav button');
+const views = {
+  dichotomous: document.querySelector('#view-dichotomous'),
+  multi: document.querySelector('#view-multi'),
+  about: document.querySelector('#view-about')
+};
+
+const dichElements = {
+  select: document.querySelector('#dichotomous-key-select'),
+  header: document.querySelector('#dichotomous-header'),
+  options: document.querySelector('#dichotomous-options'),
+  result: document.querySelector('#dichotomous-result'),
+  back: document.querySelector('#dichotomous-back'),
+  restart: document.querySelector('#dichotomous-restart')
+};
+
+const multiElements = {
+  select: document.querySelector('#multi-key-select'),
+  summary: document.querySelector('#multi-summary'),
+  characters: document.querySelector('#multi-characters'),
+  states: document.querySelector('#multi-states'),
+  selections: document.querySelector('#multi-selections'),
+  remaining: document.querySelector('#multi-remaining'),
+  reset: document.querySelector('#multi-reset')
+};
+
+let dichNavigator = null;
+let multiSession = null;
+let multiState = {
+  currentCharacterId: null,
+  currentKey: null,
+  currentKeyInfo: null
+};
+
+async function fetchJSON(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to load ${url}: ${response.status}`);
+  }
+  return response.json();
+}
+
+function setStatus(message) {
+  statusEl.textContent = message || '';
+}
+
+function switchView(view) {
+  Object.entries(views).forEach(([name, section]) => {
+    const isActive = name === view;
+    section.classList.toggle('visible', isActive);
+    const button = Array.from(viewButtons).find(btn => btn.dataset.view === name);
+    if (button) {
+      button.classList.toggle('active', isActive);
+    }
+  });
+}
+
+function initNavigation() {
+  viewButtons.forEach(button => {
+    button.addEventListener('click', () => switchView(button.dataset.view));
+  });
+}
+
+function populateDichotomousSelect(keys) {
+  const entries = Object.entries(keys)
+    .map(([id, key]) => ({ id, title: key.key_title || `Key ${id}` }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+
+  dichElements.select.innerHTML = '';
+  entries.forEach(entry => {
+    const option = document.createElement('option');
+    option.value = entry.id;
+    option.textContent = entry.title;
+    dichElements.select.appendChild(option);
+  });
+  return entries;
+}
+
+function renderDichotomous() {
+  if (!dichNavigator) return;
+  const header = dichNavigator.getHeader();
+  const options = dichNavigator.getOptions();
+
+  dichElements.header.innerHTML = `
+    <strong>${header.keyTitle}</strong>
+    ${header.scope ? `<br/><span>${header.scope}</span>` : ''}
+    <br/><small>Depth ${header.depth}</small>
+  `;
+
+  dichElements.options.innerHTML = '';
+  dichElements.result.classList.remove('visible');
+  dichElements.result.innerHTML = '';
+
+  if (options.length === 0) {
+    dichElements.options.innerHTML = '<p>No leads available. Use back or restart.</p>';
+    return;
+  }
+
+  options.forEach((option, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.index = index;
+    button.innerHTML = `
+      <strong>${index + 1}. ${option.lead.lead_text}</strong>
+      ${option.item ? `<br/><span>${option.item.item_name || ''}${option.item.to_key ? ` (see key ${option.item.to_key})` : ''}</span>` : ''}
+    `;
+    button.addEventListener('click', () => handleDichotomousChoice(index));
+    dichElements.options.appendChild(button);
+  });
+}
+
+function showResult(item) {
+  dichElements.result.classList.add('visible');
+  const lines = [`<h3>${item.item_name || 'Result'}</h3>`];
+  if (item.url) {
+    lines.push(`<p><a href="${item.url}" target="_blank" rel="noopener">Open VicFlora entry</a></p>`);
+  }
+  if (item.to_key) {
+    lines.push(`<p>Leads to key ${item.to_key}.</p>`);
+  }
+  dichElements.result.innerHTML = lines.join('');
+}
+
+function handleDichotomousChoice(index) {
+  if (!dichNavigator) return;
+  try {
+    const outcome = dichNavigator.chooseOption(index);
+    if (outcome.type === 'result') {
+      showResult(outcome.item);
+    } else if (outcome.type === 'key-transition') {
+      showResult(outcome.item);
+      renderDichotomous();
+    } else {
+      renderDichotomous();
+    }
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+function bindDichotomousControls(keys) {
+  dichElements.select.addEventListener('change', event => {
+    const keyId = event.target.value;
+    try {
+      dichNavigator = createNavigatorFromData(keys, keyId);
+      renderDichotomous();
+    } catch (error) {
+      setStatus(error.message);
+    }
+  });
+
+  dichElements.back.addEventListener('click', () => {
+    if (dichNavigator && !dichNavigator.back()) {
+      setStatus('Already at root of the starting key.');
+    } else {
+      renderDichotomous();
+    }
+  });
+
+  dichElements.restart.addEventListener('click', () => {
+    if (dichNavigator) {
+      dichNavigator.reset();
+      renderDichotomous();
+    }
+  });
+}
+
+function populateMultiSelect(list) {
+  multiElements.select.innerHTML = '';
+  list.forEach(entry => {
+    const option = document.createElement('option');
+    option.value = entry.id;
+    option.textContent = `${entry.title} (${entry.entities} taxa)`;
+    multiElements.select.appendChild(option);
+  });
+  return list;
+}
+
+function renderMultiSummary(session, keyInfo) {
+  const totalTaxa = session.possibleTaxa.size + session.eliminatedTaxa.size;
+  const remaining = session.possibleTaxa.size;
+  const progress = totalTaxa ? Math.round(((totalTaxa - remaining) / totalTaxa) * 100) : 0;
+  multiElements.summary.innerHTML = `
+    <strong>${keyInfo.title}</strong><br/>
+    ${keyInfo.entities} taxa · ${keyInfo.characters} characters<br/>
+    Remaining: ${remaining} (${progress}% filtered)
+  `;
+}
+
+function renderMultiCharacters(session) {
+  const characters = session.getRelevantCharacters();
+  multiElements.characters.innerHTML = '';
+
+  characters.forEach(char => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = char.name || `Character ${char.id}`;
+    button.addEventListener('click', () => {
+      multiState.currentCharacterId = char.id;
+      renderMultiStates(session, char.id);
+    });
+    multiElements.characters.appendChild(button);
+  });
+
+  if (characters.length === 0) {
+    multiElements.characters.innerHTML = '<p>No more useful characters. Review remaining taxa.</p>';
+  }
+}
+
+function renderMultiStates(session, characterId) {
+  const states = session.getStatesByCharacter(characterId);
+  multiElements.states.innerHTML = '';
+  const character = session.getCharacterById(characterId);
+
+  if (!states.length) {
+    multiElements.states.innerHTML = '<p>No states to choose for this character.</p>';
+    return;
+  }
+
+  states.forEach(state => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = state.name || `State ${state.id}`;
+    button.addEventListener('click', () => {
+      const result = session.chooseState(characterId, state.id);
+      setStatus(`Selected ${character?.name || characterId}: ${state.name || state.id}. Eliminated ${result.eliminated} taxa.`);
+      renderMultiAll(session);
+    });
+    multiElements.states.appendChild(button);
+  });
+}
+
+function renderMultiSelections(session) {
+  const selections = session.selections();
+  multiElements.selections.innerHTML = '';
+  if (!selections.length) {
+    multiElements.selections.innerHTML = '<li>No selections yet.</li>';
+    return;
+  }
+  selections.forEach(selection => {
+    const li = document.createElement('li');
+    li.textContent = `${selection.characterName}: ${selection.stateName}`;
+    multiElements.selections.appendChild(li);
+  });
+}
+
+function renderMultiRemaining(session) {
+  const { total, sample } = session.remainingTaxa();
+  const parts = [`<p><strong>${total}</strong> taxa remaining.</p>`];
+  if (sample.length) {
+    parts.push('<ol>');
+    sample.forEach(taxon => {
+      parts.push(`<li>${taxon.name}</li>`);
+    });
+    parts.push('</ol>');
+  }
+  multiElements.remaining.innerHTML = parts.join('');
+}
+
+function renderMultiAll(session) {
+  if (!session || !multiState.currentKey) return;
+  renderMultiSummary(session, multiState.currentKeyInfo);
+  renderMultiCharacters(session);
+  if (multiState.currentCharacterId) {
+    renderMultiStates(session, multiState.currentCharacterId);
+  }
+  renderMultiSelections(session);
+  renderMultiRemaining(session);
+}
+
+function bindMultiControls(list) {
+  multiElements.select.addEventListener('change', event => {
+    const id = event.target.value;
+    const keyInfo = list.find(entry => entry.id === id);
+    if (!keyInfo) {
+      setStatus('Key not found in dataset');
+      return;
+    }
+    multiSession = new MultiAccessSession(keyInfo.data);
+    multiState.currentKey = id;
+    multiState.currentKeyInfo = keyInfo;
+    multiState.currentCharacterId = null;
+    renderMultiAll(multiSession);
+  });
+
+  multiElements.reset.addEventListener('click', () => {
+    if (!multiSession) return;
+    multiSession.reset();
+    multiState.currentCharacterId = null;
+    renderMultiAll(multiSession);
+  });
+}
+
+async function loadData() {
+  setStatus('Loading key bundles…');
+  const [dichotomousBundle, multiBundle] = await Promise.all([
+    fetchJSON('./data/dichotomous-keys.json'),
+    fetchJSON('./data/multi-keys.json')
+  ]);
+
+  const dichKeys = dichotomousBundle.keys || {};
+  const dichEntries = populateDichotomousSelect(dichKeys);
+  if (dichEntries.length) {
+    dichNavigator = createNavigatorFromData(dichKeys, dichEntries[0].id);
+    dichElements.select.value = dichEntries[0].id;
+    renderDichotomous();
+  }
+  bindDichotomousControls(dichKeys);
+
+  const multiList = listMultiKeys(multiBundle.keys || {});
+  if (multiList.length) {
+    populateMultiSelect(multiList);
+    multiSession = new MultiAccessSession(multiList[0].data);
+    multiState.currentKey = multiList[0].id;
+    multiState.currentKeyInfo = multiList[0];
+    renderMultiAll(multiSession);
+  }
+  bindMultiControls(multiList);
+
+  setStatus('Ready to use offline. Add to Home Screen for easy access.');
+}
+
+async function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    try {
+      await navigator.serviceWorker.register('./service-worker.js');
+    } catch (error) {
+      console.warn('Service worker registration failed:', error);
+    }
+  }
+}
+
+function init() {
+  initNavigation();
+  registerServiceWorker();
+  loadData().catch(error => {
+    console.error(error);
+    setStatus(error.message);
+  });
+}
+
+init();
