@@ -1,0 +1,14 @@
+node_modules/
+.vscode/
+.DS_Store
+npm-debug.log*
+*.log
+
+# Local tooling
+.claude
+
+# Generated web assets
+web/public/data/
+web/public/icons/icon-192.png
+web/public/icons/icon-512.png
+web/public/service-worker.js.map
