@@ -30,6 +30,7 @@ const multiElements = {
 
 let dichNavigator = null;
 let multiSession = null;
+let globalDichKeys = {};
 let multiState = {
   currentCharacterId: null,
   currentKey: null,
@@ -69,6 +70,12 @@ function populateDichotomousSelect(keys) {
   const entries = Object.entries(keys)
     .map(([id, key]) => ({ id, title: key.key_title || `Key ${id}` }))
     .sort((a, b) => a.title.localeCompare(b.title));
+
+  const index1903 = entries.findIndex(entry => entry.id === '1903');
+  if (index1903 > 0) {
+    const [primary] = entries.splice(index1903, 1);
+    entries.unshift(primary);
+  }
 
   dichElements.select.innerHTML = '';
   entries.forEach(entry => {
@@ -115,7 +122,14 @@ function renderDichotomous() {
 
 function showResult(item) {
   dichElements.result.classList.add('visible');
-  const lines = [`<h3>${item.item_name || 'Result'}</h3>`];
+  const lines = [];
+  if (item.to_key) {
+    lines.push(
+      `<h3><button type="button" class="link" data-next-key="${item.to_key}">${item.item_name || 'Result'}</button></h3>`
+    );
+  } else {
+    lines.push(`<h3>${item.item_name || 'Result'}</h3>`);
+  }
   if (item.url) {
     lines.push(`<p><a href="${item.url}" target="_blank" rel="noopener">Open VicFlora entry</a></p>`);
   }
@@ -123,6 +137,20 @@ function showResult(item) {
     lines.push(`<p>Leads to key ${item.to_key}.</p>`);
   }
   dichElements.result.innerHTML = lines.join('');
+
+  const linkButton = dichElements.result.querySelector('button[data-next-key]');
+  if (linkButton) {
+    linkButton.addEventListener('click', () => {
+      const nextKey = linkButton.dataset.nextKey;
+      try {
+        dichNavigator = createNavigatorFromData(globalDichKeys, String(nextKey));
+        dichElements.select.value = String(nextKey);
+        renderDichotomous();
+      } catch (error) {
+        setStatus(error.message);
+      }
+    });
+  }
 }
 
 function handleDichotomousChoice(index) {
@@ -215,9 +243,11 @@ function renderMultiStates(session, characterId) {
   const states = session.getStatesByCharacter(characterId);
   multiElements.states.innerHTML = '';
   const character = session.getCharacterById(characterId);
+  const statesCard = multiElements.states.closest('.card');
 
   if (!states.length) {
     multiElements.states.innerHTML = '<p>No states to choose for this character.</p>';
+    statesCard?.classList.remove('active');
     return;
   }
 
@@ -231,6 +261,16 @@ function renderMultiStates(session, characterId) {
       renderMultiAll(session);
     });
     multiElements.states.appendChild(button);
+  });
+
+  statesCard?.classList.add('active');
+
+  requestAnimationFrame(() => {
+    multiElements.states.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const firstButton = multiElements.states.querySelector('button');
+    if (firstButton) {
+      firstButton.focus({ preventScroll: true });
+    }
   });
 }
 
@@ -268,6 +308,9 @@ function renderMultiAll(session) {
   if (multiState.currentCharacterId) {
     renderMultiStates(session, multiState.currentCharacterId);
   }
+  if (!multiState.currentCharacterId) {
+    multiElements.states.closest('.card')?.classList.remove('active');
+  }
   renderMultiSelections(session);
   renderMultiRemaining(session);
 }
@@ -302,10 +345,10 @@ async function loadData() {
     fetchJSON('./data/multi-keys.json')
   ]);
 
-  const dichKeys = dichotomousBundle.keys || {};
-  const dichEntries = populateDichotomousSelect(dichKeys);
+  globalDichKeys = dichotomousBundle.keys || {};
+  const dichEntries = populateDichotomousSelect(globalDichKeys);
   if (dichEntries.length) {
-    dichNavigator = createNavigatorFromData(dichKeys, dichEntries[0].id);
+    dichNavigator = createNavigatorFromData(globalDichKeys, dichEntries[0].id);
     dichElements.select.value = dichEntries[0].id;
     renderDichotomous();
   }
