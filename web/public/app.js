@@ -3,6 +3,7 @@ import { MultiAccessSession, listMultiKeys } from './modules/multiaccess.js';
 
 const statusEl = document.querySelector('#status');
 const viewButtons = document.querySelectorAll('header nav button');
+const aboutLink = document.querySelector('#about-link');
 const views = {
   dichotomous: document.querySelector('#view-dichotomous'),
   multi: document.querySelector('#view-multi'),
@@ -58,14 +59,21 @@ function switchView(view) {
     const button = Array.from(viewButtons).find(btn => btn.dataset.view === name);
     if (button) {
       button.classList.toggle('active', isActive);
+      button.setAttribute('aria-selected', isActive ? 'true' : 'false');
     }
   });
+
+  if (aboutLink) {
+    aboutLink.classList.toggle('active', view === 'about');
+  }
 }
 
 function initNavigation() {
   viewButtons.forEach(button => {
     button.addEventListener('click', () => switchView(button.dataset.view));
   });
+
+  aboutLink?.addEventListener('click', () => switchView('about'));
 }
 
 function populateDichotomousSelect(keys) {
