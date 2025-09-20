@@ -222,7 +222,8 @@ function populateMultiSelect(list) {
   list.forEach(entry => {
     const option = document.createElement('option');
     option.value = entry.id;
-    option.textContent = `${entry.title} (${entry.entities} taxa)`;
+    const label = entry.displayTitle || entry.title || entry.id;
+    option.textContent = `${label} (${entry.entities} taxa)`;
     multiElements.select.appendChild(option);
   });
   return list;
@@ -232,8 +233,9 @@ function renderMultiSummary(session, keyInfo) {
   const totalTaxa = session.possibleTaxa.size + session.eliminatedTaxa.size;
   const remaining = session.possibleTaxa.size;
   const progress = totalTaxa ? Math.round(((totalTaxa - remaining) / totalTaxa) * 100) : 0;
+  const title = keyInfo.displayTitle || keyInfo.title;
   multiElements.summary.innerHTML = `
-    <strong>${keyInfo.title}</strong><br/>
+    <strong>${title}</strong><br/>
     ${keyInfo.entities} taxa · ${keyInfo.characters} characters<br/>
     Remaining: ${remaining} (${progress}% filtered)
   `;

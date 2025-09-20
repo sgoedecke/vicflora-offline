@@ -28,6 +28,32 @@ This fetches every available Lucid bundle, decompresses the matrices, and writes
 - `vicflora-data/multi-access-keys-summary.csv`
 - `vicflora-data/key-<id>-complete.json` plus supporting CSV exports per key
 
+#### Bryophyte keys and other manual additions
+
+Some Lucid keys (notably the bryophyte suite) are not exposed through the
+VicFlora GraphQL feed. The scraper merges two data sources:
+
+1. `multiAccessKeys` returned by GraphQL.
+2. A local fallback list in `vicflora-data/manual-multi-access-keys.json`.
+
+If a key you need isn’t in the GraphQL list, add an entry to
+`manual-multi-access-keys.json` with the Lucid bundle URL, for example:
+
+```json
+[
+  {
+    "id": "hornworts-thallose-liverworts",
+    "title": "Multi-access key to the hornworts and thallose liverworts of Victoria",
+    "location": "https://vicflora-cdn.rbg.vic.gov.au/lucid-keys/thallose-liverworts-and-hornworts.js"
+  }
+]
+```
+
+You can find the CDN URLs by opening the key on VicFlora and watching the
+network pane for `https://vicflora-cdn.rbg.vic.gov.au/lucid-keys/*.js` requests.
+The scraper automatically tolerates UTF-16 Lucid bundles, so once the entry is
+present the next `node main.js multi-access` run will pull it in.
+
 ### 2. Dichotomous (KeyBase) keys
 
 ```bash
@@ -36,11 +62,13 @@ node main.js identification
 
 The downloader:
 
-1. Parses `keybase-list.html` (keep this file up to date with the KeyBase website).
-2. Downloads each `https://keybase.rbg.vic.gov.au/keys/export/<id>?format=json` export into `keybase-data/<id>.json` (skipping ones you already have).
+1. Parses `keybase-list.html`. Keep this file synchronised with the HTML list at
+   <https://keybase.rbg.vic.gov.au/projects/show/10> (the Flora of Victoria project).
+   Copy the `<div id="list">…</div>` markup from the site and paste it into
+   `keybase-list.html` before you run the script.
+2. Downloads each `https://keybase.rbg.vic.gov.au/keys/export/<id>?format=json`
+   export into `keybase-data/<id>.json` (skipping ones that are already saved).
 3. Stores the summarised list in `vicflora-data/keybase-keys.json` for reference.
-
-> Tip: open `keybase-list.html` in a browser, copy the key list HTML from KeyBase, and paste it into the file before running the downloader.
 
 ### 3. Offline web app / PWA bundle
 

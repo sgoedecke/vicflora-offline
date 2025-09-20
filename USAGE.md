@@ -7,6 +7,11 @@ npm run scrape:multi          # multi-access keys into vicflora-data/
 npm run scrape:identification # KeyBase exports into keybase-data/
 ```
 
+If a Lucid key is missing from the VicFlora API (e.g. the bryophyte suite), add
+its CDN metadata to `vicflora-data/manual-multi-access-keys.json` before
+running `npm run scrape:multi`. Each entry needs an `id`, `title`, and
+`location` (the `https://vicflora-cdn.rbg.vic.gov.au/lucid-keys/*.js` URL).
+
 Before running `npm run scrape:identification`, make sure `keybase-list.html` contains the latest list of keys from https://keybase.rbg.vic.gov.au/keys/list. Paste the `<div id="list">...</div>` HTML into the file and the downloader will do the rest.
 
 ## 2. Explore keys offline

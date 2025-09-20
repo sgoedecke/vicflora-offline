@@ -2,6 +2,20 @@ function toSet(iterable) {
   return new Set(iterable);
 }
 
+function titleCase(value) {
+  return value.replace(/\w+/g, word => {
+    const lower = word.toLowerCase();
+    return lower.charAt(0).toUpperCase() + lower.slice(1);
+  });
+}
+
+function normalizeKeyTitle(title) {
+  if (!title) return '';
+  const pattern = /^(?:multi[\s-]*access\s+key|key)\s+to\s+(?:the\s+)?/i;
+  let cleaned = title.trim().replace(pattern, '').trim();
+  return cleaned ? titleCase(cleaned) : titleCase(title.trim());
+}
+
 export class MultiAccessSession {
   constructor(keyData) {
     this.keyData = keyData;
@@ -303,6 +317,7 @@ export function listMultiKeys(bundle) {
     .map(([fileName, key]) => ({
       id: fileName,
       title: key.title || fileName,
+      displayTitle: normalizeKeyTitle(key.title || fileName),
       entities: key.entities?.length || 0,
       characters: key.features?.length || 0,
       data: key
