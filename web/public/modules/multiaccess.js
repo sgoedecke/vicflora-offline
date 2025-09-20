@@ -2,9 +2,14 @@ function toSet(iterable) {
   return new Set(iterable);
 }
 
+const LOWERCASE_WORDS = new Set(['of', 'and', 'the']);
+
 function titleCase(value) {
   return value.replace(/\w+/g, word => {
     const lower = word.toLowerCase();
+    if (LOWERCASE_WORDS.has(lower)) {
+      return lower;
+    }
     return lower.charAt(0).toUpperCase() + lower.slice(1);
   });
 }
