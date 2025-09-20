@@ -99,10 +99,6 @@ export class MultiAccessSession {
       });
   }
 
-  formatState(state) {
-    return state.name || `State ${state.id}`;
-  }
-
   getTaxonName(taxonId) {
     const entity = this.keyData.entities?.find(e => String(e.id) === String(taxonId));
     return entity?.name || entity?.title || `Taxon ${taxonId}`;
@@ -222,12 +218,6 @@ export class MultiAccessSession {
       eliminated: eliminatedNow.size,
       remaining: newPossible.size
     };
-  }
-
-  undoSelection(characterId) {
-    if (!this.selectedStates.has(characterId)) return;
-    this.selectedStates.delete(characterId);
-    this.recomputePossibleTaxa();
   }
 
   undoLastSelection() {

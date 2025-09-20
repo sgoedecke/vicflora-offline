@@ -253,48 +253,6 @@ class VicFloraExporter {
     return analysis;
   }
 
-  async exportIdentificationKey(keyEntry) {
-    await this.ensureOutputDir();
-
-    const id = keyEntry?.keybase?.key_id || keyEntry?.metadata?.id;
-    if (!id) {
-      console.warn('Identification key entry missing id, skipping export');
-      return null;
-    }
-
-    const filepath = path.join(this.outputDir, `identification-key-${id}.json`);
-    await fs.writeFile(filepath, JSON.stringify(keyEntry, null, 2));
-    console.log(`Exported identification key to ${filepath}`);
-    return filepath;
-  }
-
-  async exportIdentificationKeysSummary(keys) {
-    await this.ensureOutputDir();
-    const csvPath = path.join(this.outputDir, 'identification-keys-summary.csv');
-
-    const headers = [
-      'ID',
-      'Title',
-      'Taxonomic Scope',
-      'Geographic Scope',
-      'Created',
-      'Modified'
-    ];
-
-    const rows = keys.map(key => [
-      key.id || '',
-      key.title || '',
-      key.taxonomicScope || '',
-      key.geographicScope || '',
-      key.created || '',
-      key.modified || ''
-    ]);
-
-    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
-    await fs.writeFile(csvPath, csvContent);
-    console.log(`Exported identification key summary to ${csvPath}`);
-    return csvPath;
-  }
 }
 
 module.exports = VicFloraExporter;
