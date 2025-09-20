@@ -29,6 +29,41 @@ export class MultiAccessSession {
     return this.keyData.features?.findIndex(f => f.id === characterId) ?? -1;
   }
 
+  getCharacterDisplayName(characterId) {
+    const character = this.getCharacterById(characterId);
+    if (!character) return `Character ${characterId}`;
+
+    const name = (character.name || '').trim();
+    const parent = character.parent ? this.getCharacterById(character.parent) : null;
+    const parentName = (parent?.name || '').trim();
+    const hasParentName = parentName.length > 0;
+
+    if (character.type === 2 || name.length === 0) {
+      if (hasParentName && name.length === 0) {
+        return parentName;
+      }
+      if (hasParentName && name.length > 0) {
+        if (parentName.toLowerCase() === name.toLowerCase()) {
+          return parentName;
+        }
+        if (parentName.toLowerCase().includes(name.toLowerCase())) {
+          return parentName;
+        }
+        return `${parentName} (${name})`;
+      }
+    }
+
+    if (name.length > 0) {
+      return name;
+    }
+
+    if (hasParentName) {
+      return parentName;
+    }
+
+    return `Character ${characterId}`;
+  }
+
   isCharacterRelevant(characterId) {
     const charIndex = this.getCharacterIndex(characterId);
     if (charIndex === -1) return false;
@@ -67,6 +102,16 @@ export class MultiAccessSession {
   getTaxonName(taxonId) {
     const entity = this.keyData.entities?.find(e => String(e.id) === String(taxonId));
     return entity?.name || entity?.title || `Taxon ${taxonId}`;
+  }
+
+  getTaxonUrl(taxonId) {
+    const entity = this.keyData.entities?.find(e => String(e.id) === String(taxonId));
+    if (!entity) return null;
+
+    if (entity.url) return entity.url;
+
+    const profileEntry = entity.text?.find(item => typeof item?.path === 'string' && item.path.includes('/flora/taxon/'));
+    return profileEntry?.path || null;
   }
 
   chooseState(characterId, stateId) {
@@ -147,7 +192,7 @@ export class MultiAccessSession {
 
   remainingTaxa(limit = 25) {
     const list = Array.from(this.possibleTaxa)
-      .map(id => ({ id, name: this.getTaxonName(id) }))
+      .map(id => ({ id, name: this.getTaxonName(id), url: this.getTaxonUrl(id) }))
       .sort((a, b) => a.name.localeCompare(b.name));
     return {
       total: list.length,
@@ -158,11 +203,10 @@ export class MultiAccessSession {
   selections() {
     const details = [];
     for (const [characterId, stateId] of this.selectedStates) {
-      const character = this.getCharacterById(characterId);
       const state = this.getStatesByCharacter(characterId).find(s => s.id === stateId);
       details.push({
         characterId,
-        characterName: character?.name || `Character ${characterId}`,
+        characterName: this.getCharacterDisplayName(characterId),
         stateId,
         stateName: state?.name || `State ${stateId}`
       });

@@ -238,7 +238,9 @@ function renderMultiCharacters(session) {
   characters.forEach(char => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = char.name || `Character ${char.id}`;
+    button.textContent = session.getCharacterDisplayName
+      ? session.getCharacterDisplayName(char.id)
+      : (char.name || `Character ${char.id}`);
     button.addEventListener('click', () => {
       multiState.currentCharacterId = char.id;
       renderMultiStates(session, char.id);
@@ -254,7 +256,10 @@ function renderMultiCharacters(session) {
 function renderMultiStates(session, characterId) {
   const states = session.getStatesByCharacter(characterId);
   multiElements.states.innerHTML = '';
-  const character = session.getCharacterById(characterId);
+  const baseCharacter = session.getCharacterById?.(characterId);
+  const characterName = session.getCharacterDisplayName
+    ? session.getCharacterDisplayName(characterId)
+    : (baseCharacter?.name || `Character ${characterId}`);
   const statesCard = multiElements.states.closest('.card');
 
   if (!states.length) {
@@ -269,7 +274,7 @@ function renderMultiStates(session, characterId) {
     button.textContent = state.name || `State ${state.id}`;
     button.addEventListener('click', () => {
       const result = session.chooseState(characterId, state.id);
-      setStatus(`Selected ${character?.name || characterId}: ${state.name || state.id}. Eliminated ${result.eliminated} taxa.`);
+      setStatus(`Selected ${characterName}: ${state.name || state.id}. Eliminated ${result.eliminated} taxa.`);
       renderMultiAll(session);
     });
     multiElements.states.appendChild(button);
@@ -305,15 +310,34 @@ function renderMultiSelections(session) {
 
 function renderMultiRemaining(session) {
   const { total, sample } = session.remainingTaxa();
-  const parts = [`<p><strong>${total}</strong> taxa remaining.</p>`];
-  if (sample.length) {
-    parts.push('<ol>');
-    sample.forEach(taxon => {
-      parts.push(`<li>${taxon.name}</li>`);
-    });
-    parts.push('</ol>');
+  multiElements.remaining.innerHTML = '';
+
+  const summary = document.createElement('p');
+  const count = document.createElement('strong');
+  count.textContent = String(total);
+  summary.append(count, ' taxa remaining.');
+  multiElements.remaining.appendChild(summary);
+
+  if (!sample.length) {
+    return;
   }
-  multiElements.remaining.innerHTML = parts.join('');
+
+  const list = document.createElement('ol');
+  sample.forEach(taxon => {
+    const item = document.createElement('li');
+    if (taxon.url) {
+      const link = document.createElement('a');
+      link.href = taxon.url;
+      link.textContent = taxon.name;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      item.appendChild(link);
+    } else {
+      item.textContent = taxon.name;
+    }
+    list.appendChild(item);
+  });
+  multiElements.remaining.appendChild(list);
 }
 
 function renderMultiAll(session) {
@@ -360,10 +384,12 @@ function bindMultiControls(list) {
       return;
     }
     multiState.currentCharacterId = undone.characterId;
-    renderMultiAll(multiSession);
-    const character = multiSession.getCharacterById(undone.characterId);
     const state = multiSession.getStatesByCharacter(undone.characterId).find(s => s.id === undone.stateId);
-    setStatus(`Removed ${character?.name || undone.characterId}: ${state?.name || undone.stateId}.`);
+    const characterName = multiSession.getCharacterDisplayName
+      ? multiSession.getCharacterDisplayName(undone.characterId)
+      : (multiSession.getCharacterById?.(undone.characterId)?.name || undone.characterId);
+    renderMultiAll(multiSession);
+    setStatus(`Removed ${characterName}: ${state?.name || undone.stateId}.`);
   });
 }
 

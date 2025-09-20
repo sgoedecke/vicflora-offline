@@ -106,10 +106,16 @@ footer button.active {
 }
 
 .controls label {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 600;
-  gap: 0.35rem;
+}
+
+.controls label span {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 select {
