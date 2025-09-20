@@ -76,7 +76,26 @@ class VicFloraClient {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
-        return await response.text();
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        if (buffer.length >= 2) {
+          const bom = buffer.slice(0, 2);
+          if (bom[0] === 0xff && bom[1] === 0xfe) {
+            return buffer.toString('utf16le');
+          }
+          if (bom[0] === 0xfe && bom[1] === 0xff) {
+            const swapped = Buffer.from(buffer);
+            for (let i = 0; i < swapped.length; i += 2) {
+              const byte = swapped[i];
+              swapped[i] = swapped[i + 1];
+              swapped[i + 1] = byte;
+            }
+            return swapped.toString('utf16le');
+          }
+        }
+
+        return buffer.toString('utf8');
       } catch (error) {
         retries++;
         if (retries >= maxRetries) {

@@ -9,6 +9,8 @@ const EXPECTED_BRYOPHYTE_TITLES = [
   'Multi-access key to the mosses of Victoria'
 ];
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 class MultiAccessScraper {
   constructor() {
     this.client = new VicFloraClient();
@@ -201,10 +203,12 @@ class MultiAccessScraper {
 
         // Also get additional metadata from GraphQL
         let metadata = null;
-        try {
-          metadata = await this.getMultiAccessKeyMetadata(keyInfo.id);
-        } catch (error) {
-          console.warn(`⚠️  Unable to fetch GraphQL metadata for ${keyInfo.title || keyInfo.id}: ${error.message}`);
+        if (UUID_REGEX.test(keyInfo.id)) {
+          try {
+            metadata = await this.getMultiAccessKeyMetadata(keyInfo.id);
+          } catch (error) {
+            console.warn(`⚠️  Unable to fetch GraphQL metadata for ${keyInfo.title || keyInfo.id}: ${error.message}`);
+          }
         }
 
         results.push({
