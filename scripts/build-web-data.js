@@ -84,7 +84,29 @@ async function main() {
       continue;
     }
     const key = await loadJSON(filePath);
-    multi[fileName] = key;
+    const {
+      title,
+      features = [],
+      states = [],
+      entities = [],
+      decompressedScores = {},
+      decompressedMeasures = {},
+      metadata = {},
+      description = '',
+      text = []
+    } = key;
+
+    multi[fileName] = {
+      title,
+      description,
+      text,
+      features,
+      states,
+      entities,
+      decompressedScores,
+      decompressedMeasures,
+      metadata
+    };
   }
   await writeJSON(path.join(webDataDir, 'multi-keys.json'), {
     generatedAt: new Date().toISOString(),

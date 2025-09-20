@@ -246,9 +246,7 @@ function renderMultiCharacters(session) {
   characters.forEach(char => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = session.getCharacterDisplayName
-      ? session.getCharacterDisplayName(char.id)
-      : (char.name || `Character ${char.id}`);
+    button.textContent = session.getCharacterDisplayName(char.id);
     if (char.type === 2) {
       button.dataset.type = 'numeric';
     }
@@ -267,15 +265,13 @@ function renderMultiCharacters(session) {
 function renderMultiStates(session, characterId) {
   const states = session.getStatesByCharacter(characterId);
   multiElements.states.innerHTML = '';
-  const baseCharacter = session.getCharacterById?.(characterId);
-  const characterName = session.getCharacterDisplayName
-    ? session.getCharacterDisplayName(characterId)
-    : (baseCharacter?.name || `Character ${characterId}`);
+  const baseCharacter = session.getCharacterById(characterId);
+  const characterName = session.getCharacterDisplayName(characterId);
   const statesCard = multiElements.states.closest('.card');
 
   if (baseCharacter?.type === 2) {
-    const selection = session.getSelection?.(characterId);
-    const range = session.getMeasurementRange?.(characterId);
+    const selection = session.getSelection(characterId);
+    const range = session.getMeasurementRange(characterId);
 
     const container = document.createElement('div');
     container.className = 'numeric-character';
@@ -325,10 +321,13 @@ function renderMultiStates(session, characterId) {
     multiElements.states.appendChild(container);
     statesCard?.classList.add('active');
 
+    if (range) {
+      input.min = String(range.min);
+      input.max = String(range.max);
+    }
+
     requestAnimationFrame(() => {
-      if (!input.hasAttribute('data-initial-focus')) {
-        input.focus({ preventScroll: false });
-      }
+      input.focus({ preventScroll: false });
     });
     return;
   }
