@@ -1,5 +1,13 @@
 const VicFloraClient = require('./vicflora-scraper');
 const LZString = require('./lz-string');
+const fs = require('fs').promises;
+const path = require('path');
+
+const EXPECTED_BRYOPHYTE_TITLES = [
+  'Multi-access key to the hornworts and thallose liverworts of Victoria',
+  'Multi-access key to the leafy liverworts of Victoria',
+  'Multi-access key to the mosses of Victoria'
+];
 
 class MultiAccessScraper {
   constructor() {
@@ -19,6 +27,26 @@ class MultiAccessScraper {
 
     const data = await this.client.graphqlRequest(query);
     return data.multiAccessKeys;
+  }
+
+  async loadManualKeyList() {
+    const manualPath = path.join(process.cwd(), 'vicflora-data', 'manual-multi-access-keys.json');
+    try {
+      const raw = await fs.readFile(manualPath, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(entry => entry && entry.id && entry.location).map(entry => ({
+          id: String(entry.id),
+          title: entry.title || entry.id,
+          location: entry.location
+        }));
+      }
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        console.warn(`⚠️  Failed to load manual multi-access key list: ${error.message}`);
+      }
+    }
+    return [];
   }
 
   async getMultiAccessKeyMetadata(id) {
@@ -49,8 +77,17 @@ class MultiAccessScraper {
   }
 
   parseLucidBundle(jsContent) {
+    if (!jsContent) {
+      throw new Error('Empty Lucid bundle content');
+    }
+
+    const normalized = jsContent
+      .replace(/\u0000/g, '')
+      .replace(/\uFEFF/g, '')
+      .trim();
+
     // Strip the "var key = " wrapper and parse JSON
-    const match = jsContent.match(/var key = ({.*});?\s*$/);
+    const match = normalized.match(/var\s+key\s*=\s*({[\s\S]*});?\s*$/);
     if (!match) {
       throw new Error('Could not parse Lucid bundle format');
     }
@@ -137,16 +174,38 @@ class MultiAccessScraper {
   async scrapeAllMultiAccessKeys() {
     console.log('Fetching list of multi-access keys...');
     const keysList = await this.getMultiAccessKeysList();
-    console.log(`Found ${keysList.length} multi-access keys`);
+    const manualKeys = await this.loadManualKeyList();
+
+    const combined = [...keysList];
+    for (const manual of manualKeys) {
+      if (!combined.some(key => key.id === manual.id)) {
+        combined.push(manual);
+      }
+    }
+
+    console.log(`Found ${combined.length} multi-access keys`);
+
+    const missingBryophytes = EXPECTED_BRYOPHYTE_TITLES.filter(expected =>
+      !combined.some(key => (key.title || '').trim().toLowerCase() === expected.toLowerCase())
+    );
+    if (missingBryophytes.length) {
+      console.warn('⚠️  Missing expected bryophyte multi-access keys:', missingBryophytes.join('; '));
+      console.warn('    If VicFlora publishes new keys, re-run the scraper after updating vicflora-data/manual-multi-access-keys.json with their IDs and download URLs.');
+    }
 
     const results = [];
 
-    for (const keyInfo of keysList) {
+    for (const keyInfo of combined) {
       try {
         const keyData = await this.downloadAndParseKey(keyInfo);
 
         // Also get additional metadata from GraphQL
-        const metadata = await this.getMultiAccessKeyMetadata(keyInfo.id);
+        let metadata = null;
+        try {
+          metadata = await this.getMultiAccessKeyMetadata(keyInfo.id);
+        } catch (error) {
+          console.warn(`⚠️  Unable to fetch GraphQL metadata for ${keyInfo.title || keyInfo.id}: ${error.message}`);
+        }
 
         results.push({
           ...keyData,

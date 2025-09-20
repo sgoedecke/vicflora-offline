@@ -4,12 +4,5 @@
     "1906",
     "1907"
   ],
-  "multiAccessKeys": [
-    "key-115cc464-6167-4b50-9c3a-72f0bc8ff745-complete.json",
-    "key-2aca28ae-4324-47d1-a43f-d20522e72fea-complete.json",
-    "key-a958fd46-1327-46a2-ad14-47bce05988cf-complete.json",
-    "key-d2a3243e-22e9-41cc-85f2-46b5c4799629-complete.json",
-    "key-f0df3b5c-b214-4b09-8cdc-beaac7722092-complete.json",
-    "key-f4e1046d-d53b-4f98-920c-4e4c18d75db8-complete.json"
-  ]
+  "multiAccessKeys": null
 }

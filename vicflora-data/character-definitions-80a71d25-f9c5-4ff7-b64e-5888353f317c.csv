@@ -1,0 +1,175 @@
+Character ID,Character Name,Character Type,Parent ID,State ID,State Name,State Description
+1,Growth form,discrete,,1,Tree,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/125504?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#tree","type":2}]
+1,Growth form,discrete,,2,Erect shrub,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/124202?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#erect-shrub","type":2}]
+1,Growth form,discrete,,3,Prostrate shrub,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19798?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#prostrate-shrub","type":2}]
+2,Branchlet pruinosity,discrete,,4,Pruinose,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19430?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#pruinose","type":2}]
+2,Branchlet pruinosity,discrete,,5,Not pruinose,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/126905?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#not-pruinose","type":2}]
+3,Branchlet hairs (presence),discrete,,6,Branchlet hairs present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40175?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#branchlet-hairs-present","type":2}]
+3,Branchlet hairs (presence),discrete,,7,Branchlet hairs absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/42553?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#branchlet-hairs-absent","type":2}]
+4,Branchlet hairs (orientation),discrete,,8,Appressed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25076?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#appressed","type":2}]
+4,Branchlet hairs (orientation),discrete,,9,Sub-appressed,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#sub-appressed","type":2}]
+4,Branchlet hairs (orientation),discrete,,10,Widely spreading,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36264?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#widely-spreading","type":2}]
+5,Branchlet tip pungency,discrete,,11,Pungent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/10630?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#pungent","type":2}]
+5,Branchlet tip pungency,discrete,,12,Not pungent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27054?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#not-pungent","type":2}]
+6,Stipule pungency,discrete,,13,Stipule pungent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22008?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#stipule-pungent","type":2}]
+6,Stipule pungency,discrete,,14,Stipule not pungent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/13976?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#stipule-not-pungent","type":2}]
+7,Foliage type,discrete,,15,Bipinnate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/126738?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#bipinnate","type":2}]
+7,Foliage type,discrete,,16,Phyllodes,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25174?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#phyllodes","type":2}]
+7,Foliage type,discrete,,17,Absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20310?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaves-absent","type":2}]
+8,Phyllode length,grouping,,,,
+9,Phyllode width,grouping,,,,
+10,Phyllode shape,discrete,,18,Linear,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/10142?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#linear","type":2}]
+10,Phyllode shape,discrete,,19,Narrowly elliptic to orbicular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28872?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#narrowly-elliptic-to-orbicular","type":2}]
+10,Phyllode shape,discrete,,20,Narrowly oblong to oblong,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/55700?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#narrowly-oblong-to-oblong","type":2}]
+10,Phyllode shape,discrete,,21,Lanceolate to ovate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/13974?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#lanceolate-to-ovate","type":2}]
+10,Phyllode shape,discrete,,22,Oblanceolate to obovate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36191?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#oblanceolate-to-obovate","type":2}]
+10,Phyllode shape,discrete,,23,Triangular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22024?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#triangular","type":2}]
+11,Phyllode arrangement,discrete,,24,Fasciculate,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#fasciculate","type":2}]
+11,Phyllode arrangement,discrete,,25,Whorled,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19998?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#whorled","type":2}]
+11,Phyllode arrangement,discrete,,26,Scattered,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/10682?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#scattered","type":2}]
+12,Phyllode number (per whorl),grouping,,,,
+13,Phyllode colour,discrete,,27,Glaucous or grey,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28872?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#glaucous-or-grey","type":2}]
+13,Phyllode colour,discrete,,28,Sub-glaucous to grey-green,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22024?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#sub-glaucous-to-grey-green","type":2}]
+13,Phyllode colour,discrete,,29,Green,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28760?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#green","type":2}]
+14,Phyllode hairs (presence),discrete,,30,Phyllode hairs present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28872?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#phyllode-hairs-present","type":2}]
+14,Phyllode hairs (presence),discrete,,31,Phyllode hairs absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28854?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#phyllode-hairs-absent","type":2}]
+15,Phyllode cross-section,discrete,,32,Terete,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/124426?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#terete","type":2}]
+15,Phyllode cross-section,discrete,,33,Sub-terete,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/18518?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#sub-terete","type":2}]
+15,Phyllode cross-section,discrete,,34,Compressed,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#compressed","type":2}]
+15,Phyllode cross-section,discrete,,35,Quadrangular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40929?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#quadrangular","type":2}]
+15,Phyllode cross-section,discrete,,36,Pentagonal,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#pentagonal","type":2}]
+15,Phyllode cross-section,discrete,,37,Flat,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25174?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#flat","type":2}]
+16,Phyllode nerve number (non-flat phyllodes),discrete,,38,Zero,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/124426?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#zero","type":2}]
+16,Phyllode nerve number (non-flat phyllodes),discrete,,39,Four,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/40929?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#four","type":2}]
+16,Phyllode nerve number (non-flat phyllodes),discrete,,40,Five,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#five","type":2}]
+16,Phyllode nerve number (non-flat phyllodes),discrete,,41,Eight,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#eight","type":2}]
+16,Phyllode nerve number (non-flat phyllodes),discrete,,42,Numerous,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#numerous","type":2}]
+17,Phyllode nerve number (flat or compressed phyllodes),discrete,,43,Nerves absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/27083?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#nerves-absent","type":2}]
+17,Phyllode nerve number (flat or compressed phyllodes),discrete,,44,1 per face,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28646?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#1-per-face","type":2}]
+17,Phyllode nerve number (flat or compressed phyllodes),discrete,,45,2 per face,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28713?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#2-per-face","type":2}]
+17,Phyllode nerve number (flat or compressed phyllodes),discrete,,46,3 per face,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25254?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#3-per-face","type":2}]
+17,Phyllode nerve number (flat or compressed phyllodes),discrete,,47,4 per face,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#4-per-face","type":2}]
+17,Phyllode nerve number (flat or compressed phyllodes),discrete,,48,numerous per face,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28791?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#numerous-per-face","type":2}]
+18,Phyllode nerve anastomoses (multi-nerved phyllodes only),discrete,,49,Anastomoses numerous,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/39773?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#anastomoses-numerous","type":2}]
+18,Phyllode nerve anastomoses (multi-nerved phyllodes only),discrete,,50,Anastomoses few,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28791?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#anastomoses-few","type":2}]
+18,Phyllode nerve anastomoses (multi-nerved phyllodes only),discrete,,51,Anastomoses absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21967?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#anastomoses-absent","type":2}]
+19,Phyllode apex (pungency),discrete,,52,Sharply pungent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36241?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#sharply-pungent","type":2}]
+19,Phyllode apex (pungency),discrete,,53,Coarsely pungent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/39835?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#coarsely-pungent","type":2}]
+19,Phyllode apex (pungency),discrete,,54,Apex not pungent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20680?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#apex-not-pungent","type":2}]
+20,Phyllode base (decurrence),discrete,,55,Continuous with branchlet,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22038?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#continuous-with-branchlet","type":2}]
+20,Phyllode base (decurrence),discrete,,56,Not continuous with branchlet,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/20680?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#not-continuous-with-branchlet","type":2}]
+21,Pulvinus (presence),discrete,,57,Pulvinus present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22028?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#pulvinus-present","type":2}]
+21,Pulvinus (presence),discrete,,58,Pulvinus absent or very reduced,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25076?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#pulvinus-absent-or-very-reduced","type":2}]
+22,Gland number (on phyllodes including apex),grouping,,,,
+23,Gland distance above pulvinus or base (on phyllodes),grouping,,,,
+24,Gland at apex of phyllodes,discrete,,59,Apex gland present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/25188?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#apex-gland-present","type":2}]
+24,Gland at apex of phyllodes,discrete,,60,Apex gland absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/22008?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#apex-gland-absent","type":2}]
+25,Petiole length,grouping,,,,
+26,Rachis length,grouping,,,,
+27,Pinnae number (pairs),grouping,,,,
+28,Pinnae length,grouping,,,,
+29,Petiolar glands (presence),discrete,,61,Petiolar glands present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/32724?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#petiolar-glands-present","type":2}]
+29,Petiolar glands (presence),discrete,,62,Petiolar glands absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/55550?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#petiolar-glands-absent","type":2}]
+30,Petiolar glands (number),grouping,,,,
+31,Jugary glands (presence),discrete,,63,Jugary glands present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21930?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#jugary-glands-present","type":2}]
+31,Jugary glands (presence),discrete,,64,Jugary glands absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/42559?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#jugary-glands-absent","type":2}]
+32,Interjugary glands (presence),discrete,,65,Interjugary glands present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21998?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#interjugary-glands-present","type":2}]
+32,Interjugary glands (presence),discrete,,66,Interjugary glands absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21930?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#interjugary-glands-absent","type":2}]
+33,Rachilla glands (presence),discrete,,67,Rachilla glands present,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#rachilla-glands-present","type":2}]
+33,Rachilla glands (presence),discrete,,68,Rachilla glands absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#rachilla-glands-absent","type":2}]
+34,Leaflet number (pairs),grouping,,,,
+35,Leaflet length,grouping,,,,
+36,Leaflet width,grouping,,,,
+37,Leaflet shape,discrete,,69,Leaflet linear,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21953?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-linear","type":2}]
+37,Leaflet shape,discrete,,70,Leaflet narrowly oblong,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/126738?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-narrowly-oblong","type":2}]
+37,Leaflet shape,discrete,,71,Leaflet oblong,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-oblong","type":2}]
+37,Leaflet shape,discrete,,72,Leaflet elliptic,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-elliptic","type":2}]
+37,Leaflet shape,discrete,,73,Leaflet ovate to lanceolate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36205?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-ovate-to-lanceolate","type":2}]
+37,Leaflet shape,discrete,,74,Leaflet obovate to oblanceolate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/55550?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-obovate-to-oblanceolate","type":2}]
+38,Leaflet cross-section,discrete,,75,Flat or almost so,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21930?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#flat-or-almost-so","type":2}]
+38,Leaflet cross-section,discrete,,76,Incurved,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36205?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#incurved","type":2}]
+39,Leaflet colour (upper surface),discrete,,77,Leaflet green,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/17762?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-green","type":2}]
+39,Leaflet colour (upper surface),discrete,,78,Leaflet grey green to sub-glaucous,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/42559?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-grey-green-to-sub-glaucous","type":2}]
+39,Leaflet colour (upper surface),discrete,,79,Leaflet glaucous,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/126738?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-glaucous","type":2}]
+40,Leaflet colour (lower surface),discrete,,80,Same as upper surface,
+40,Leaflet colour (lower surface),discrete,,81,Slightly paler than upper surface,
+40,Leaflet colour (lower surface),discrete,,82,Much paler than upper surface,
+41,Leaflet hairs (presence),discrete,,83,Leaflet hairs present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36205?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-hairs-present","type":2}]
+41,Leaflet hairs (presence),discrete,,84,Leaflet hairs absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/17762?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#leaflet-hairs-absent","type":2}]
+42,Leaflet hairs (position),discrete,,85,On both surfaces,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#on-both-surfaces","type":2}]
+42,Leaflet hairs (position),discrete,,86,On upper surface,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#on-upper-surface","type":2}]
+42,Leaflet hairs (position),discrete,,87,On lower surface,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#on-lower-surface","type":2}]
+42,Leaflet hairs (position),discrete,,88,On margins,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#on-margins","type":2}]
+42,Leaflet hairs (position),discrete,,89,Tuft of hairs at the apex,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#tuft-of-hairs-at-the-apex","type":2}]
+43,Inflorescence arrangement,discrete,,90,Simple,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/124430?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#simple","type":2}]
+43,Inflorescence arrangement,discrete,,91,Racemose,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/21934?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#racemose","type":2}]
+43,Inflorescence arrangement,discrete,,92,Paniculate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/133270?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#paniculate","type":2}]
+44,Inflorescence shape,discrete,,93,Globular,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/124430?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#globular","type":2}]
+44,Inflorescence shape,discrete,,94,Obloid to ellipsoid,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/19998?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#obloid-to-ellipsoid","type":2}]
+44,Inflorescence shape,discrete,,95,Cylindrical,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28800?maxsize=1024","type":2},{"caption":"Inflorescence","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#cylindrical","type":2}]
+45,Inflorescence colour,discrete,,96,White to cream,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28752?maxsize=1024","type":2}]
+45,Inflorescence colour,discrete,,97,Pale yellow,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/124430?maxsize=1024","type":2}]
+45,Inflorescence colour,discrete,,98,Lemon yellow to golden,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28862?maxsize=1024","type":2}]
+46,Inflorescence flower number (per head),grouping,,,,
+47,Raceme length,grouping,,,,
+48,Raceme basal bracts (or bract scars),discrete,,99,Raceme bracts present,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#raceme-bracts-present","type":2}]
+48,Raceme basal bracts (or bract scars),discrete,,100,Raceme bracts absent,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#raceme-bracts-absent","type":2}]
+49,Peduncle length,grouping,,,,
+50,Peduncle hairs (presence),discrete,,101,Peduncle hairs present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/13202?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#peduncle-hairs-present","type":2}]
+50,Peduncle hairs (presence),discrete,,102,Peduncle hairs absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/34775?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#peduncle-hairs-absent","type":2}]
+51,Flower merous,grouping,,,,
+52,Sepal fusion,discrete,,103,Free to base,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#free-to-base","type":2}]
+52,Sepal fusion,discrete,,104,Very shortly united,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#very-shortly-united","type":2}]
+52,Sepal fusion,discrete,,105,Clearly united,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#clearly-united","type":2}]
+53,Pod width,grouping,,,,
+54,Pod curvature,discrete,,106,Straight,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28650?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#straight","type":2}]
+54,Pod curvature,discrete,,107,Slightly curved,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/39759?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#slightly-curved","type":2}]
+54,Pod curvature,discrete,,108,Curved,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/39751?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#curved","type":2}]
+54,Pod curvature,discrete,,109,Twisted,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/11910?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#twisted","type":2}]
+54,Pod curvature,discrete,,110,Openly coiled,[{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#openly-coiled","type":2}]
+54,Pod curvature,discrete,,111,Tightly coiled,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/126716?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#tightly-coiled","type":2}]
+54,Pod curvature,discrete,,112,Undulate,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/18518?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#undulate","type":2}]
+55,Pod hairs,discrete,,113,Pod hairs present,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/10652?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#pod-hairs-present","type":2}]
+55,Pod hairs,discrete,,114,Pod hairs absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/28650?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#pod-hairs-absent","type":2}]
+56,Seed orientation (in pods),discrete,,115,Longitudinal,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/39757?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#longitudinal","type":2}]
+56,Seed orientation (in pods),discrete,,116,Oblique,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/10652?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#oblique","type":2}]
+56,Seed orientation (in pods),discrete,,117,Transverse,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/124408?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#transverse","type":2}]
+57,Funicle,discrete,,118,Half or more encircling seed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/126860?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#half-or-more-encircling-the-seed","type":2}]
+57,Funicle,discrete,,119,Not encircling seed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16470?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#not-encircling-the-seed","type":2}]
+58,Aril development,discrete,,120,Well developed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/36293?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#well-developed","type":2}]
+58,Aril development,discrete,,121,Poorly developed,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/16470?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#poorly-developed","type":2}]
+58,Aril development,discrete,,122,Aril absent,[{"caption":"Image","path":"https://data.rbg.vic.gov.au/cip/preview/image/public/29042?maxsize=1024","type":2},{"caption":"Information","path":"https://vicflora.rbg.vic.gov.au/pages/acacia#aril-absent","type":2}]
+59,Occurrence,discrete,,123,Snowfields,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/snowfields","type":2}]
+59,Occurrence,discrete,,124,Wilsons Promontory,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/wilsons-promontory","type":2}]
+59,Occurrence,discrete,,125,Murray Mallee,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/murray-mallee","type":2}]
+59,Occurrence,discrete,,126,Wannon,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/wannon","type":2}]
+59,Occurrence,discrete,,127,Riverina,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/riverina","type":2}]
+59,Occurrence,discrete,,128,Gippsland Plain,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/gippsland-plain","type":2}]
+59,Occurrence,discrete,,129,East Gippsland,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/east-gippsland","type":2}]
+59,Occurrence,discrete,,130,Eastern Highlands,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/eastern-highlands","type":2}]
+59,Occurrence,discrete,,131,Midlands,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/midlands","type":2}]
+59,Occurrence,discrete,,132,Victorian Volcanic Plain,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/victorian-volcanic-plain","type":2}]
+59,Occurrence,discrete,,133,Grampians,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/grampians","type":2}]
+59,Occurrence,discrete,,134,Wimmera,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/wimmera","type":2}]
+59,Occurrence,discrete,,135,Lowan Mallee,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/lowan-mallee","type":2}]
+59,Occurrence,discrete,,136,Otway Plain,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/otway-plain","type":2}]
+59,Occurrence,discrete,,137,Otway Range,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/otway-range","type":2}]
+59,Occurrence,discrete,,138,Gippsland Highlands,[{"caption":"Information","path":"https://rbgvictoria.github.io/vicflora-static-pages/bioregions/gippsland-highlands","type":2}]
+60,mm long,numeric,8,,,
+61,mm wide,numeric,9,,,
+62,per whorl,numeric,12,,,
+63,glands,numeric,22,,,
+64,mm above pulvinus or base,numeric,23,,,
+65,mm long,numeric,25,,,
+66,mm long,numeric,26,,,
+67,pairs,numeric,27,,,
+68,mm long,numeric,28,,,
+69,glands (Petiole gland number),numeric,30,,,
+70,pairs of leaflets,numeric,34,,,
+71,mm long,numeric,35,,,
+72,mm wide,numeric,36,,,
+73,Flowers per head,numeric,46,,,
+74,mm long,numeric,47,,,
+75,mm long,numeric,49,,,
+76,merous,numeric,51,,,
+77,mm wide,numeric,53,,,

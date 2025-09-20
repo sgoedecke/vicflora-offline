@@ -22,20 +22,46 @@ async function writeJSON(filePath, data) {
   await fs.writeFile(filePath, JSON.stringify(data, null, 2));
 }
 
+function normalizeKeyTitle(title) {
+  if (!title || typeof title !== 'string') return title;
+  const patterns = [
+    /^key\s+to\s+the\s+/i,
+    /^key\s+to\s+/i,
+    /^key:\s*/i,
+    /^key\s+/i
+  ];
+
+  let cleaned = title.trim();
+  for (const pattern of patterns) {
+    if (pattern.test(cleaned)) {
+      cleaned = cleaned.replace(pattern, '');
+      break;
+    }
+  }
+
+  const categoryPattern = /^(?:the\s+)?(families|genera|species|subfamilies|subgenera|tribes|subtribes|orders|suborders|sections|subsections)\s+of\s+/i;
+  if (categoryPattern.test(cleaned)) {
+    cleaned = cleaned.replace(categoryPattern, '');
+  }
+
+  return cleaned.trim();
+}
+
 async function main() {
   const root = process.cwd();
   const configPath = path.join(root, 'web', 'web-config.json');
   const defaultConfig = {
     dichotomousKeys: ['1903', '1906', '1907'],
-    multiAccessKeys: [
-      'key-115cc464-6167-4b50-9c3a-72f0bc8ff745-complete.json',
-      'key-2aca28ae-4324-47d1-a43f-d20522e72fea-complete.json'
-    ]
+    multiAccessKeys: null
   };
 
   let config = defaultConfig;
   if (await fileExists(configPath)) {
-    config = JSON.parse(await fs.readFile(configPath, 'utf8'));
+    const userConfig = JSON.parse(await fs.readFile(configPath, 'utf8'));
+    config = {
+      ...defaultConfig,
+      ...userConfig
+    };
   }
 
   const webDataDir = path.join(root, 'web', 'public', 'data');
@@ -59,7 +85,24 @@ async function main() {
 
     const key = await loadJSON(filePath);
     const normalized = key.keybase || key;
-    dichotomous[id] = normalized;
+    const cleaned = { ...normalized };
+
+    if (cleaned.key_title) {
+      cleaned.key_title = normalizeKeyTitle(cleaned.key_title);
+    }
+
+    if (cleaned.key_name) {
+      cleaned.key_name = normalizeKeyTitle(cleaned.key_name);
+    }
+
+    if (cleaned.taxonomic_scope?.item_name) {
+      cleaned.taxonomic_scope = {
+        ...cleaned.taxonomic_scope,
+        item_name: normalizeKeyTitle(cleaned.taxonomic_scope.item_name)
+      };
+    }
+
+    dichotomous[id] = cleaned;
 
     for (const item of normalized.items || []) {
       if (item?.to_key) {
@@ -77,7 +120,16 @@ async function main() {
 
   // Build multi-access dataset
   const multi = {};
-  for (const fileName of config.multiAccessKeys) {
+  let multiKeyFiles = Array.isArray(config.multiAccessKeys) ? config.multiAccessKeys.map(String) : null;
+
+  if (!multiKeyFiles || multiKeyFiles.length === 0) {
+    const files = await fs.readdir(path.join(root, 'vicflora-data'));
+    multiKeyFiles = files
+      .filter(name => name.startsWith('key-') && name.endsWith('-complete.json'))
+      .sort();
+  }
+
+  for (const fileName of multiKeyFiles) {
     const filePath = path.join(root, 'vicflora-data', fileName);
     if (!(await fileExists(filePath))) {
       console.warn(`⚠️  Missing multi-access key file ${fileName}`);

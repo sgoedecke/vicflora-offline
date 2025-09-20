@@ -115,6 +115,8 @@ footer button.active {
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
+  max-width: 100%;
+  flex: 1 1 260px;
 }
 
 .controls label span {
@@ -127,7 +129,8 @@ select {
   padding: 0.5rem;
   border-radius: 0.5rem;
   border: 1px solid var(--border);
-  min-width: 240px;
+  min-width: 0;
+  width: 100%;
 }
 
 button {
