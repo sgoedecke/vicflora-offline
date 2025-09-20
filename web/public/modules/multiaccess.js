@@ -64,6 +64,10 @@ export class MultiAccessSession {
     return `Character ${characterId}`;
   }
 
+  getSelection(characterId) {
+    return this.selectedStates.get(characterId) || null;
+  }
+
   isCharacterRelevant(characterId) {
     const charIndex = this.getCharacterIndex(characterId);
     if (charIndex === -1) return false;
@@ -114,6 +118,32 @@ export class MultiAccessSession {
     return profileEntry?.path || null;
   }
 
+  getMeasurementRange(characterId) {
+    const measures = this.keyData.decompressedMeasures?.[String(characterId)];
+    if (!measures) return null;
+
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    let count = 0;
+
+    for (const values of Object.values(measures)) {
+      if (!Array.isArray(values)) continue;
+      const numericValues = values.slice(1).filter(value => typeof value === 'number' && !Number.isNaN(value));
+      if (!numericValues.length) continue;
+      const localMin = Math.min(...numericValues);
+      const localMax = Math.max(...numericValues);
+      if (localMin < min) min = localMin;
+      if (localMax > max) max = localMax;
+      count += 1;
+    }
+
+    if (!count || !Number.isFinite(min) || !Number.isFinite(max)) {
+      return null;
+    }
+
+    return { min, max, count };
+  }
+
   chooseState(characterId, stateId) {
     const stateList = this.getStatesByCharacter(characterId);
     const selectedIndex = stateList.findIndex(state => state.id === stateId);
@@ -142,7 +172,51 @@ export class MultiAccessSession {
     }
 
     this.possibleTaxa = newPossible;
-    this.selectedStates.set(characterId, stateId);
+    this.selectedStates.set(characterId, { type: 'state', value: stateId });
+
+    return {
+      eliminated: eliminatedNow.size,
+      remaining: newPossible.size
+    };
+  }
+
+  applyNumericSelection(characterId, rawValue) {
+    const value = Number(rawValue);
+    if (!Number.isFinite(value)) {
+      return { eliminated: 0, remaining: this.possibleTaxa.size };
+    }
+
+    const measures = this.keyData.decompressedMeasures?.[String(characterId)] || {};
+    const newPossible = new Set();
+    const eliminatedNow = new Set();
+
+    for (const taxonId of this.possibleTaxa) {
+      const measurement = measures[String(taxonId)] ?? measures[taxonId];
+      if (!Array.isArray(measurement) || measurement.length < 2) {
+        eliminatedNow.add(taxonId);
+        this.eliminatedTaxa.add(taxonId);
+        continue;
+      }
+
+      const numericValues = measurement.slice(1).filter(num => typeof num === 'number' && !Number.isNaN(num));
+      if (!numericValues.length) {
+        eliminatedNow.add(taxonId);
+        this.eliminatedTaxa.add(taxonId);
+        continue;
+      }
+
+      const min = Math.min(...numericValues);
+      const max = Math.max(...numericValues);
+      if (value >= min && value <= max) {
+        newPossible.add(taxonId);
+      } else {
+        eliminatedNow.add(taxonId);
+        this.eliminatedTaxa.add(taxonId);
+      }
+    }
+
+    this.possibleTaxa = newPossible;
+    this.selectedStates.set(characterId, { type: 'numeric', value });
 
     return {
       eliminated: eliminatedNow.size,
@@ -169,12 +243,12 @@ export class MultiAccessSession {
       return null;
     }
 
-    const stateId = this.selectedStates.get(lastKey);
+    const selection = this.selectedStates.get(lastKey);
     this.selectedStates.delete(lastKey);
     this.recomputePossibleTaxa();
     return {
       characterId: lastKey,
-      stateId
+      selection
     };
   }
 
@@ -185,8 +259,13 @@ export class MultiAccessSession {
     this.possibleTaxa = toSet(Object.keys(this.keyData.decompressedScores || {}));
     this.eliminatedTaxa.clear();
 
-    for (const [characterId, stateId] of snapshot) {
-      this.chooseState(characterId, stateId);
+    for (const [characterId, selection] of snapshot) {
+      if (!selection) continue;
+      if (selection.type === 'numeric') {
+        this.applyNumericSelection(characterId, selection.value);
+      } else {
+        this.chooseState(characterId, selection.value);
+      }
     }
   }
 
@@ -202,13 +281,27 @@ export class MultiAccessSession {
 
   selections() {
     const details = [];
-    for (const [characterId, stateId] of this.selectedStates) {
-      const state = this.getStatesByCharacter(characterId).find(s => s.id === stateId);
+    for (const [characterId, selection] of this.selectedStates) {
+      const characterName = this.getCharacterDisplayName(characterId);
+      if (selection?.type === 'numeric') {
+        details.push({
+          characterId,
+          characterName,
+          type: 'numeric',
+          value: selection.value,
+          stateId: null,
+          stateName: `${selection.value}`
+        });
+        continue;
+      }
+
+      const state = this.getStatesByCharacter(characterId).find(s => s.id === selection?.value);
       details.push({
         characterId,
-        characterName: this.getCharacterDisplayName(characterId),
-        stateId,
-        stateName: state?.name || `State ${stateId}`
+        characterName,
+        type: 'state',
+        stateId: selection?.value ?? null,
+        stateName: state?.name || `State ${selection?.value}`
       });
     }
     return details;

@@ -52,6 +52,14 @@ function setStatus(message) {
   statusEl.textContent = message || '';
 }
 
+function formatMeasurement(value) {
+  if (!Number.isFinite(value)) return '';
+  return Number(value).toLocaleString(undefined, {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: Number.isInteger(Number(value)) ? 0 : 1
+  });
+}
+
 function switchView(view) {
   Object.entries(views).forEach(([name, section]) => {
     const isActive = name === view;
@@ -241,6 +249,9 @@ function renderMultiCharacters(session) {
     button.textContent = session.getCharacterDisplayName
       ? session.getCharacterDisplayName(char.id)
       : (char.name || `Character ${char.id}`);
+    if (char.type === 2) {
+      button.dataset.type = 'numeric';
+    }
     button.addEventListener('click', () => {
       multiState.currentCharacterId = char.id;
       renderMultiStates(session, char.id);
@@ -261,6 +272,66 @@ function renderMultiStates(session, characterId) {
     ? session.getCharacterDisplayName(characterId)
     : (baseCharacter?.name || `Character ${characterId}`);
   const statesCard = multiElements.states.closest('.card');
+
+  if (baseCharacter?.type === 2) {
+    const selection = session.getSelection?.(characterId);
+    const range = session.getMeasurementRange?.(characterId);
+
+    const container = document.createElement('div');
+    container.className = 'numeric-character';
+
+    if (range) {
+      const rangeInfo = document.createElement('p');
+      rangeInfo.className = 'numeric-range';
+      rangeInfo.textContent = `Observed range: ${formatMeasurement(range.min)} – ${formatMeasurement(range.max)} (${range.count} taxa scored)`;
+      container.appendChild(rangeInfo);
+    }
+
+    const form = document.createElement('form');
+    form.className = 'numeric-form';
+
+    const label = document.createElement('label');
+    label.textContent = 'Enter value:';
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = 'any';
+    input.placeholder = 'Enter measurement';
+    if (selection?.type === 'numeric' && Number.isFinite(selection.value)) {
+      input.value = selection.value;
+    }
+
+    const submit = document.createElement('button');
+    submit.type = 'submit';
+    submit.textContent = 'Apply';
+
+    label.appendChild(input);
+    form.append(label, submit);
+    container.appendChild(form);
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const value = parseFloat(input.value);
+      if (!Number.isFinite(value)) {
+        setStatus(`Enter a numeric value for ${characterName}.`);
+        input.focus();
+        return;
+      }
+      const result = session.applyNumericSelection(characterId, value);
+      setStatus(`Selected ${characterName}: ${formatMeasurement(value)}. Eliminated ${result.eliminated} taxa.`);
+      renderMultiAll(session);
+    });
+
+    multiElements.states.appendChild(container);
+    statesCard?.classList.add('active');
+
+    requestAnimationFrame(() => {
+      if (!input.hasAttribute('data-initial-focus')) {
+        input.focus({ preventScroll: false });
+      }
+    });
+    return;
+  }
 
   if (!states.length) {
     multiElements.states.innerHTML = '<p>No states to choose for this character.</p>';
@@ -303,7 +374,11 @@ function renderMultiSelections(session) {
   }
   selections.forEach(selection => {
     const li = document.createElement('li');
-    li.textContent = `${selection.characterName}: ${selection.stateName}`;
+    if (selection.type === 'numeric') {
+      li.textContent = `${selection.characterName}: ${formatMeasurement(selection.value)}`;
+    } else {
+      li.textContent = `${selection.characterName}: ${selection.stateName}`;
+    }
     multiElements.selections.appendChild(li);
   });
 }
@@ -384,12 +459,20 @@ function bindMultiControls(list) {
       return;
     }
     multiState.currentCharacterId = undone.characterId;
-    const state = multiSession.getStatesByCharacter(undone.characterId).find(s => s.id === undone.stateId);
     const characterName = multiSession.getCharacterDisplayName
       ? multiSession.getCharacterDisplayName(undone.characterId)
       : (multiSession.getCharacterById?.(undone.characterId)?.name || undone.characterId);
+
+    let removedLabel;
+    if (undone.selection?.type === 'numeric') {
+      removedLabel = formatMeasurement(undone.selection.value);
+    } else {
+      const state = multiSession.getStatesByCharacter(undone.characterId).find(s => s.id === undone.selection?.value);
+      removedLabel = state?.name || undone.selection?.value;
+    }
+
     renderMultiAll(multiSession);
-    setStatus(`Removed ${characterName}: ${state?.name || undone.stateId}.`);
+    setStatus(`Removed ${characterName}: ${removedLabel}.`);
   });
 }
 
