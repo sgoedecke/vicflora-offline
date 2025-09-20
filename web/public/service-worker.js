@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vicflora-offline-v1';
+const CACHE_NAME = 'vicflora-offline-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -39,15 +39,12 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    caches.match(request).then(cached => {
-      if (cached) {
-        return cached;
-      }
-      return fetch(request).then(response => {
+    fetch(request)
+      .then(response => {
         const clone = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
         return response;
-      }).catch(() => cached);
-    })
+      })
+      .catch(() => caches.match(request))
   );
 });
