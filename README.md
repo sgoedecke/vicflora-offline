@@ -1,6 +1,6 @@
 # VicFlora Offline Keys
 
-https://imaginative-panda-8c7f64.netlify.app/
+https://vicfloraoffline.netlify.app/
 
 VicFlora offers multiple keys to let you identify plants. But the website is pretty slow, and sometimes you're looking at plants where you don't have reception. What if there was a way to use the VicFlora keys without any internet at all?
 
