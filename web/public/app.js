@@ -1,5 +1,6 @@
 import { createNavigatorFromData, listSearchableKeys } from './modules/dichotomous.js';
 import { MultiAccessSession, listMultiKeys } from './modules/multiaccess.js';
+import { buildTaxonIndex, searchTaxa, taxonIdFromUrl } from './modules/species.js';
 
 const statusEl = document.querySelector('#status');
 const viewButtons = document.querySelectorAll('header nav button');
@@ -7,6 +8,7 @@ const aboutLink = document.querySelector('#about-link');
 const views = {
   dichotomous: document.querySelector('#view-dichotomous'),
   multi: document.querySelector('#view-multi'),
+  species: document.querySelector('#view-species'),
   about: document.querySelector('#view-about')
 };
 
@@ -33,6 +35,12 @@ const multiElements = {
   undo: document.querySelector('#multi-undo')
 };
 
+const speciesElements = {
+  search: document.querySelector('#species-search'),
+  matches: document.querySelector('#species-matches'),
+  detail: document.querySelector('#species-detail')
+};
+
 let dichNavigator = null;
 let multiSession = null;
 let globalDichKeys = {};
@@ -45,6 +53,10 @@ let currentView = 'dichotomous';
 let dichResultItemId = null;
 let dichResult = null;
 let multiLoad = null;
+let descriptionsLoad = null;
+let descriptions = {};
+let taxonIndex = new Map();
+let currentSpeciesId = null;
 
 const READY_MESSAGE = 'Ready to use offline. Add to Home Screen for easy access.';
 const STORAGE_KEY = 'vicflora-offline-state-v1';
@@ -67,6 +79,7 @@ let dichMode = savedState.dichMode === 'bracketed' ? 'bracketed' : 'interactive'
 function saveState() {
   persisted.view = currentView;
   persisted.dichMode = dichMode;
+  persisted.speciesId = currentSpeciesId;
   if (dichNavigator) {
     persisted.dich = { ...dichNavigator.serialize(), resultItemId: dichResultItemId };
   }
@@ -119,6 +132,10 @@ function switchView(view) {
 
   if (view === 'multi') {
     ensureMultiLoaded();
+  }
+  if (view === 'species') {
+    ensureDescriptionsLoaded();
+    if (!currentSpeciesId) speciesElements.search.focus();
   }
   saveState();
 }
@@ -324,6 +341,7 @@ function showResult(item, via = null) {
   if (via) {
     lines.push(`<p>Represented in Victoria by <strong>${via.item_name || ''}</strong>.</p>`);
   }
+  lines.push('<div class="taxon-description"></div>');
   if (item.url) {
     lines.push(`<p><a href="${item.url}" target="_blank" rel="noopener">Open VicFlora entry</a></p>`);
   }
@@ -334,6 +352,10 @@ function showResult(item, via = null) {
     lines.push(`<p>Leads to key ${item.to_key}.</p>`);
   }
   dichElements.result.innerHTML = lines.join('');
+  fillDescription(
+    dichElements.result.querySelector('.taxon-description'),
+    taxonIdFromUrl(via?.url) || taxonIdFromUrl(item.url)
+  );
   saveState();
 
   const linkButton = dichElements.result.querySelector('button[data-next-key]');
@@ -717,6 +739,10 @@ async function loadData() {
     }
   }
   bindDichotomousControls(globalDichKeys);
+  taxonIndex = buildTaxonIndex(globalDichKeys);
+  if (savedState.speciesId && taxonIndex.has(savedState.speciesId)) {
+    showSpecies(savedState.speciesId);
+  }
 
   setStatus(READY_MESSAGE);
 }
@@ -758,6 +784,113 @@ async function loadMultiData() {
   setStatus(READY_MESSAGE);
 }
 
+function escapeHtml(text) {
+  return String(text ?? '').replace(/[&<>"']/g, ch => `&#${ch.charCodeAt(0)};`);
+}
+
+// Descriptions are only fetched when first needed (a key result or the Species tab).
+function ensureDescriptionsLoaded() {
+  if (!descriptionsLoad) {
+    descriptionsLoad = fetchJSON('./data/descriptions.json')
+      .then(bundle => {
+        descriptions = bundle.taxa || {};
+      })
+      .catch(error => {
+        descriptionsLoad = null;
+        console.warn('Could not load descriptions:', error);
+      });
+  }
+  return descriptionsLoad;
+}
+
+async function fillDescription(container, taxonId) {
+  if (!container || !taxonId) return;
+  await ensureDescriptionsLoaded();
+  const taxon = descriptions[taxonId];
+  if (!taxon?.html) return;
+  container.innerHTML = `
+    ${taxon.vernacular ? `<p class="vernacular">${escapeHtml(taxon.vernacular)}</p>` : ''}
+    ${taxon.html}
+  `;
+}
+
+function showSpecies(taxonId) {
+  const entry = taxonIndex.get(taxonId);
+  if (!entry) return;
+  currentSpeciesId = taxonId;
+  speciesElements.matches.innerHTML = '';
+  const detail = speciesElements.detail;
+  detail.hidden = false;
+
+  const keyButtons = entry.keys
+    .map(keyId => {
+      const title = globalDichKeys[keyId]?.key_title || `Key ${keyId}`;
+      return `<li><button type="button" class="link" data-open-key="${escapeHtml(keyId)}">${escapeHtml(title)}</button></li>`;
+    })
+    .join('');
+  const ownKey = entry.toKey && globalDichKeys[entry.toKey]
+    ? `<p><button type="button" class="secondary" data-open-key="${escapeHtml(entry.toKey)}">Open key to ${escapeHtml(globalDichKeys[entry.toKey].key_title)}</button></p>`
+    : '';
+
+  detail.innerHTML = `
+    <h3>${escapeHtml(descriptions[taxonId]?.name || entry.name)}</h3>
+    <div class="taxon-description"><p class="muted">No description bundled for this taxon.</p></div>
+    ${ownKey}
+    <h4>Appears in</h4>
+    <ul class="key-links">${keyButtons}</ul>
+    <p><a href="https://vicflora.rbg.vic.gov.au/flora/taxon/${escapeHtml(taxonId)}" target="_blank" rel="noopener">Open VicFlora entry</a></p>
+  `;
+  fillDescription(detail.querySelector('.taxon-description'), taxonId);
+  saveState();
+}
+
+function openDichotomousKey(keyId) {
+  try {
+    dichNavigator = createNavigatorFromData(globalDichKeys, String(keyId));
+    setDichotomousSearchValue(String(keyId));
+    switchView('dichotomous');
+    renderDichotomous();
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+function renderSpeciesMatches() {
+  const results = searchTaxa(taxonIndex, speciesElements.search.value, descriptions);
+  speciesElements.matches.innerHTML = results
+    .map(entry => {
+      const vernacular = descriptions[entry.id]?.vernacular;
+      return `<li><button type="button" data-taxon="${escapeHtml(entry.id)}">
+        <span class="scientific_name">${escapeHtml(entry.name)}</span>
+        ${vernacular ? `<small>${escapeHtml(vernacular)}</small>` : ''}
+      </button></li>`;
+    })
+    .join('');
+}
+
+function initSpecies() {
+  speciesElements.search.addEventListener('input', async () => {
+    await ensureDescriptionsLoaded();
+    renderSpeciesMatches();
+  });
+
+  // Taxon links can appear in search results and inside description notes anywhere in the app.
+  document.addEventListener('click', event => {
+    const taxonLink = event.target.closest('[data-taxon]');
+    if (taxonLink && taxonIndex.has(taxonLink.dataset.taxon)) {
+      event.preventDefault();
+      switchView('species');
+      showSpecies(taxonLink.dataset.taxon);
+      speciesElements.detail.scrollIntoView({ block: 'start' });
+      return;
+    }
+    const keyButton = event.target.closest('#species-detail [data-open-key]');
+    if (keyButton) {
+      openDichotomousKey(keyButton.dataset.openKey);
+    }
+  });
+}
+
 async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     try {
@@ -770,6 +903,7 @@ async function registerServiceWorker() {
 
 function init() {
   initNavigation();
+  initSpecies();
   registerServiceWorker();
   if (savedState.view && savedState.view !== currentView) {
     switchView(savedState.view);

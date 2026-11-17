@@ -70,7 +70,20 @@ The downloader:
    export into `keybase-data/<id>.json` (skipping ones that are already saved).
 3. Stores the summarised list in `vicflora-data/keybase-keys.json` for reference.
 
-### 3. Offline web app / PWA bundle
+### 3. Taxon descriptions
+
+```bash
+node scripts/fetch-descriptions.js            # every taxon linked from a key
+node scripts/fetch-descriptions.js --key 2168 # just the taxa in one key
+```
+
+Fetches each taxon's VicFlora profile (description, distribution & habitat,
+notes) and common name via GraphQL, sanitizes the HTML, and stores it in
+`vicflora-data/taxon-descriptions.json`. Already-fetched taxa are skipped. The
+web build copies it to `web/public/data/descriptions.json`, which the app loads
+on demand for key results and the Species lookup tab.
+
+### 4. Offline web app / PWA bundle
 
 ```bash
 npm run build:web

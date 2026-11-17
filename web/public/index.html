@@ -17,6 +17,7 @@
       <nav class="tabs" role="tablist">
         <button data-view="dichotomous" class="tab active" role="tab" aria-selected="true">Dichotomous Keys</button>
         <button data-view="multi" class="tab" role="tab" aria-selected="false">Multi-Access Keys</button>
+        <button data-view="species" class="tab" role="tab" aria-selected="false">Species</button>
       </nav>
     </header>
 
@@ -74,6 +75,18 @@
             <h3>Remaining Taxa</h3>
             <div id="multi-remaining"></div>
           </div>
+        </div>
+      </section>
+
+      <section id="view-species" class="view">
+        <div class="panel">
+          <h2>Species</h2>
+          <div class="controls">
+            <label for="species-search">Look up:</label>
+            <input id="species-search" type="search" placeholder="Scientific or common name…" autocomplete="off" />
+          </div>
+          <ul id="species-matches" class="species-matches"></ul>
+          <article id="species-detail" class="taxon-detail" hidden></article>
         </div>
       </section>
 

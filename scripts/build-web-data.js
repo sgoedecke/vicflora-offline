@@ -175,6 +175,14 @@ async function main() {
     keys: multi
   });
 
+  // Taxon descriptions (see scripts/fetch-descriptions.js), lazy-loaded by the app.
+  const descriptionsPath = path.join(root, 'vicflora-data', 'taxon-descriptions.json');
+  if (await fileExists(descriptionsPath)) {
+    await fs.copyFile(descriptionsPath, path.join(webDataDir, 'descriptions.json'));
+  } else {
+    await fs.writeFile(path.join(webDataDir, 'descriptions.json'), JSON.stringify({ taxa: {} }));
+  }
+
   // Copy config snapshot for reference
   await writeJSON(path.join(webDataDir, 'config.json'), config);
 
