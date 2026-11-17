@@ -399,10 +399,21 @@ function handleDichotomousChoice(index) {
 }
 
 function bindDichotomousControls(keys) {
+  // Clear on focus so the full key list shows; restore if nothing is picked.
+  dichElements.search.addEventListener('focus', () => {
+    dichElements.search.placeholder = dichElements.search.value || 'Start typing a key…';
+    dichElements.search.value = '';
+  });
+  dichElements.search.addEventListener('blur', () => {
+    if (dichNavigator) setDichotomousSearchValue(dichNavigator.startKeyId);
+  });
+
   dichElements.search.addEventListener('change', event => {
     const value = event.target.value;
+    if (!value) return;
     const match = Array.from(dichElements.datalist.options).find(option => option.value === value);
     const keyId = match?.dataset.keyId || value.replace(/.*\[(\d+)\]$/, '$1');
+    if (!keys[keyId]) return;
     try {
       dichNavigator = createNavigatorFromData(keys, keyId);
       renderDichotomous();
