@@ -137,6 +137,33 @@ export class DichotomousNavigator {
     }
     return false;
   }
+
+  findItem(itemId) {
+    return this.currentState().context.items.get(itemId) || null;
+  }
+
+  serialize() {
+    return {
+      startKeyId: this.startKeyId,
+      stack: this.stack.map(state => ({
+        keyId: state.context.keyId,
+        currentLeadId: state.currentLeadId,
+        history: [...state.history]
+      }))
+    };
+  }
+
+  // Throws if the saved state refers to keys that are no longer bundled.
+  restore(saved) {
+    if (!saved?.stack?.length) {
+      throw new Error('No saved dichotomous state');
+    }
+    this.stack = saved.stack.map(entry => ({
+      context: this.loadKey(String(entry.keyId)),
+      currentLeadId: entry.currentLeadId,
+      history: Array.isArray(entry.history) ? [...entry.history] : []
+    }));
+  }
 }
 
 export function createNavigatorFromData(rawKeys, startKeyId = START_KEY_DEFAULT) {

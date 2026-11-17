@@ -101,23 +101,26 @@ class MultiAccessScraper {
     }
   }
 
+  // Lucid scores are keyed by state id; each decoded row has one digit per
+  // entity (in entity order): 0 absent, 1 common, 2 rare, 3 uncertain,
+  // 4/5 common/rare but misinterpreted.
   decompressScores(compressedScores) {
     const decompressed = {};
 
-    for (const [entityId, compressedData] of Object.entries(compressedScores)) {
+    for (const [stateId, compressedData] of Object.entries(compressedScores)) {
       try {
         const decompressedString = LZString.decompressFromBase64(compressedData);
         if (decompressedString) {
           // Convert ASCII codes to actual numbers
           const scores = decompressedString.split('').map(char => char.charCodeAt(0) - 48);
-          decompressed[entityId] = scores;
+          decompressed[stateId] = scores;
         } else {
-          console.warn(`Failed to decompress scores for entity ${entityId}`);
-          decompressed[entityId] = null;
+          console.warn(`Failed to decompress scores for state ${stateId}`);
+          decompressed[stateId] = null;
         }
       } catch (error) {
-        console.warn(`Error decompressing scores for entity ${entityId}:`, error.message);
-        decompressed[entityId] = null;
+        console.warn(`Error decompressing scores for state ${stateId}:`, error.message);
+        decompressed[stateId] = null;
       }
     }
 

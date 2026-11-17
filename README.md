@@ -127,6 +127,7 @@ npm run scrape:identification # node main.js identification
 npm run scrape:all            # node main.js all
 npm run key                   # node keying-cli-simple.js
 npm run key:dichotomous       # node keybase-cli.js
+npm test                      # check the web app's key logic against web/public/data
 ```
 
 ## License

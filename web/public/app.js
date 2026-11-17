@@ -39,6 +39,41 @@ let multiState = {
   currentKey: null,
   currentKeyInfo: null
 };
+let currentView = 'dichotomous';
+let dichResultItemId = null;
+let multiLoad = null;
+
+const READY_MESSAGE = 'Ready to use offline. Add to Home Screen for easy access.';
+const STORAGE_KEY = 'vicflora-offline-state-v1';
+
+// Progress is saved so it survives Android killing the app in the background
+// (e.g. while switching to the camera). `savedState` is the snapshot from
+// launch; `persisted` is what gets written back as the user goes.
+function readSavedState() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+const savedState = readSavedState();
+const persisted = { ...savedState };
+
+function saveState() {
+  persisted.view = currentView;
+  if (dichNavigator) {
+    persisted.dich = { ...dichNavigator.serialize(), resultItemId: dichResultItemId };
+  }
+  if (multiSession && multiState.currentKey) {
+    persisted.multi = { key: multiState.currentKey, selections: multiSession.serialize() };
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+  } catch {
+    // Storage can be unavailable (private browsing, quota); progress just won't persist.
+  }
+}
 
 async function fetchJSON(url) {
   const response = await fetch(url);
@@ -61,6 +96,8 @@ function formatMeasurement(value) {
 }
 
 function switchView(view) {
+  if (!views[view]) return;
+  currentView = view;
   Object.entries(views).forEach(([name, section]) => {
     const isActive = name === view;
     section.classList.toggle('visible', isActive);
@@ -74,6 +111,11 @@ function switchView(view) {
   if (aboutLink) {
     aboutLink.classList.toggle('active', view === 'about');
   }
+
+  if (view === 'multi') {
+    ensureMultiLoaded();
+  }
+  saveState();
 }
 
 function initNavigation() {
@@ -105,8 +147,14 @@ function populateDichotomousSelect(keys) {
   return entries;
 }
 
+function setDichotomousSearchValue(keyId) {
+  const title = globalDichKeys[keyId]?.key_title || `Key ${keyId}`;
+  dichElements.search.value = `${title} [${keyId}]`;
+}
+
 function renderDichotomous() {
   if (!dichNavigator) return;
+  dichResultItemId = null;
   const header = dichNavigator.getHeader();
   const options = dichNavigator.getOptions();
 
@@ -122,6 +170,7 @@ function renderDichotomous() {
 
   if (options.length === 0) {
     dichElements.options.innerHTML = '<p>No leads available. Use back or restart.</p>';
+    saveState();
     return;
   }
 
@@ -136,9 +185,11 @@ function renderDichotomous() {
     button.addEventListener('click', () => handleDichotomousChoice(index));
     dichElements.options.appendChild(button);
   });
+  saveState();
 }
 
 function showResult(item) {
+  dichResultItemId = item.item_id ?? null;
   dichElements.result.classList.add('visible');
   const lines = [];
   if (item.to_key) {
@@ -155,6 +206,7 @@ function showResult(item) {
     lines.push(`<p>Leads to key ${item.to_key}.</p>`);
   }
   dichElements.result.innerHTML = lines.join('');
+  saveState();
 
   const linkButton = dichElements.result.querySelector('button[data-next-key]');
   if (linkButton) {
@@ -162,8 +214,7 @@ function showResult(item) {
       const nextKey = linkButton.dataset.nextKey;
       try {
         dichNavigator = createNavigatorFromData(globalDichKeys, String(nextKey));
-        const nextTitle = globalDichKeys[nextKey]?.key_title || `Key ${nextKey}`;
-        dichElements.search.value = `${nextTitle} [${nextKey}]`;
+        setDichotomousSearchValue(String(nextKey));
         renderDichotomous();
       } catch (error) {
         setStatus(error.message);
@@ -429,6 +480,14 @@ function renderMultiAll(session) {
   }
   renderMultiSelections(session);
   renderMultiRemaining(session);
+  saveState();
+}
+
+function startMultiSession(keyInfo) {
+  multiSession = new MultiAccessSession(keyInfo.data);
+  multiState.currentKey = keyInfo.id;
+  multiState.currentKeyInfo = keyInfo;
+  multiState.currentCharacterId = null;
 }
 
 function bindMultiControls(list) {
@@ -439,10 +498,7 @@ function bindMultiControls(list) {
       setStatus('Key not found in dataset');
       return;
     }
-    multiSession = new MultiAccessSession(keyInfo.data);
-    multiState.currentKey = id;
-    multiState.currentKeyInfo = keyInfo;
-    multiState.currentCharacterId = null;
+    startMultiSession(keyInfo);
     renderMultiAll(multiSession);
   });
 
@@ -480,31 +536,69 @@ function bindMultiControls(list) {
 
 async function loadData() {
   setStatus('Loading key bundles…');
-  const [dichotomousBundle, multiBundle] = await Promise.all([
-    fetchJSON('./data/dichotomous-keys.json'),
-    fetchJSON('./data/multi-keys.json')
-  ]);
+  const dichotomousBundle = await fetchJSON('./data/dichotomous-keys.json');
 
   globalDichKeys = dichotomousBundle.keys || {};
   const dichEntries = populateDichotomousSelect(globalDichKeys);
   if (dichEntries.length) {
     dichNavigator = createNavigatorFromData(globalDichKeys, dichEntries[0].id);
-    dichElements.search.value = `${dichEntries[0].title} [${dichEntries[0].id}]`;
+    const saved = savedState.dich;
+    if (saved) {
+      try {
+        const restored = createNavigatorFromData(globalDichKeys, String(saved.startKeyId));
+        restored.restore(saved);
+        dichNavigator = restored;
+      } catch (error) {
+        console.warn('Could not restore saved dichotomous progress:', error);
+      }
+    }
+    setDichotomousSearchValue(dichNavigator.startKeyId);
     renderDichotomous();
+    const savedResult = saved?.resultItemId != null ? dichNavigator.findItem(saved.resultItemId) : null;
+    if (savedResult && !savedResult.to_key) {
+      showResult(savedResult);
+    }
   }
   bindDichotomousControls(globalDichKeys);
+
+  setStatus(READY_MESSAGE);
+}
+
+// The multi-access bundle is large, so it is only parsed when that tab is used.
+function ensureMultiLoaded() {
+  if (!multiLoad) {
+    multiLoad = loadMultiData().catch(error => {
+      multiLoad = null;
+      console.error(error);
+      setStatus(error.message);
+    });
+  }
+  return multiLoad;
+}
+
+async function loadMultiData() {
+  setStatus('Loading multi-access keys…');
+  multiElements.summary.textContent = 'Loading multi-access keys…';
+  const multiBundle = await fetchJSON('./data/multi-keys.json');
 
   const multiList = listMultiKeys(multiBundle.keys || {});
   if (multiList.length) {
     populateMultiSelect(multiList);
-    multiSession = new MultiAccessSession(multiList[0].data);
-    multiState.currentKey = multiList[0].id;
-    multiState.currentKeyInfo = multiList[0];
+    const saved = savedState.multi;
+    const savedInfo = saved && multiList.find(entry => entry.id === saved.key);
+    const keyInfo = savedInfo || multiList[0];
+    startMultiSession(keyInfo);
+    if (savedInfo) {
+      multiSession.restore(saved.selections);
+    }
+    multiElements.select.value = keyInfo.id;
     renderMultiAll(multiSession);
+  } else {
+    multiElements.summary.textContent = '';
   }
   bindMultiControls(multiList);
 
-  setStatus('Ready to use offline. Add to Home Screen for easy access.');
+  setStatus(READY_MESSAGE);
 }
 
 async function registerServiceWorker() {
@@ -520,6 +614,9 @@ async function registerServiceWorker() {
 function init() {
   initNavigation();
   registerServiceWorker();
+  if (savedState.view && savedState.view !== currentView) {
+    switchView(savedState.view);
+  }
   loadData().catch(error => {
     console.error(error);
     setStatus(error.message);

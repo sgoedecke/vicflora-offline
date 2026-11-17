@@ -1,7 +1,3 @@
-function toSet(iterable) {
-  return new Set(iterable);
-}
-
 const LOWERCASE_WORDS = new Set(['of', 'and', 'the']);
 
 function titleCase(value) {
@@ -21,31 +17,60 @@ function normalizeKeyTitle(title) {
   return cleaned ? titleCase(cleaned) : titleCase(title.trim());
 }
 
+// Lucid score codes (as used by VicFlora's Lucid player):
+// 0 absent/unscored, 1 common, 2 rare, 3 uncertain, 4 common & misinterpreted,
+// 5 rare & misinterpreted. VicFlora keys retain uncertain and misinterpreted
+// scores, so any non-zero score counts as a match.
+function isMatchingScore(score) {
+  return score >= 1 && score <= 5;
+}
+
+// Lucid measures are [type, outsideMin, normalMin, normalMax, outsideMax].
+// Type 3 means "uncertain" and matches any value.
+function parseMeasure(raw) {
+  if (!Array.isArray(raw) || !raw.length) return null;
+  if (raw[0] === 3) return { any: true };
+  if (raw.length < 5) return null;
+  const [, outsideMin, normalMin, normalMax, outsideMax] = raw;
+  const min = Number.isFinite(outsideMin) ? outsideMin : normalMin;
+  const max = Number.isFinite(outsideMax) ? outsideMax : normalMax;
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+  return { any: false, min, max };
+}
+
 export class MultiAccessSession {
   constructor(keyData) {
     this.keyData = keyData;
+    this.scores = keyData.decompressedScores || {};
+    this.measures = keyData.decompressedMeasures || {};
+    this.entities = keyData.entities || [];
+    // Score rows are indexed by entity position, so keep both id and index.
+    this.taxonIds = this.entities.map(entity => String(entity.id));
+    this.taxonIndex = new Map(this.taxonIds.map((id, index) => [id, index]));
+    this.entityById = new Map(this.entities.map(entity => [String(entity.id), entity]));
+    this.featureById = new Map((keyData.features || []).map(feature => [feature.id, feature]));
+    this.statesByFeature = new Map();
+    (keyData.states || []).forEach(state => {
+      if (!this.statesByFeature.has(state.feature)) {
+        this.statesByFeature.set(state.feature, []);
+      }
+      this.statesByFeature.get(state.feature).push(state);
+    });
     this.selectedStates = new Map();
-    this.eliminatedTaxa = new Set();
     this.reset();
   }
 
   reset() {
-    const scores = this.keyData.decompressedScores || {};
-    this.possibleTaxa = toSet(Object.keys(scores));
     this.selectedStates.clear();
-    this.eliminatedTaxa.clear();
+    this.recomputePossibleTaxa();
   }
 
   getCharacterById(characterId) {
-    return this.keyData.features?.find(f => f.id === characterId);
+    return this.featureById.get(characterId);
   }
 
   getStatesByCharacter(characterId) {
-    return this.keyData.states?.filter(s => s.feature === characterId) || [];
-  }
-
-  getCharacterIndex(characterId) {
-    return this.keyData.features?.findIndex(f => f.id === characterId) ?? -1;
+    return this.statesByFeature.get(characterId) || [];
   }
 
   getCharacterDisplayName(characterId) {
@@ -87,18 +112,65 @@ export class MultiAccessSession {
     return this.selectedStates.get(characterId) || null;
   }
 
-  isCharacterRelevant(characterId) {
-    const charIndex = this.getCharacterIndex(characterId);
-    if (charIndex === -1) return false;
+  stateMatchesTaxon(stateId, taxonId) {
+    const row = this.scores[stateId] ?? this.scores[String(stateId)];
+    if (!row) return false;
+    return isMatchingScore(row[this.taxonIndex.get(taxonId)]);
+  }
 
-    const stateValues = new Set();
-    for (const taxonId of this.possibleTaxa) {
-      const scores = this.keyData.decompressedScores[taxonId];
-      if (!scores || scores[charIndex] === undefined) continue;
-      stateValues.add(scores[charIndex]);
-      if (stateValues.size > 1) return true;
+  getMeasure(characterId, taxonId) {
+    return parseMeasure(this.measures[String(characterId)]?.[taxonId]);
+  }
+
+  numericMatchesTaxon(characterId, taxonId, value) {
+    const measure = this.getMeasure(characterId, taxonId);
+    if (!measure) return false;
+    return measure.any || (value >= measure.min && value <= measure.max);
+  }
+
+  taxonMatchesSelection(characterId, selection, taxonId) {
+    if (selection.type === 'numeric') {
+      return this.numericMatchesTaxon(characterId, taxonId, selection.value);
     }
-    return stateValues.size > 1;
+    return this.stateMatchesTaxon(selection.value, taxonId);
+  }
+
+  recomputePossibleTaxa() {
+    const selections = Array.from(this.selectedStates.entries());
+    this.possibleTaxa = new Set();
+    this.eliminatedTaxa = new Set();
+    for (const taxonId of this.taxonIds) {
+      const keep = selections.every(([characterId, selection]) =>
+        this.taxonMatchesSelection(characterId, selection, taxonId)
+      );
+      (keep ? this.possibleTaxa : this.eliminatedTaxa).add(taxonId);
+    }
+  }
+
+  // A character is worth asking about if some answer would remove some, but
+  // not all, of the remaining taxa.
+  isCharacterRelevant(characterId) {
+    const character = this.getCharacterById(characterId);
+    if (!character || this.possibleTaxa.size < 2) return false;
+
+    if (character.type === 2) {
+      const signatures = new Set();
+      for (const taxonId of this.possibleTaxa) {
+        const measure = this.getMeasure(characterId, taxonId);
+        signatures.add(!measure ? 'none' : measure.any ? 'any' : `${measure.min}:${measure.max}`);
+        if (signatures.size > 1) return true;
+      }
+      return false;
+    }
+
+    const total = this.possibleTaxa.size;
+    return this.getStatesByCharacter(characterId).some(state => {
+      let matches = 0;
+      for (const taxonId of this.possibleTaxa) {
+        if (this.stateMatchesTaxon(state.id, taxonId)) matches += 1;
+      }
+      return matches > 0 && matches < total;
+    });
   }
 
   getRelevantCharacters() {
@@ -119,12 +191,12 @@ export class MultiAccessSession {
   }
 
   getTaxonName(taxonId) {
-    const entity = this.keyData.entities?.find(e => String(e.id) === String(taxonId));
+    const entity = this.entityById.get(String(taxonId));
     return entity?.name || entity?.title || `Taxon ${taxonId}`;
   }
 
   getTaxonUrl(taxonId) {
-    const entity = this.keyData.entities?.find(e => String(e.id) === String(taxonId));
+    const entity = this.entityById.get(String(taxonId));
     if (!entity) return null;
 
     if (entity.url) return entity.url;
@@ -133,66 +205,39 @@ export class MultiAccessSession {
     return profileEntry?.path || null;
   }
 
+  // Range of values across the remaining taxa that have a measurement.
   getMeasurementRange(characterId) {
-    const measures = this.keyData.decompressedMeasures?.[String(characterId)];
-    if (!measures) return null;
-
     let min = Number.POSITIVE_INFINITY;
     let max = Number.NEGATIVE_INFINITY;
     let count = 0;
 
-    for (const values of Object.values(measures)) {
-      if (!Array.isArray(values)) continue;
-      const numericValues = values.slice(1).filter(value => typeof value === 'number' && !Number.isNaN(value));
-      if (!numericValues.length) continue;
-      const localMin = Math.min(...numericValues);
-      const localMax = Math.max(...numericValues);
-      if (localMin < min) min = localMin;
-      if (localMax > max) max = localMax;
+    for (const taxonId of this.possibleTaxa) {
+      const measure = this.getMeasure(characterId, taxonId);
+      if (!measure || measure.any) continue;
+      if (measure.min < min) min = measure.min;
+      if (measure.max > max) max = measure.max;
       count += 1;
     }
 
-    if (!count || !Number.isFinite(min) || !Number.isFinite(max)) {
-      return null;
-    }
+    return count ? { min, max, count } : null;
+  }
 
-    return { min, max, count };
+  applySelection(characterId, selection) {
+    const before = this.possibleTaxa.size;
+    this.selectedStates.set(characterId, selection);
+    this.recomputePossibleTaxa();
+    return {
+      eliminated: before - this.possibleTaxa.size,
+      remaining: this.possibleTaxa.size
+    };
   }
 
   chooseState(characterId, stateId) {
-    const stateList = this.getStatesByCharacter(characterId);
-    const selectedIndex = stateList.findIndex(state => state.id === stateId);
-    if (selectedIndex === -1) {
+    const exists = this.getStatesByCharacter(characterId).some(state => state.id === stateId);
+    if (!exists) {
       return { eliminated: 0, remaining: this.possibleTaxa.size };
     }
-
-    const newPossible = new Set();
-    const eliminatedNow = new Set();
-    const charIndex = this.getCharacterIndex(characterId);
-
-    for (const taxonId of this.possibleTaxa) {
-      const scores = this.keyData.decompressedScores[taxonId];
-      if (!scores) continue;
-      const value = scores[charIndex];
-      const matches =
-        value === selectedIndex ||
-        value === 2 ||
-        value === 4;
-      if (matches) {
-        newPossible.add(taxonId);
-      } else {
-        eliminatedNow.add(taxonId);
-        this.eliminatedTaxa.add(taxonId);
-      }
-    }
-
-    this.possibleTaxa = newPossible;
-    this.selectedStates.set(characterId, { type: 'state', value: stateId });
-
-    return {
-      eliminated: eliminatedNow.size,
-      remaining: newPossible.size
-    };
+    return this.applySelection(characterId, { type: 'state', value: stateId });
   }
 
   applyNumericSelection(characterId, rawValue) {
@@ -200,54 +245,11 @@ export class MultiAccessSession {
     if (!Number.isFinite(value)) {
       return { eliminated: 0, remaining: this.possibleTaxa.size };
     }
-
-    const measures = this.keyData.decompressedMeasures?.[String(characterId)] || {};
-    const newPossible = new Set();
-    const eliminatedNow = new Set();
-
-    for (const taxonId of this.possibleTaxa) {
-      const measurement = measures[String(taxonId)] ?? measures[taxonId];
-      if (!Array.isArray(measurement) || measurement.length < 2) {
-        eliminatedNow.add(taxonId);
-        this.eliminatedTaxa.add(taxonId);
-        continue;
-      }
-
-      const numericValues = measurement.slice(1).filter(num => typeof num === 'number' && !Number.isNaN(num));
-      if (!numericValues.length) {
-        eliminatedNow.add(taxonId);
-        this.eliminatedTaxa.add(taxonId);
-        continue;
-      }
-
-      const min = Math.min(...numericValues);
-      const max = Math.max(...numericValues);
-      if (value >= min && value <= max) {
-        newPossible.add(taxonId);
-      } else {
-        eliminatedNow.add(taxonId);
-        this.eliminatedTaxa.add(taxonId);
-      }
-    }
-
-    this.possibleTaxa = newPossible;
-    this.selectedStates.set(characterId, { type: 'numeric', value });
-
-    return {
-      eliminated: eliminatedNow.size,
-      remaining: newPossible.size
-    };
+    return this.applySelection(characterId, { type: 'numeric', value });
   }
 
   undoLastSelection() {
-    if (this.selectedStates.size === 0) {
-      return null;
-    }
-
-    let lastKey;
-    for (const key of this.selectedStates.keys()) {
-      lastKey = key;
-    }
+    const lastKey = Array.from(this.selectedStates.keys()).pop();
     if (lastKey === undefined) {
       return null;
     }
@@ -261,21 +263,21 @@ export class MultiAccessSession {
     };
   }
 
-  recomputePossibleTaxa() {
-    const snapshot = Array.from(this.selectedStates.entries());
+  serialize() {
+    return Array.from(this.selectedStates.entries());
+  }
+
+  restore(entries) {
     this.selectedStates.clear();
-
-    this.possibleTaxa = toSet(Object.keys(this.keyData.decompressedScores || {}));
-    this.eliminatedTaxa.clear();
-
-    for (const [characterId, selection] of snapshot) {
-      if (!selection) continue;
-      if (selection.type === 'numeric') {
-        this.applyNumericSelection(characterId, selection.value);
-      } else {
-        this.chooseState(characterId, selection.value);
+    (entries || []).forEach(([characterId, selection]) => {
+      if (!this.getCharacterById(characterId)) return;
+      if (selection?.type === 'numeric' && Number.isFinite(selection.value)) {
+        this.selectedStates.set(characterId, { type: 'numeric', value: selection.value });
+      } else if (selection?.type === 'state' && this.getStatesByCharacter(characterId).some(s => s.id === selection.value)) {
+        this.selectedStates.set(characterId, { type: 'state', value: selection.value });
       }
-    }
+    });
+    this.recomputePossibleTaxa();
   }
 
   remainingTaxa(limit = 25) {
