@@ -162,7 +162,8 @@ function showResult(item) {
       const nextKey = linkButton.dataset.nextKey;
       try {
         dichNavigator = createNavigatorFromData(globalDichKeys, String(nextKey));
-        dichElements.select.value = String(nextKey);
+        const nextTitle = globalDichKeys[nextKey]?.key_title || `Key ${nextKey}`;
+        dichElements.search.value = `${nextTitle} [${nextKey}]`;
         renderDichotomous();
       } catch (error) {
         setStatus(error.message);

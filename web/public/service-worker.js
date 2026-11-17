@@ -38,13 +38,32 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Stale-while-revalidate: serve from cache immediately (so weak signal never
+  // blocks the app) and refresh the cache in the background for next time.
   event.respondWith(
-    fetch(request)
-      .then(response => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+    caches.open(CACHE_NAME).then(async cache => {
+      const cached = await cache.match(request);
+      const network = fetch(request).then(response => {
+        if (response.status === 200) {
+          cache.put(request, response.clone());
+        }
         return response;
-      })
-      .catch(() => caches.match(request))
+      });
+
+      if (cached) {
+        event.waitUntil(network.catch(() => {}));
+        return cached;
+      }
+
+      try {
+        return await network;
+      } catch (error) {
+        if (request.mode === 'navigate') {
+          const fallback = await cache.match('./index.html');
+          if (fallback) return fallback;
+        }
+        throw error;
+      }
+    })
   );
 });
