@@ -44,6 +44,10 @@ function normalizeKeyTitle(title) {
     cleaned = cleaned.replace(categoryPattern, '');
   }
 
+  // Bryophyte keys use the "Key to Pottiaceae genera" form
+  const trailingCategoryPattern = /\s+(genera|species|subspecies|varieties)$/i;
+  cleaned = cleaned.replace(trailingCategoryPattern, '');
+
   return cleaned.trim();
 }
 
@@ -67,9 +71,15 @@ async function main() {
   const webDataDir = path.join(root, 'web', 'public', 'data');
   await fs.mkdir(webDataDir, { recursive: true });
 
-  // Build dichotomous dataset
+  // Build dichotomous dataset. Start from the configured roots, then include every
+  // other scraped key: many (e.g. genus keys under single-genus families like
+  // Hibbertia) aren't linked from any parent key via to_key.
   const dichotomous = {};
-  const pending = [...config.dichotomousKeys.map(id => String(id))];
+  const scrapedKeyIds = (await fs.readdir(path.join(root, 'keybase-data')))
+    .filter(name => /^\d+\.json$/.test(name))
+    .map(name => name.replace(/\.json$/, ''))
+    .sort((a, b) => Number(a) - Number(b));
+  const pending = [...config.dichotomousKeys.map(id => String(id)), ...scrapedKeyIds];
   const seen = new Set();
 
   while (pending.length) {
