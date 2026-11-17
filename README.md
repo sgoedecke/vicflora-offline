@@ -90,8 +90,7 @@ node scripts/fetch-glossary.js
 Fetches the VicFlora glossary (~880 terms) into `vicflora-data/glossary.json`.
 The app marks botanical terms in key leads and descriptions with a faint dotted
 underline; tapping one shows its definition. Units, place names and everyday
-words (see `STOP_TERMS` in `web/public/modules/glossary.js`) are left unmarked,
-and the "Glossary terms" checkbox turns marking off entirely.
+words (see `STOP_TERMS` in `web/public/modules/glossary.js`) are left unmarked.
 
 ### 4. Offline web app / PWA bundle
 

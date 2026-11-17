@@ -21,7 +21,6 @@ const dichElements = {
   result: document.querySelector('#dichotomous-result'),
   bracketed: document.querySelector('#dichotomous-bracketed'),
   modeButtons: document.querySelectorAll('[data-dich-mode]'),
-  glossaryToggle: document.querySelector('#glossary-toggle'),
   back: document.querySelector('#dichotomous-back'),
   restart: document.querySelector('#dichotomous-restart')
 };
@@ -79,13 +78,11 @@ function readSavedState() {
 const savedState = readSavedState();
 const persisted = { ...savedState };
 let dichMode = savedState.dichMode === 'bracketed' ? 'bracketed' : 'interactive';
-let glossaryEnabled = savedState.glossaryEnabled !== false;
 
 function saveState() {
   persisted.view = currentView;
   persisted.dichMode = dichMode;
   persisted.speciesId = currentSpeciesId;
-  persisted.glossaryEnabled = glossaryEnabled;
   if (dichNavigator) {
     persisted.dich = { ...dichNavigator.serialize(), resultItemId: dichResultItemId };
   }
@@ -897,7 +894,7 @@ async function loadGlossary() {
 }
 
 function annotateGlossary(root) {
-  if (glossaryEnabled) glossary?.annotate(root);
+  glossary?.annotate(root);
 }
 
 const RELATIONSHIP_LABELS = {
@@ -964,16 +961,6 @@ function initGlossary() {
   );
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape') hideGlossaryTerm();
-  });
-
-  dichElements.glossaryToggle.checked = glossaryEnabled;
-  dichElements.glossaryToggle.addEventListener('change', () => {
-    glossaryEnabled = dichElements.glossaryToggle.checked;
-    const result = dichResult;
-    renderDichotomous();
-    if (dichMode === 'interactive' && result) showResult(result.item, result.via);
-    if (currentSpeciesId) showSpecies(currentSpeciesId);
-    saveState();
   });
 }
 

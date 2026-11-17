@@ -449,16 +449,6 @@ button.link {
   color: var(--muted);
 }
 
-.toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin: 0 0 1rem 1rem;
-  color: var(--muted);
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
 .gloss {
   text-decoration: underline dotted;
   text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
