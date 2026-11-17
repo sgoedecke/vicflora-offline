@@ -449,6 +449,79 @@ button.link {
   color: var(--muted);
 }
 
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1rem 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.gloss {
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+.gloss-popover {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 2rem));
+  max-height: 50vh;
+  overflow-y: auto;
+  background: var(--card-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.25);
+  z-index: 10;
+  line-height: 1.5;
+}
+
+.gloss-popover[hidden] {
+  display: none;
+}
+
+.gloss-popover h3 {
+  margin: 0 2rem 0.5rem 0;
+}
+
+.gloss-popover p {
+  margin: 0 0 0.5rem;
+}
+
+.gloss-popover .muted {
+  color: var(--muted);
+}
+
+.gloss-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  color: var(--muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
+}
+
+.gloss-related {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.gloss-related span {
+  color: var(--muted);
+}
+
 #status {
   min-height: 1.5rem;
   margin-bottom: 1rem;

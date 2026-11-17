@@ -1,5 +1,5 @@
 // Bump this whenever app files change so the new set is installed atomically.
-const CACHE_NAME = 'vicflora-offline-v7';
+const CACHE_NAME = 'vicflora-offline-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -8,11 +8,13 @@ const ASSETS = [
   './modules/dichotomous.js',
   './modules/multiaccess.js',
   './modules/species.js',
+  './modules/glossary.js',
   './manifest.json',
   './favicon.svg',
   './data/dichotomous-keys.json',
   './data/multi-keys.json',
   './data/descriptions.json',
+  './data/glossary.json',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

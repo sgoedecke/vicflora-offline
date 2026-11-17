@@ -183,6 +183,14 @@ async function main() {
     await fs.writeFile(path.join(webDataDir, 'descriptions.json'), JSON.stringify({ taxa: {} }));
   }
 
+  // Glossary (see scripts/fetch-glossary.js), used for tap-to-define terms.
+  const glossaryPath = path.join(root, 'vicflora-data', 'glossary.json');
+  if (await fileExists(glossaryPath)) {
+    await fs.copyFile(glossaryPath, path.join(webDataDir, 'glossary.json'));
+  } else {
+    await fs.writeFile(path.join(webDataDir, 'glossary.json'), '[]');
+  }
+
   // Copy config snapshot for reference
   await writeJSON(path.join(webDataDir, 'config.json'), config);
 

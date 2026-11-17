@@ -81,7 +81,17 @@ Fetches each taxon's VicFlora profile (description, distribution & habitat,
 notes) and common name via GraphQL, sanitizes the HTML, and stores it in
 `vicflora-data/taxon-descriptions.json`. Already-fetched taxa are skipped. The
 web build copies it to `web/public/data/descriptions.json`, which the app loads
-on demand for key results and the Species lookup tab.
+on demand for key results and the Species Search tab.
+
+```bash
+node scripts/fetch-glossary.js
+```
+
+Fetches the VicFlora glossary (~880 terms) into `vicflora-data/glossary.json`.
+The app marks botanical terms in key leads and descriptions with a faint dotted
+underline; tapping one shows its definition. Units, place names and everyday
+words (see `STOP_TERMS` in `web/public/modules/glossary.js`) are left unmarked,
+and the "Glossary terms" checkbox turns marking off entirely.
 
 ### 4. Offline web app / PWA bundle
 

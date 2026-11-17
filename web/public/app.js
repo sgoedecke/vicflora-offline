@@ -1,6 +1,7 @@
 import { createNavigatorFromData, listSearchableKeys } from './modules/dichotomous.js';
 import { MultiAccessSession, listMultiKeys } from './modules/multiaccess.js';
 import { buildTaxonIndex, searchTaxa, taxonIdFromUrl } from './modules/species.js';
+import { Glossary } from './modules/glossary.js';
 
 const statusEl = document.querySelector('#status');
 const viewButtons = document.querySelectorAll('header nav button');
@@ -20,6 +21,7 @@ const dichElements = {
   result: document.querySelector('#dichotomous-result'),
   bracketed: document.querySelector('#dichotomous-bracketed'),
   modeButtons: document.querySelectorAll('[data-dich-mode]'),
+  glossaryToggle: document.querySelector('#glossary-toggle'),
   back: document.querySelector('#dichotomous-back'),
   restart: document.querySelector('#dichotomous-restart')
 };
@@ -57,6 +59,8 @@ let descriptionsLoad = null;
 let descriptions = {};
 let taxonIndex = new Map();
 let currentSpeciesId = null;
+let glossary = null;
+const glossaryPopover = document.querySelector('#gloss-popover');
 
 const READY_MESSAGE = 'Ready to use offline. Add to Home Screen for easy access.';
 const STORAGE_KEY = 'vicflora-offline-state-v1';
@@ -75,11 +79,13 @@ function readSavedState() {
 const savedState = readSavedState();
 const persisted = { ...savedState };
 let dichMode = savedState.dichMode === 'bracketed' ? 'bracketed' : 'interactive';
+let glossaryEnabled = savedState.glossaryEnabled !== false;
 
 function saveState() {
   persisted.view = currentView;
   persisted.dichMode = dichMode;
   persisted.speciesId = currentSpeciesId;
+  persisted.glossaryEnabled = glossaryEnabled;
   if (dichNavigator) {
     persisted.dich = { ...dichNavigator.serialize(), resultItemId: dichResultItemId };
   }
@@ -226,6 +232,7 @@ function renderDichotomous() {
       ${option.item ? `<br/><span>${itemLabel(option.item, option.via)}</span>` : ''}
     `;
     button.addEventListener('click', () => handleDichotomousChoice(index));
+    annotateGlossary(button.querySelector('strong'));
     dichElements.options.appendChild(button);
   });
   saveState();
@@ -266,6 +273,7 @@ function renderBracketed() {
       const text = document.createElement('span');
       text.className = 'lead-text';
       text.innerHTML = lead.text;
+      annotateGlossary(text);
 
       const dest = document.createElement('span');
       dest.className = 'lead-dest';
@@ -715,7 +723,7 @@ function bindMultiControls(list) {
 
 async function loadData() {
   setStatus('Loading key bundles…');
-  const dichotomousBundle = await fetchJSON('./data/dichotomous-keys.json');
+  const [dichotomousBundle] = await Promise.all([fetchJSON('./data/dichotomous-keys.json'), loadGlossary()]);
 
   globalDichKeys = dichotomousBundle.keys || {};
   const dichEntries = populateDichotomousSelect(globalDichKeys);
@@ -812,6 +820,7 @@ async function fillDescription(container, taxonId) {
     ${taxon.vernacular ? `<p class="vernacular">${escapeHtml(taxon.vernacular)}</p>` : ''}
     ${taxon.html}
   `;
+  annotateGlossary(container);
 }
 
 function showSpecies(taxonId) {
@@ -868,6 +877,95 @@ function renderSpeciesMatches() {
     .join('');
 }
 
+async function loadGlossary() {
+  try {
+    glossary = new Glossary(await fetchJSON('./data/glossary.json'));
+  } catch (error) {
+    console.warn('Could not load glossary:', error);
+  }
+}
+
+function annotateGlossary(root) {
+  if (glossaryEnabled) glossary?.annotate(root);
+}
+
+const RELATIONSHIP_LABELS = {
+  'isOpposedTo': 'Opposite',
+  'isRelatedTo(cf.)': 'Compare',
+  'hasExactSynonym': 'Synonym',
+  'hasPartiallyOverlappingSynonym': 'Similar',
+  'hasApproximatelyEqualSynonym': 'Similar',
+  'hasVariation': 'Variant',
+  'isVariationOf': 'Variant of',
+  'hasPlural': 'Plural',
+  'isPluralOf': 'Singular',
+  'hasAbbreviation': 'Abbreviation',
+  'isAbbreviationOf': 'Abbreviation of',
+  'hasAdjective': 'Adjective',
+  'isAdjectiveOf': 'Noun'
+};
+
+function showGlossaryTerm(word) {
+  const term = glossary?.lookup(word);
+  if (!term) return;
+  const related = term.related
+    .filter(([, name]) => name !== term.definedBy)
+    .map(([type, name]) => {
+      const label = RELATIONSHIP_LABELS[type] || 'See';
+      const link = glossary.lookup(name)
+        ? `<button type="button" class="link" data-gloss="${escapeHtml(name)}">${escapeHtml(name)}</button>`
+        : escapeHtml(name);
+      return `<li><span>${label}:</span> ${link}</li>`;
+    })
+    .join('');
+  glossaryPopover.innerHTML = `
+    <button type="button" class="gloss-close" aria-label="Close">×</button>
+    <h3>${escapeHtml(term.name)}</h3>
+    ${term.definedBy ? `<p class="muted">Variant of <strong>${escapeHtml(term.definedBy)}</strong></p>` : ''}
+    <div class="gloss-definition">${term.definition || '<p class="muted">No definition.</p>'}</div>
+    ${related ? `<ul class="gloss-related">${related}</ul>` : ''}
+  `;
+  glossaryPopover.hidden = false;
+}
+
+function hideGlossaryTerm() {
+  glossaryPopover.hidden = true;
+}
+
+// Capture phase so tapping a term inside a lead button shows the definition
+// instead of choosing the lead.
+function initGlossary() {
+  document.addEventListener(
+    'click',
+    event => {
+      const term = event.target.closest('[data-gloss]');
+      if (term) {
+        event.preventDefault();
+        event.stopPropagation();
+        showGlossaryTerm(term.dataset.gloss);
+        return;
+      }
+      if (!glossaryPopover.hidden && (!glossaryPopover.contains(event.target) || event.target.closest('.gloss-close'))) {
+        hideGlossaryTerm();
+      }
+    },
+    true
+  );
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') hideGlossaryTerm();
+  });
+
+  dichElements.glossaryToggle.checked = glossaryEnabled;
+  dichElements.glossaryToggle.addEventListener('change', () => {
+    glossaryEnabled = dichElements.glossaryToggle.checked;
+    const result = dichResult;
+    renderDichotomous();
+    if (dichMode === 'interactive' && result) showResult(result.item, result.via);
+    if (currentSpeciesId) showSpecies(currentSpeciesId);
+    saveState();
+  });
+}
+
 function initSpecies() {
   speciesElements.search.addEventListener('input', async () => {
     await ensureDescriptionsLoaded();
@@ -904,6 +1002,7 @@ async function registerServiceWorker() {
 function init() {
   initNavigation();
   initSpecies();
+  initGlossary();
   registerServiceWorker();
   if (savedState.view && savedState.view !== currentView) {
     switchView(savedState.view);
