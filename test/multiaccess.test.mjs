@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { MultiAccessSession } from '../web/public/modules/multiaccess.js';
-import { createNavigatorFromData } from '../web/public/modules/dichotomous.js';
+import { createNavigatorFromData, listSearchableKeys } from '../web/public/modules/dichotomous.js';
 
 const readJSON = file => JSON.parse(readFileSync(new URL(`../web/public/data/${file}`, import.meta.url)));
 const multiKeys = readJSON('multi-keys.json').keys;
@@ -152,4 +152,20 @@ test('dichotomous progress survives serialize/restore, including across linked k
   assert.deepEqual(restored.getOptions().map(o => o.lead.lead_id), nav.getOptions().map(o => o.lead.lead_id));
 
   assert.throws(() => restored.restore({ stack: [{ keyId: 'missing', currentLeadId: 1, history: [] }] }));
+});
+
+test('dichotomous search lists every key title once, picking the canonical copy', () => {
+  const entries = listSearchableKeys(dichKeys);
+  const titles = entries.map(e => e.title);
+  assert.equal(new Set(titles).size, titles.length);
+  assert.equal(new Set(Object.values(dichKeys).map(k => k.key_title)).size, titles.length);
+
+  const idFor = title => entries.find(e => e.title === title)?.id;
+  assert.equal(idFor('Hibbertia'), '2245');
+  // Linked from the Taraxacum key (and has the 2023 edits), unlike orphaned 9769
+  assert.equal(idFor('Taraxacum species group 1 in Victoria'), '9770');
+  // 6144 is an orphaned re-upload with scope/geography swapped
+  assert.equal(idFor('Nematolepis'), '4212');
+  // Both linked from the dicot family key; 5871 is the later edit
+  assert.equal(idFor('Proteaceae'), '5871');
 });

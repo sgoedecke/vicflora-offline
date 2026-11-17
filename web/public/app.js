@@ -1,4 +1,4 @@
-import { createNavigatorFromData } from './modules/dichotomous.js';
+import { createNavigatorFromData, listSearchableKeys } from './modules/dichotomous.js';
 import { MultiAccessSession, listMultiKeys } from './modules/multiaccess.js';
 
 const statusEl = document.querySelector('#status');
@@ -127,9 +127,7 @@ function initNavigation() {
 }
 
 function populateDichotomousSelect(keys) {
-  const entries = Object.entries(keys)
-    .map(([id, key]) => ({ id, title: key.key_title || `Key ${id}` }))
-    .sort((a, b) => a.title.localeCompare(b.title));
+  const entries = listSearchableKeys(keys);
 
   const index1903 = entries.findIndex(entry => entry.id === '1903');
   if (index1903 > 0) {

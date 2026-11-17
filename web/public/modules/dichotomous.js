@@ -169,3 +169,38 @@ export class DichotomousNavigator {
 export function createNavigatorFromData(rawKeys, startKeyId = START_KEY_DEFAULT) {
   return new DichotomousNavigator(rawKeys, startKeyId);
 }
+
+function lastEdited(key) {
+  const times = [key.timestamp_created, key.timestamp_modified].filter(Boolean).sort();
+  return times[times.length - 1] || '';
+}
+
+// KeyBase contains some keys uploaded more than once under the same title.
+// Keep every key navigable, but only list one per title in search: prefer the
+// copy a parent key links to, then the most recently edited.
+export function listSearchableKeys(rawKeys) {
+  const linked = new Set();
+  for (const key of Object.values(rawKeys)) {
+    for (const item of key.items || []) {
+      if (item?.to_key) linked.add(String(item.to_key));
+    }
+  }
+
+  const byTitle = new Map();
+  for (const [id, key] of Object.entries(rawKeys)) {
+    const title = key.key_title || `Key ${id}`;
+    const candidate = { id, title, linked: linked.has(id), edited: lastEdited(key) };
+    const current = byTitle.get(title);
+    if (
+      !current ||
+      (candidate.linked && !current.linked) ||
+      (candidate.linked === current.linked && candidate.edited > current.edited)
+    ) {
+      byTitle.set(title, candidate);
+    }
+  }
+
+  return [...byTitle.values()]
+    .map(({ id, title }) => ({ id, title }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+}
