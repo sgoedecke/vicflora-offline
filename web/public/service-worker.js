@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vicflora-offline-v2';
+const CACHE_NAME = 'vicflora-offline-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -34,7 +34,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const { request } = event;
-  if (request.method !== 'GET') {
+  if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) {
     return;
   }
 
