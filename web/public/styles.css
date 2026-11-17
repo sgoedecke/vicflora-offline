@@ -254,6 +254,95 @@ button.link {
   margin-top: 0;
 }
 
+.segmented {
+  display: inline-flex;
+  margin-bottom: 1rem;
+}
+
+.segmented button {
+  border-radius: 0;
+}
+
+.segmented button:first-child {
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.segmented button:last-child {
+  border-radius: 0 0.5rem 0.5rem 0;
+  border-left: none;
+}
+
+.segmented button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.bracketed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+}
+
+.couplet {
+  padding: 0.5rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  scroll-margin-top: 0.5rem;
+}
+
+.couplet.on-path {
+  border-left-color: rgba(37, 99, 235, 0.35);
+}
+
+.couplet.current {
+  border-left-color: var(--accent);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.couplet.flash {
+  animation: couplet-flash 1.2s ease-out;
+}
+
+@keyframes couplet-flash {
+  from { background: rgba(37, 99, 235, 0.25); }
+  to { background: transparent; }
+}
+
+.lead {
+  display: grid;
+  grid-template-columns: 3.75rem 1fr;
+  column-gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.lead-number {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.lead-number .from {
+  font-weight: 400;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.lead-dest {
+  grid-column: 2;
+  text-align: right;
+  font-weight: 600;
+}
+
+.lead-dest button.link {
+  text-decoration: none;
+  padding: 0.25rem 0;
+}
+
 #status {
   min-height: 1.5rem;
   margin-bottom: 1rem;

@@ -16,6 +16,8 @@ const dichElements = {
   header: document.querySelector('#dichotomous-header'),
   options: document.querySelector('#dichotomous-options'),
   result: document.querySelector('#dichotomous-result'),
+  bracketed: document.querySelector('#dichotomous-bracketed'),
+  modeButtons: document.querySelectorAll('[data-dich-mode]'),
   back: document.querySelector('#dichotomous-back'),
   restart: document.querySelector('#dichotomous-restart')
 };
@@ -41,6 +43,7 @@ let multiState = {
 };
 let currentView = 'dichotomous';
 let dichResultItemId = null;
+let dichResult = null;
 let multiLoad = null;
 
 const READY_MESSAGE = 'Ready to use offline. Add to Home Screen for easy access.';
@@ -59,9 +62,11 @@ function readSavedState() {
 
 const savedState = readSavedState();
 const persisted = { ...savedState };
+let dichMode = savedState.dichMode === 'bracketed' ? 'bracketed' : 'interactive';
 
 function saveState() {
   persisted.view = currentView;
+  persisted.dichMode = dichMode;
   if (dichNavigator) {
     persisted.dich = { ...dichNavigator.serialize(), resultItemId: dichResultItemId };
   }
@@ -150,11 +155,19 @@ function setDichotomousSearchValue(keyId) {
   dichElements.search.value = `${title} [${keyId}]`;
 }
 
+function itemLabel(item, via) {
+  if (!item) return '';
+  const name = item.item_name || '';
+  const viaName = via ? ` → ${via.item_name || ''}` : '';
+  const key = item.to_key || via?.to_key;
+  return `${name}${viaName}${key ? ` (see key ${key})` : ''}`;
+}
+
 function renderDichotomous() {
   if (!dichNavigator) return;
   dichResultItemId = null;
+  dichResult = null;
   const header = dichNavigator.getHeader();
-  const options = dichNavigator.getOptions();
 
   dichElements.header.innerHTML = `
     <strong>${header.keyTitle}</strong>
@@ -162,10 +175,25 @@ function renderDichotomous() {
     <br/><small>Depth ${header.depth}</small>
   `;
 
+  dichElements.modeButtons.forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.dichMode === dichMode));
+  });
+
   dichElements.options.innerHTML = '';
   dichElements.result.classList.remove('visible');
   dichElements.result.innerHTML = '';
 
+  const bracketed = dichMode === 'bracketed';
+  dichElements.options.hidden = bracketed;
+  dichElements.bracketed.hidden = !bracketed;
+  if (bracketed) {
+    renderBracketed();
+    saveState();
+    return;
+  }
+  dichElements.bracketed.innerHTML = '';
+
+  const options = dichNavigator.getOptions();
   if (options.length === 0) {
     dichElements.options.innerHTML = '<p>No leads available. Use back or restart.</p>';
     saveState();
@@ -178,7 +206,7 @@ function renderDichotomous() {
     button.dataset.index = index;
     button.innerHTML = `
       <strong>${index + 1}. ${option.lead.lead_text}</strong>
-      ${option.item ? `<br/><span>${option.item.item_name || ''}${option.item.to_key ? ` (see key ${option.item.to_key})` : ''}</span>` : ''}
+      ${option.item ? `<br/><span>${itemLabel(option.item, option.via)}</span>` : ''}
     `;
     button.addEventListener('click', () => handleDichotomousChoice(index));
     dichElements.options.appendChild(button);
@@ -186,8 +214,104 @@ function renderDichotomous() {
   saveState();
 }
 
-function showResult(item) {
+const LEAD_MARKS = ['', '′', '″', '‴'];
+
+function renderBracketed() {
+  const { couplets, numberByNode, currentNodeId, pathNodeIds } = dichNavigator.getBracketed();
+  const onPath = new Set(pathNodeIds);
+  const list = dichElements.bracketed;
+  list.innerHTML = '';
+
+  couplets.forEach(couplet => {
+    const li = document.createElement('li');
+    li.className = 'couplet';
+    li.id = `couplet-${couplet.number}`;
+    li.classList.toggle('on-path', onPath.has(couplet.nodeId));
+    li.classList.toggle('current', couplet.nodeId === currentNodeId && couplets.length > 1);
+
+    couplet.leads.forEach((lead, index) => {
+      const row = document.createElement('div');
+      row.className = 'lead';
+
+      const label = document.createElement('span');
+      label.className = 'lead-number';
+      label.textContent = `${couplet.number}${LEAD_MARKS[index] ?? String.fromCharCode(97 + index)}`;
+      if (index === 0 && couplet.parentNumber) {
+        const from = document.createElement('button');
+        from.type = 'button';
+        from.className = 'link from';
+        from.dataset.goto = couplet.parentNumber;
+        from.setAttribute('aria-label', `Back to couplet ${couplet.parentNumber}`);
+        from.textContent = `(${couplet.parentNumber})`;
+        label.append(' ', from);
+      }
+
+      const text = document.createElement('span');
+      text.className = 'lead-text';
+      text.innerHTML = lead.text;
+
+      const dest = document.createElement('span');
+      dest.className = 'lead-dest';
+      if (lead.goto) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'link';
+        button.dataset.goto = lead.goto;
+        button.textContent = `→ ${lead.goto}`;
+        dest.append(button);
+      } else if (lead.item) {
+        const keyTarget = lead.item.to_key || lead.via?.to_key;
+        const name = document.createElement(keyTarget ? 'button' : 'span');
+        name.className = 'taxon';
+        if (keyTarget) {
+          name.type = 'button';
+          name.classList.add('link');
+          name.dataset.openKey = keyTarget;
+          name.title = `Open key ${keyTarget}`;
+        }
+        name.textContent = lead.via
+          ? `${lead.item.item_name} → ${lead.via.item_name}`
+          : lead.item.item_name || '';
+        if (keyTarget) name.append(' ›');
+        dest.append(name);
+      }
+
+      row.append(label, text, dest);
+      li.append(row);
+    });
+    list.append(li);
+  });
+
+  const current = numberByNode.get(currentNodeId);
+  if (current > 1) {
+    scrollToCouplet(current, { flash: false, smooth: false });
+  }
+}
+
+function scrollToCouplet(number, { flash = true, smooth = true } = {}) {
+  const target = document.getElementById(`couplet-${number}`);
+  if (!target) return;
+  target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+  if (flash) {
+    target.classList.remove('flash');
+    void target.offsetWidth;
+    target.classList.add('flash');
+  }
+}
+
+function setDichMode(mode) {
+  if (mode === dichMode) return;
+  const result = dichResult;
+  dichMode = mode;
+  renderDichotomous();
+  if (mode === 'interactive' && result) {
+    showResult(result.item, result.via);
+  }
+}
+
+function showResult(item, via = null) {
   dichResultItemId = item.item_id ?? null;
+  dichResult = { item, via };
   dichElements.result.classList.add('visible');
   const lines = [];
   if (item.to_key) {
@@ -197,8 +321,14 @@ function showResult(item) {
   } else {
     lines.push(`<h3>${item.item_name || 'Result'}</h3>`);
   }
+  if (via) {
+    lines.push(`<p>Represented in Victoria by <strong>${via.item_name || ''}</strong>.</p>`);
+  }
   if (item.url) {
     lines.push(`<p><a href="${item.url}" target="_blank" rel="noopener">Open VicFlora entry</a></p>`);
+  }
+  if (via?.url) {
+    lines.push(`<p><a href="${via.url}" target="_blank" rel="noopener">Open VicFlora entry for ${via.item_name || ''}</a></p>`);
   }
   if (item.to_key) {
     lines.push(`<p>Leads to key ${item.to_key}.</p>`);
@@ -226,7 +356,7 @@ function handleDichotomousChoice(index) {
   try {
     const outcome = dichNavigator.chooseOption(index);
     if (outcome.type === 'result') {
-      showResult(outcome.item);
+      showResult(outcome.item, outcome.via);
     } else if (outcome.type === 'key-transition') {
       showResult(outcome.item);
       renderDichotomous();
@@ -252,10 +382,39 @@ function bindDichotomousControls(keys) {
   });
 
   dichElements.back.addEventListener('click', () => {
-    if (dichNavigator && !dichNavigator.back()) {
+    if (!dichNavigator) return;
+    if (dichMode === 'bracketed') {
+      if (dichNavigator.exitKey()) {
+        renderDichotomous();
+      } else {
+        setStatus('Already in the starting key.');
+      }
+      return;
+    }
+    if (!dichNavigator.back()) {
       setStatus('Already at root of the starting key.');
     } else {
       renderDichotomous();
+    }
+  });
+
+  dichElements.modeButtons.forEach(button => {
+    button.addEventListener('click', () => setDichMode(button.dataset.dichMode));
+  });
+
+  dichElements.bracketed.addEventListener('click', event => {
+    const target = event.target.closest('button');
+    if (!target) return;
+    if (target.dataset.goto) {
+      scrollToCouplet(target.dataset.goto);
+    } else if (target.dataset.openKey) {
+      try {
+        dichNavigator.openKey(target.dataset.openKey);
+        renderDichotomous();
+        dichElements.header.scrollIntoView({ block: 'start' });
+      } catch (error) {
+        setStatus(error.message);
+      }
     }
   });
 

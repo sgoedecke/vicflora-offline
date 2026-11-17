@@ -169,3 +169,59 @@ test('dichotomous search lists every key title once, picking the canonical copy'
   // Both linked from the dicot family key; 5871 is the later edit
   assert.equal(idFor('Proteaceae'), '5871');
 });
+
+test('bracketed layout numbers every couplet depth-first and covers every lead', () => {
+  for (const [id, key] of Object.entries(dichKeys)) {
+    const { couplets } = createNavigatorFromData(dichKeys, id).getBracketed();
+    const realLeads = key.leads.filter(lead => lead.lead_text !== '[link through]');
+    assert.equal(couplets.flatMap(c => c.leads).length, realLeads.length, `key ${id}`);
+    couplets.forEach((couplet, index) => {
+      assert.equal(couplet.number, index + 1);
+      for (const lead of couplet.leads) {
+        assert.ok(lead.item || lead.goto > couplet.number, `key ${id} couplet ${couplet.number} dead end`);
+        if (lead.goto) assert.equal(couplets[lead.goto - 1].parentNumber, couplet.number);
+      }
+    });
+  }
+
+  const { couplets } = createNavigatorFromData(dichKeys, '2245').getBracketed();
+  assert.equal(couplets[0].leads[0].goto, 2);
+  assert.equal(couplets[1].parentNumber, 1);
+});
+
+test('bracketed view tracks the step-by-step position', () => {
+  const nav = createNavigatorFromData(dichKeys, '2245');
+  nav.chooseOption(0);
+  nav.chooseOption(0);
+  const { numberByNode, currentNodeId, pathNodeIds } = nav.getBracketed();
+  assert.equal(numberByNode.get(currentNodeId), 3);
+  assert.deepEqual(pathNodeIds.map(n => numberByNode.get(n)), [1, 2]);
+});
+
+test('"[link through]" leads continue into the single member\'s key', () => {
+  const nav = createNavigatorFromData(dichKeys, '1904');
+  const path = [];
+  const find = () => nav.getOptions().findIndex(o => o.item?.item_name === 'Isoetaceae');
+  // Walk the ferns key until the Isoetaceae lead is offered.
+  const walk = () => {
+    if (find() >= 0) return true;
+    const options = nav.getOptions();
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].item) continue;
+      nav.chooseOption(i);
+      path.push(i);
+      if (walk()) return true;
+      nav.back();
+      path.pop();
+    }
+    return false;
+  };
+  assert.ok(walk());
+  const option = nav.getOptions()[find()];
+  assert.equal(option.via?.item_name, 'Isoetes');
+  const outcome = nav.chooseOption(find());
+  assert.equal(outcome.type, 'key-transition');
+  assert.equal(nav.getHeader().keyId, '1914');
+  assert.ok(nav.exitKey());
+  assert.equal(nav.getHeader().keyId, '1904');
+});

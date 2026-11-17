@@ -1,5 +1,5 @@
 // Bump this whenever app files change so the new set is installed atomically.
-const CACHE_NAME = 'vicflora-offline-v5';
+const CACHE_NAME = 'vicflora-offline-v6';
 const ASSETS = [
   './',
   './index.html',

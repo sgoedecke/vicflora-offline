@@ -35,6 +35,47 @@ function keyContextFromData(keyId, keyData) {
   };
 }
 
+const LINK_THROUGH = '[link through]';
+
+// KeyBase models single-member groups (e.g. a family with one genus) as a lead
+// ending at the group, with one "[link through]" child pointing at the member.
+function linkThroughItem(context, lead) {
+  const children = context.leadsByParent.get(lead.lead_id) || [];
+  const link = children.find(child => child.lead_text === LINK_THROUGH && child.item);
+  return link ? context.items.get(link.item) || null : null;
+}
+
+// Couplets are numbered depth-first, as in printed bracketed keys: the first
+// lead's branch is fully numbered before the second lead's.
+function buildBracketedKey(context) {
+  const couplets = [];
+  const numberByNode = new Map();
+  const isCouplet = nodeId =>
+    (context.leadsByParent.get(nodeId) || []).some(lead => lead.lead_text !== LINK_THROUGH);
+
+  const visit = (nodeId, parentNumber) => {
+    const number = couplets.length + 1;
+    numberByNode.set(nodeId, number);
+    const couplet = { number, parentNumber, nodeId, leads: [] };
+    couplets.push(couplet);
+
+    for (const lead of context.leadsByParent.get(nodeId) || []) {
+      const item = lead.item ? context.items.get(lead.item) || null : null;
+      const entry = { leadId: lead.lead_id, text: lead.lead_text, item, via: null, goto: null };
+      if (item) {
+        entry.via = linkThroughItem(context, lead);
+      } else if (isCouplet(lead.lead_id)) {
+        visit(lead.lead_id, number);
+        entry.goto = numberByNode.get(lead.lead_id);
+      }
+      couplet.leads.push(entry);
+    }
+  };
+
+  visit(context.root, null);
+  return { couplets, numberByNode };
+}
+
 export class DichotomousNavigator {
   constructor(keysById, startKeyId = START_KEY_DEFAULT) {
     this.keys = keysById;
@@ -75,10 +116,12 @@ export class DichotomousNavigator {
     const options = context.leadsByParent.get(currentLeadId) || [];
     return options.map(option => {
       const item = option.item ? context.items.get(option.item) : null;
+      const via = item ? linkThroughItem(context, option) : null;
       return {
         lead: option,
         item,
-        hasLink: Boolean(item?.to_key)
+        via,
+        hasLink: Boolean(item?.to_key || via?.to_key)
       };
     });
   }
@@ -101,20 +144,21 @@ export class DichotomousNavigator {
     }
 
     const state = this.currentState();
-    const { lead, item } = choice;
+    const { lead, item, via } = choice;
 
     if (item) {
-      if (item.to_key) {
-        const nextKey = this.loadKey(String(item.to_key));
-        this.pushState(nextKey);
+      const target = item.to_key ? item : via?.to_key ? via : null;
+      if (target) {
+        this.openKey(String(target.to_key));
         return {
           type: 'key-transition',
-          item
+          item: target
         };
       }
       return {
         type: 'result',
-        item
+        item,
+        via
       };
     }
 
@@ -122,6 +166,28 @@ export class DichotomousNavigator {
     state.currentLeadId = lead.lead_id;
     return {
       type: 'continue'
+    };
+  }
+
+  openKey(keyId) {
+    this.pushState(this.loadKey(String(keyId)));
+  }
+
+  // Leave the current sub-key, ignoring any step-by-step history within it.
+  exitKey() {
+    if (this.stack.length > 1) {
+      this.stack.pop();
+      return true;
+    }
+    return false;
+  }
+
+  getBracketed() {
+    const { context, currentLeadId, history } = this.currentState();
+    return {
+      ...buildBracketedKey(context),
+      currentNodeId: currentLeadId,
+      pathNodeIds: [...history]
     };
   }
 

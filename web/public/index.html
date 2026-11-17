@@ -33,9 +33,14 @@
             <button id="dichotomous-restart" class="secondary">Restart</button>
             <button id="dichotomous-back" class="secondary">Back</button>
           </div>
+          <div class="segmented" role="group" aria-label="Key layout">
+            <button type="button" class="secondary" data-dich-mode="interactive" aria-pressed="true">Step by step</button>
+            <button type="button" class="secondary" data-dich-mode="bracketed" aria-pressed="false">Bracketed</button>
+          </div>
           <div id="dichotomous-header" class="panel-info"></div>
           <div id="dichotomous-options" class="card-list"></div>
           <div id="dichotomous-result" class="result"></div>
+          <ol id="dichotomous-bracketed" class="bracketed" hidden></ol>
         </div>
       </section>
 
