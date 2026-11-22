@@ -1,7 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Glossary } from '../web/public/modules/glossary.js';
-import { buildTaxonIndex, searchTaxa } from '../web/public/modules/species.js';
+import {
+  buildTaxonIndex,
+  findInfraspecificTaxa,
+  mergeDescriptionsIntoIndex,
+  searchTaxa
+} from '../web/public/modules/species.js';
 
 const glossary = new Glossary([
   { name: 'lobe', definition: '<p>a part of an organ.</p>', related: [] },
@@ -37,4 +42,48 @@ test('species search matches scientific and common names', () => {
   assert.equal(searchTaxa(index, 'ranun', descriptions)[0].name, 'Ranunculus amplus');
   assert.equal(searchTaxa(index, 'buttercup', descriptions)[0].name, 'Ranunculus amplus');
   assert.deepEqual(index.get('e4bf52c9-a442-45ec-ad1f-7b7106764dbd').keys, ['1']);
+});
+
+test('mergeDescriptionsIntoIndex adds subspecies and taxonomic scopes to search', () => {
+  const speciesId = '11111111-1111-1111-1111-111111111111';
+  const subspId = '22222222-2222-2222-2222-222222222222';
+  const genusId = '33333333-3333-3333-3333-333333333333';
+  const keys = {
+    10: {
+      taxonomic_scope: {
+        item_name: 'Microsorum',
+        url: `https://vicflora.rbg.vic.gov.au/flora/taxon/${genusId}`
+      },
+      items: [
+        {
+          item_name: 'microsorum pustulatum',
+          url: `https://vicflora.rbg.vic.gov.au/flora/taxon/${speciesId}`
+        }
+      ]
+    }
+  };
+  const descriptions = {
+    [genusId]: { name: 'Microsorum', rank: 'GENUS', vernacular: null },
+    [speciesId]: { name: 'Microsorum pustulatum', rank: 'SPECIES', vernacular: 'Kangaroo Fern' },
+    [subspId]: { name: 'Microsorum pustulatum subsp. pustulatum', rank: 'SUBSPECIES', vernacular: 'Kangaroo Fern' }
+  };
+
+  const index = buildTaxonIndex(keys);
+  assert.equal(index.get(genusId).toKey, '10');
+  assert.equal(index.has(subspId), false);
+
+  mergeDescriptionsIntoIndex(index, descriptions);
+  assert.equal(index.get(speciesId).name, 'Microsorum pustulatum');
+  assert.equal(index.get(subspId).name, 'Microsorum pustulatum subsp. pustulatum');
+  assert.deepEqual(index.get(subspId).keys, []);
+
+  assert.equal(searchTaxa(index, 'microsorum pustulatum ssp', descriptions)[0].id, subspId);
+  assert.equal(searchTaxa(index, 'microsorum pustulatum subspecies', descriptions)[0].id, subspId);
+
+  assert.deepEqual(
+    findInfraspecificTaxa(index, speciesId, descriptions).map(entry => entry.id),
+    [subspId]
+  );
+  assert.deepEqual(findInfraspecificTaxa(index, genusId, descriptions), []);
+  assert.deepEqual(findInfraspecificTaxa(index, subspId, descriptions), []);
 });
