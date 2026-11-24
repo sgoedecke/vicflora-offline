@@ -162,3 +162,12 @@ test('bundled Hypericum perforatum and Hibbertia fasciculata resolve their sole 
   assert.equal(hibbertia?.entry.name, 'Hibbertia fasciculata var. prostrata');
   assert.equal(hasOwnDescription(hibbertia?.taxon), true);
 });
+
+test('displayed app version matches service worker cache version', () => {
+  const html = fs.readFileSync(new URL('../web/public/index.html', import.meta.url), 'utf8');
+  const sw = fs.readFileSync(new URL('../web/public/service-worker.js', import.meta.url), 'utf8');
+  const htmlVersion = html.match(/class="app-version"[^>]*>(v\d+)</)?.[1];
+  const swVersion = sw.match(/CACHE_NAME\s*=\s*'vicflora-offline-(v\d+)'/)?.[1];
+  assert.ok(htmlVersion, 'Expected .app-version badge in index.html');
+  assert.equal(htmlVersion, swVersion);
+});
