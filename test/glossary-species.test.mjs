@@ -1,9 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { Glossary } from '../web/public/modules/glossary.js';
 import {
   buildTaxonIndex,
   findInfraspecificTaxa,
+  findSoleInfraspecificProfile,
+  hasOwnDescription,
   mergeDescriptionsIntoIndex,
   searchTaxa
 } from '../web/public/modules/species.js';
@@ -86,4 +89,76 @@ test('mergeDescriptionsIntoIndex adds subspecies and taxonomic scopes to search'
   );
   assert.deepEqual(findInfraspecificTaxa(index, genusId, descriptions), []);
   assert.deepEqual(findInfraspecificTaxa(index, subspId, descriptions), []);
+});
+
+test('findSoleInfraspecificProfile resolves single-child species lacking a description', () => {
+  const spNoDesc = '11111111-1111-1111-1111-111111111111';
+  const spNoDescVar = '22222222-2222-2222-2222-222222222222';
+  const spWithDesc = '33333333-3333-3333-3333-333333333333';
+  const spWithDescSubsp = '44444444-4444-4444-4444-444444444444';
+  const spMulti = '55555555-5555-5555-5555-555555555555';
+  const spMultiA = '66666666-6666-6666-6666-666666666666';
+  const spMultiB = '77777777-7777-7777-7777-777777777777';
+
+  const descriptions = {
+    [spNoDesc]: {
+      name: 'Hibbertia fasciculata',
+      rank: 'SPECIES',
+      html: '<div class="notes"><p>1 variety in Victoria. Profile provided under variety.</p></div>'
+    },
+    [spNoDescVar]: {
+      name: 'Hibbertia fasciculata var. prostrata',
+      rank: 'VARIETY',
+      html: '<div class="description"><p>Erect to spreading shrubs.</p></div>'
+    },
+    [spWithDesc]: {
+      name: 'Acacia dealbata',
+      rank: 'SPECIES',
+      html: '<div class="description"><p>Tree or shrub.</p></div>'
+    },
+    [spWithDescSubsp]: {
+      name: 'Acacia dealbata subsp. dealbata',
+      rank: 'SUBSPECIES',
+      html: '<div class="description"><p>Tall tree.</p></div>'
+    },
+    [spMulti]: {
+      name: 'Sinapis alba',
+      rank: 'SPECIES',
+      html: '<div class="notes"><p>2 subspecies in Victoria.</p></div>'
+    },
+    [spMultiA]: {
+      name: 'Sinapis alba subsp. alba',
+      rank: 'SUBSPECIES',
+      html: '<div class="description"><p>Subsp. alba.</p></div>'
+    },
+    [spMultiB]: {
+      name: 'Sinapis alba subsp. dissecta',
+      rank: 'SUBSPECIES',
+      html: '<div class="description"><p>Subsp. dissecta.</p></div>'
+    }
+  };
+
+  const index = buildTaxonIndex({}, descriptions);
+  assert.equal(hasOwnDescription(descriptions[spNoDesc]), false);
+  assert.equal(hasOwnDescription(descriptions[spWithDesc]), true);
+
+  const resolved = findSoleInfraspecificProfile(index, spNoDesc, descriptions);
+  assert.equal(resolved?.entry.id, spNoDescVar);
+  assert.equal(resolved?.taxon.rank, 'VARIETY');
+  assert.equal(findSoleInfraspecificProfile(index, spWithDesc, descriptions), null);
+  assert.equal(findSoleInfraspecificProfile(index, spMulti, descriptions), null);
+});
+
+test('bundled Hypericum perforatum and Hibbertia fasciculata resolve their sole infraspecific profiles', () => {
+  const keys = JSON.parse(fs.readFileSync(new URL('../web/public/data/dichotomous-keys.json', import.meta.url), 'utf8')).keys;
+  const descriptions = JSON.parse(fs.readFileSync(new URL('../web/public/data/descriptions.json', import.meta.url), 'utf8')).taxa;
+  const index = buildTaxonIndex(keys, descriptions);
+
+  const hypericum = findSoleInfraspecificProfile(index, '6494d110-7304-47b0-9e13-19ddf43d9224', descriptions);
+  assert.equal(hypericum?.entry.name, 'Hypericum perforatum subsp. veronense');
+  assert.equal(hasOwnDescription(hypericum?.taxon), true);
+
+  const hibbertia = findSoleInfraspecificProfile(index, '68cbbf3e-7606-4126-9176-030173b88c18', descriptions);
+  assert.equal(hibbertia?.entry.name, 'Hibbertia fasciculata var. prostrata');
+  assert.equal(hasOwnDescription(hibbertia?.taxon), true);
 });

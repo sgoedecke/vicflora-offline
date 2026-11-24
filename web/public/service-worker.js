@@ -1,5 +1,5 @@
 // Bump this whenever app files change so the new set is installed atomically.
-const CACHE_NAME = 'vicflora-offline-v11';
+const CACHE_NAME = 'vicflora-offline-v12';
 const ASSETS = [
   './',
   './index.html',
@@ -21,20 +21,24 @@ const ASSETS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches
+      .open(CACHE_NAME)
+      .then(cache => cache.addAll(ASSETS.map(url => new Request(url, { cache: 'reload' }))))
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => (key === CACHE_NAME ? null : caches.delete(key)))
+    caches
+      .keys()
+      .then(keys =>
+        Promise.all(
+          keys.map(key => (key === CACHE_NAME ? null : caches.delete(key)))
+        )
       )
-    )
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
@@ -43,25 +47,19 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Stale-while-revalidate: serve from cache immediately (so weak signal never
-  // blocks the app) and refresh the cache in the background for next time.
+  // Cache-first for the atomically precached versioned bundle so weak signal
+  // never blocks the app and files from different deploys are never mixed.
   event.respondWith(
     caches.open(CACHE_NAME).then(async cache => {
       const cached = await cache.match(request);
-      const network = fetch(request).then(response => {
+      if (cached) return cached;
+
+      try {
+        const response = await fetch(request);
         if (response.status === 200) {
           cache.put(request, response.clone());
         }
         return response;
-      });
-
-      if (cached) {
-        event.waitUntil(network.catch(() => {}));
-        return cached;
-      }
-
-      try {
-        return await network;
       } catch (error) {
         if (request.mode === 'navigate') {
           const fallback = await cache.match('./index.html');

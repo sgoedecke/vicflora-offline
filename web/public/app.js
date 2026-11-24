@@ -3,6 +3,7 @@ import { MultiAccessSession, listMultiKeys } from './modules/multiaccess.js';
 import {
   buildTaxonIndex,
   findInfraspecificTaxa,
+  findSoleInfraspecificProfile,
   mergeDescriptionsIntoIndex,
   searchTaxa,
   taxonIdFromUrl
@@ -843,10 +844,45 @@ function ensureDescriptionsLoaded() {
   return descriptionsLoad;
 }
 
+const INFRASPECIFIC_RANK_LABELS = {
+  SUBSPECIES: 'subspecies',
+  VARIETY: 'variety',
+  FORM: 'form'
+};
+
+function extractNotesHtml(html) {
+  if (!html) return '';
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = html;
+  return Array.from(wrapper.querySelectorAll('.notes'))
+    .map(node => node.innerHTML)
+    .join('');
+}
+
 async function fillDescription(container, taxonId) {
   if (!container || !taxonId) return;
   await ensureDescriptionsLoaded();
   const taxon = descriptions[taxonId];
+  const soleChild = findSoleInfraspecificProfile(taxonIndex, taxonId, descriptions);
+  if (soleChild) {
+    const vernacular = taxon?.vernacular || soleChild.taxon.vernacular;
+    const rankLabel = INFRASPECIFIC_RANK_LABELS[soleChild.taxon.rank] || 'infraspecific taxon';
+    const parentNotes = extractNotesHtml(taxon?.html);
+    container.innerHTML = `
+      ${vernacular ? `<p class="vernacular">${escapeHtml(vernacular)}</p>` : ''}
+      <p class="sole-infraspecific-note">Only 1 ${rankLabel} in Victoria — showing <button type="button" class="link scientific_name" data-taxon="${escapeHtml(soleChild.entry.id)}">${escapeHtml(soleChild.entry.name)}</button></p>
+      ${soleChild.taxon.html}
+      ${parentNotes ? `<div class="species-notes">${parentNotes}</div>` : ''}
+    `;
+    for (const link of container.querySelectorAll('a[data-taxon]')) {
+      if (!taxonIndex.has(link.dataset.taxon)) {
+        link.removeAttribute('data-taxon');
+      }
+    }
+    annotateGlossary(container);
+    return;
+  }
+
   const children = findInfraspecificTaxa(taxonIndex, taxonId, descriptions);
   if (!taxon?.html && !children.length) return;
   container.innerHTML = taxon?.html
@@ -1042,12 +1078,23 @@ function initSpecies() {
 }
 
 async function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    try {
-      await navigator.serviceWorker.register('./service-worker.js');
-    } catch (error) {
-      console.warn('Service worker registration failed:', error);
-    }
+  if (!('serviceWorker' in navigator)) return;
+  const hadController = Boolean(navigator.serviceWorker.controller);
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+  try {
+    const registration = await navigator.serviceWorker.register('./service-worker.js');
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        registration.update().catch(() => {});
+      }
+    });
+  } catch (error) {
+    console.warn('Service worker registration failed:', error);
   }
 }
 

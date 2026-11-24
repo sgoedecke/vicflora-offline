@@ -75,6 +75,20 @@ export function findInfraspecificTaxa(index, taxonId, descriptions = {}) {
   return matches;
 }
 
+export function hasOwnDescription(taxon) {
+  return Boolean(taxon?.html && /class="description"/.test(taxon.html));
+}
+
+export function findSoleInfraspecificProfile(index, taxonId, descriptions = {}) {
+  if (hasOwnDescription(descriptions[taxonId])) return null;
+  const children = findInfraspecificTaxa(index, taxonId, descriptions);
+  if (children.length !== 1) return null;
+  const child = children[0];
+  const childTaxon = descriptions[child.id];
+  if (!childTaxon?.html) return null;
+  return { entry: child, taxon: childTaxon };
+}
+
 export function searchTaxa(index, query, descriptions = {}, limit = 30) {
   const q = query.trim().toLowerCase().replace(/\b(?:ssp\.?|subspecies)\b/g, 'subsp.');
   if (q.length < 2) return [];

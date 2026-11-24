@@ -385,8 +385,18 @@ button.link {
   content: 'Notes';
 }
 
+.taxon-description .species-notes::before {
+  content: 'Species notes';
+}
+
 .taxon-description .infraspecific-taxa::before {
   content: 'Subspecies & varieties';
+}
+
+.taxon-description .sole-infraspecific-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
 .taxon-description p {
