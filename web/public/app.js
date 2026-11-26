@@ -944,6 +944,7 @@ function renderLightboxItem() {
     switchEl.innerHTML = '';
   }
 
+  img.classList.remove('is-loaded');
   img.style.width = '';
   img.style.height = '';
   img.classList.toggle('is-drawing', item.kind === 'drawing');
@@ -960,6 +961,7 @@ function renderLightboxItem() {
   creditEl.textContent = `${label}: ${item.attribution}`;
 
   if (img.complete && img.naturalWidth) {
+    img.classList.add('is-loaded');
     requestAnimationFrame(fitLightboxImage);
   }
 }
@@ -1004,7 +1006,10 @@ function initPhotoLightbox() {
 
   closeBtn?.addEventListener('click', closePhotoLightbox);
   stage?.addEventListener('click', closePhotoLightbox);
-  img?.addEventListener('load', fitLightboxImage);
+  img?.addEventListener('load', () => {
+    img.classList.add('is-loaded');
+    fitLightboxImage();
+  });
 
   window.addEventListener('resize', fitLightboxImage);
   document.addEventListener('keydown', event => {
@@ -1061,6 +1066,17 @@ function createPhotoFigure(source, displayName, onOpenFullscreen) {
   img.loading = 'lazy';
   img.decoding = 'async';
 
+  const markLoaded = () => {
+    figure.classList.remove('is-loading');
+    figure.classList.add('is-loaded');
+  };
+  if (img.complete && img.naturalWidth > 0) {
+    markLoaded();
+  } else {
+    figure.classList.add('is-loading');
+    img.addEventListener('load', markLoaded, { once: true });
+  }
+
   trigger.append(img);
   trigger.addEventListener('click', () => onOpenFullscreen(source, trigger));
 
@@ -1070,6 +1086,7 @@ function createPhotoFigure(source, displayName, onOpenFullscreen) {
 
   img.addEventListener('error', () => {
     source.failed = true;
+    figure.classList.remove('is-loading');
     if (!source.offline) {
       const msg = navigator.onLine === false ? `${label} unavailable offline.` : `Could not load ${label.toLowerCase()}.`;
       figure.innerHTML = `<p class="taxon-photo-offline-note">${msg}</p>`;

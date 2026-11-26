@@ -390,6 +390,7 @@ button.link {
 }
 
 .taxon-photo-trigger {
+  position: relative;
   display: block;
   padding: 0;
   border: 0;
@@ -417,7 +418,31 @@ button.link {
   height: auto;
   border-radius: 0.5rem;
   border: 1px solid var(--border);
-  background: rgba(15, 23, 42, 0.04);
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.taxon-photo.is-loading .taxon-photo-trigger {
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.taxon-photo.is-loading img {
+  border-color: transparent;
+  background: transparent;
+  opacity: 0;
+}
+
+.taxon-photo.is-loading .taxon-photo-trigger::after {
+  content: 'Loading…';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+  pointer-events: none;
 }
 
 .taxon-media--pair .taxon-photo img {
@@ -427,7 +452,7 @@ button.link {
   object-fit: contain;
 }
 
-.taxon-photo--drawing img {
+.taxon-photo--drawing.is-loaded img {
   background: #ffffff;
   padding: 0.25rem;
 }
@@ -571,7 +596,7 @@ body.lightbox-open {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
 
-.photo-lightbox-img.is-drawing {
+.photo-lightbox-img.is-drawing.is-loaded {
   background: #ffffff;
   padding: 0.35rem;
 }
