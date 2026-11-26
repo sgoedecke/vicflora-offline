@@ -15,6 +15,7 @@
     "list": "node main.js list",
     "key": "node keying-cli-simple.js",
     "key:dichotomous": "node keybase-cli.js",
+    "fetch:photos": "node scripts/fetch-photos.js",
     "build:web": "node scripts/build-web-data.js",
     "test": "node --test test/*.test.mjs"
   },

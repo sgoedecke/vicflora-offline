@@ -9,6 +9,7 @@ import {
   taxonIdFromUrl
 } from './modules/species.js';
 import { Glossary } from './modules/glossary.js';
+import { PhotoStore, formatBytes } from './modules/photos.js';
 
 const statusEl = document.querySelector('#status');
 const viewButtons = document.querySelectorAll('header nav button');
@@ -48,6 +49,20 @@ const speciesElements = {
   matches: document.querySelector('#species-matches'),
   detail: document.querySelector('#species-detail')
 };
+
+const photosStatusEl = document.querySelector('#photos-status');
+
+const photoStore = new PhotoStore();
+let photoStatus = null;
+let photoSyncProgress = null;
+let photoSyncLastError = null;
+let photoSyncQuotaExceeded = false;
+let photoSyncSkippedReason = null;
+let lastStatusUpdateAt = 0;
+let lastAutoSyncAttemptAt = 0;
+let lastPhotoCheckAt = 0;
+let appBooted = false;
+let descriptionRenderSeq = 0;
 
 let dichNavigator = null;
 let multiSession = null;
@@ -145,7 +160,11 @@ function switchView(view) {
   }
   if (view === 'species') {
     ensureDescriptionsLoaded();
+    refreshPhotoStatus();
     if (!currentSpeciesId) speciesElements.search.focus();
+  }
+  if (view === 'about') {
+    refreshPhotoStatus();
   }
   saveState();
 }
@@ -859,11 +878,312 @@ function extractNotesHtml(html) {
     .join('');
 }
 
+const photoLightboxEl = document.querySelector('#photo-lightbox');
+const lightboxState = {
+  items: [],
+  index: 0,
+  displayName: '',
+  returnFocusEl: null
+};
+
+function mediaKindLabel(kind) {
+  return kind === 'drawing' ? 'Illustration' : 'Photo';
+}
+
+function fitLightboxImage() {
+  if (!photoLightboxEl || photoLightboxEl.hidden) return;
+  const stage = photoLightboxEl.querySelector('.photo-lightbox-stage');
+  const img = photoLightboxEl.querySelector('.photo-lightbox-img');
+  if (!stage || !img || !img.naturalWidth || !img.naturalHeight) return;
+
+  const style = window.getComputedStyle(stage);
+  const padX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+  const padY = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
+  const availW = Math.max(1, stage.clientWidth - padX);
+  const availH = Math.max(1, stage.clientHeight - padY);
+
+  const scale = Math.min(availW / img.naturalWidth, availH / img.naturalHeight);
+  img.style.width = `${Math.max(1, Math.floor(img.naturalWidth * scale))}px`;
+  img.style.height = `${Math.max(1, Math.floor(img.naturalHeight * scale))}px`;
+}
+
+function renderLightboxItem() {
+  if (!photoLightboxEl || !lightboxState.items.length) return;
+  const item = lightboxState.items[lightboxState.index];
+  if (!item) return;
+
+  const speciesEl = photoLightboxEl.querySelector('.photo-lightbox-species');
+  const switchEl = photoLightboxEl.querySelector('.photo-lightbox-switch');
+  const img = photoLightboxEl.querySelector('.photo-lightbox-img');
+  const captionEl = photoLightboxEl.querySelector('.photo-lightbox-caption');
+  const creditEl = photoLightboxEl.querySelector('.photo-lightbox-credit');
+
+  const label = mediaKindLabel(item.kind);
+  speciesEl.textContent = lightboxState.displayName || '';
+
+  if (lightboxState.items.length > 1) {
+    switchEl.hidden = false;
+    switchEl.innerHTML = '';
+    lightboxState.items.forEach((entry, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = mediaKindLabel(entry.kind);
+      btn.className = idx === lightboxState.index ? 'active' : '';
+      btn.setAttribute('aria-pressed', idx === lightboxState.index ? 'true' : 'false');
+      btn.addEventListener('click', event => {
+        event.stopPropagation();
+        if (lightboxState.index !== idx) {
+          lightboxState.index = idx;
+          renderLightboxItem();
+        }
+      });
+      switchEl.append(btn);
+    });
+  } else {
+    switchEl.hidden = true;
+    switchEl.innerHTML = '';
+  }
+
+  img.style.width = '';
+  img.style.height = '';
+  img.classList.toggle('is-drawing', item.kind === 'drawing');
+  img.alt = `${lightboxState.displayName || 'Species'} ${label.toLowerCase()}`;
+  img.src = item.src;
+
+  if (item.caption) {
+    captionEl.textContent = item.caption;
+    captionEl.hidden = false;
+  } else {
+    captionEl.textContent = '';
+    captionEl.hidden = true;
+  }
+  creditEl.textContent = `${label}: ${item.attribution}`;
+
+  if (img.complete && img.naturalWidth) {
+    requestAnimationFrame(fitLightboxImage);
+  }
+}
+
+function openPhotoLightbox(items, startIndex, displayName, triggerEl) {
+  if (!photoLightboxEl || !items.length) return;
+  hideGlossaryTerm();
+  lightboxState.items = items;
+  lightboxState.index = Math.max(0, Math.min(startIndex, items.length - 1));
+  lightboxState.displayName = displayName || '';
+  lightboxState.returnFocusEl = triggerEl || document.activeElement;
+
+  photoLightboxEl.hidden = false;
+  document.body.classList.add('lightbox-open');
+  renderLightboxItem();
+  photoLightboxEl.querySelector('.photo-lightbox-close')?.focus();
+}
+
+function closePhotoLightbox() {
+  if (!photoLightboxEl || photoLightboxEl.hidden) return;
+  photoLightboxEl.hidden = true;
+  document.body.classList.remove('lightbox-open');
+  const img = photoLightboxEl.querySelector('.photo-lightbox-img');
+  if (img) {
+    img.removeAttribute('src');
+    img.style.width = '';
+    img.style.height = '';
+  }
+  const focusTarget = lightboxState.returnFocusEl;
+  lightboxState.items = [];
+  lightboxState.returnFocusEl = null;
+  if (focusTarget && focusTarget.isConnected && typeof focusTarget.focus === 'function') {
+    focusTarget.focus();
+  }
+}
+
+function initPhotoLightbox() {
+  if (!photoLightboxEl) return;
+  const closeBtn = photoLightboxEl.querySelector('.photo-lightbox-close');
+  const stage = photoLightboxEl.querySelector('.photo-lightbox-stage');
+  const img = photoLightboxEl.querySelector('.photo-lightbox-img');
+
+  closeBtn?.addEventListener('click', closePhotoLightbox);
+  stage?.addEventListener('click', closePhotoLightbox);
+  img?.addEventListener('load', fitLightboxImage);
+
+  window.addEventListener('resize', fitLightboxImage);
+  document.addEventListener('keydown', event => {
+    if (photoLightboxEl.hidden) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closePhotoLightbox();
+    } else if (event.key === 'ArrowRight' && lightboxState.items.length > 1) {
+      event.preventDefault();
+      lightboxState.index = (lightboxState.index + 1) % lightboxState.items.length;
+      renderLightboxItem();
+    } else if (event.key === 'ArrowLeft' && lightboxState.items.length > 1) {
+      event.preventDefault();
+      lightboxState.index = (lightboxState.index - 1 + lightboxState.items.length) % lightboxState.items.length;
+      renderLightboxItem();
+    }
+  });
+}
+
+function createPhotoFigure(source, displayName, onOpenFullscreen) {
+  if (!source) return null;
+  const label = mediaKindLabel(source.kind);
+  const figure = document.createElement('figure');
+  figure.className = source.kind === 'drawing' ? 'taxon-photo taxon-photo--drawing' : 'taxon-photo';
+  figure.dataset.photoKey = source.key || '';
+  figure.dataset.photoKind = source.kind || 'photo';
+  figure.dataset.photoOffline = source.offline ? 'true' : 'false';
+
+  if (source.deferred) {
+    if (source.constrained && source.onlineUrl && navigator.onLine !== false) {
+      const note = document.createElement('p');
+      note.className = 'taxon-photo-offline-note';
+      note.innerHTML = `${label} paused on low-data connection. <button type="button" class="link" data-load-remote-photo="true">Load</button>`;
+      figure.append(note);
+      return figure;
+    }
+    const note = document.createElement('p');
+    note.className = 'taxon-photo-offline-note';
+    note.textContent = `${label} available once synced offline.`;
+    figure.append(note);
+    return figure;
+  }
+
+  if (!source.src) return null;
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'taxon-photo-trigger';
+  trigger.setAttribute('aria-label', `View ${displayName || 'species'} ${label.toLowerCase()} full screen`);
+
+  const img = document.createElement('img');
+  img.src = source.src;
+  img.alt = `${displayName || 'Species'} ${label.toLowerCase()}`;
+  img.loading = 'lazy';
+  img.decoding = 'async';
+
+  trigger.append(img);
+  trigger.addEventListener('click', () => onOpenFullscreen(source, trigger));
+
+  const caption = document.createElement('figcaption');
+  caption.className = 'taxon-photo-credit';
+  caption.textContent = `${label}: ${source.attribution}`;
+
+  img.addEventListener('error', () => {
+    source.failed = true;
+    if (!source.offline) {
+      const msg = navigator.onLine === false ? `${label} unavailable offline.` : `Could not load ${label.toLowerCase()}.`;
+      figure.innerHTML = `<p class="taxon-photo-offline-note">${msg}</p>`;
+    } else {
+      figure.remove();
+    }
+  });
+
+  figure.append(trigger);
+  if (source.caption) {
+    const legend = document.createElement('p');
+    legend.className = 'taxon-photo-caption';
+    legend.textContent = source.caption;
+    figure.append(legend);
+  }
+  figure.append(caption);
+  return figure;
+}
+
+async function resolveTaxonMedia(primaryId, fallbackId, options) {
+  let sources = await photoStore.getMediaSources(primaryId, options).catch(() => []);
+  if (!sources.length && fallbackId) {
+    sources = await photoStore.getMediaSources(fallbackId, options).catch(() => []);
+  }
+  return sources;
+}
+
+function createMediaGallery(sources, displayName) {
+  const wrapper = document.createElement('div');
+  wrapper.className = sources.length > 1 ? 'taxon-media taxon-media--pair' : 'taxon-media';
+
+  const openFromGallery = (clickedSource, triggerEl) => {
+    const viewable = sources.filter(s => s.src && !s.deferred && !s.failed);
+    const idx = Math.max(0, viewable.findIndex(s => s.key === clickedSource.key && s.kind === clickedSource.kind));
+    openPhotoLightbox(viewable, idx, displayName, triggerEl);
+  };
+
+  for (const source of sources) {
+    const figure = createPhotoFigure(source, displayName, openFromGallery);
+    if (figure) wrapper.append(figure);
+  }
+  return wrapper.childElementCount ? wrapper : null;
+}
+
+async function attachTaxonPhoto(container, token, { allowRemote = true, forceRemote = false } = {}) {
+  const primaryId = container.dataset.photoPrimaryId;
+  const fallbackId = container.dataset.photoFallbackId || null;
+  const displayName = container.dataset.photoDisplayName || 'Species photo';
+  if (!primaryId) return;
+
+  const sources = await resolveTaxonMedia(primaryId, fallbackId, { allowRemote, forceRemote });
+  if (!container.isConnected || container.dataset.renderToken !== token) return;
+
+  const existing = container.querySelector('.taxon-media');
+  if (!sources.length) {
+    container.dataset.photoState = photoStore.index ? 'none' : 'pending';
+    return;
+  }
+
+  const allOffline = sources.every(s => s.offline);
+  const anyDeferred = sources.some(s => s.deferred);
+  container.dataset.photoState = allOffline ? 'offline' : (anyDeferred ? 'deferred' : 'remote');
+
+  // Don't replace an already-rendered offline gallery with the exact same keys.
+  if (existing) {
+    const existingFigs = Array.from(existing.querySelectorAll('.taxon-photo'));
+    const sameOffline =
+      existingFigs.length === sources.length &&
+      existingFigs.every(
+        (fig, i) => fig.dataset.photoOffline === 'true' && fig.dataset.photoKey === (sources[i].key || '')
+      );
+    if (sameOffline) return;
+  }
+
+  const gallery = createMediaGallery(sources, displayName);
+  if (!gallery) return;
+
+  if (existing) {
+    existing.replaceWith(gallery);
+  } else {
+    // Only replace the "No description bundled" placeholder when an actual image is rendered.
+    const hasRenderedImage = sources.some(s => s.src && !s.deferred);
+    const placeholderOnly =
+      hasRenderedImage &&
+      container.children.length === 1 &&
+      container.firstElementChild?.classList.contains('muted');
+    if (placeholderOnly) container.innerHTML = '';
+    const vernEl = container.querySelector('.vernacular');
+    if (vernEl) vernEl.after(gallery);
+    else container.prepend(gallery);
+  }
+}
+
 async function fillDescription(container, taxonId) {
   if (!container || !taxonId) return;
+  const token = String(++descriptionRenderSeq);
+  container.dataset.renderToken = token;
+
   await ensureDescriptionsLoaded();
+  if (!container.isConnected || container.dataset.renderToken !== token) return;
+
   const taxon = descriptions[taxonId];
   const soleChild = findSoleInfraspecificProfile(taxonIndex, taxonId, descriptions);
+  const primaryPhotoId = soleChild ? soleChild.entry.id : taxonId;
+  const fallbackPhotoId = soleChild ? taxonId : '';
+  const displayName = soleChild
+    ? soleChild.entry.name
+    : (taxon?.name || taxonIndex.get(taxonId)?.name || 'Species photo');
+
+  container.dataset.photoPrimaryId = primaryPhotoId;
+  container.dataset.photoFallbackId = fallbackPhotoId;
+  container.dataset.photoDisplayName = displayName;
+
+  // Render text immediately without waiting on IndexedDB or photo index network fetches.
   if (soleChild) {
     const vernacular = taxon?.vernacular || soleChild.taxon.vernacular;
     const rankLabel = INFRASPECIFIC_RANK_LABELS[soleChild.taxon.rank] || 'infraspecific taxon';
@@ -880,37 +1200,41 @@ async function fillDescription(container, taxonId) {
       }
     }
     annotateGlossary(container);
+    attachTaxonPhoto(container, token);
     return;
   }
 
   const children = findInfraspecificTaxa(taxonIndex, taxonId, descriptions);
-  if (!taxon?.html && !children.length) return;
-  container.innerHTML = taxon?.html
-    ? `
-      ${taxon.vernacular ? `<p class="vernacular">${escapeHtml(taxon.vernacular)}</p>` : ''}
-      ${taxon.html}
-    `
-    : (taxon?.vernacular ? `<p class="vernacular">${escapeHtml(taxon.vernacular)}</p>` : '');
-  for (const link of container.querySelectorAll('a[data-taxon]')) {
-    if (!taxonIndex.has(link.dataset.taxon)) {
-      link.removeAttribute('data-taxon');
+  if (taxon?.html || children.length) {
+    container.innerHTML = taxon?.html
+      ? `
+        ${taxon.vernacular ? `<p class="vernacular">${escapeHtml(taxon.vernacular)}</p>` : ''}
+        ${taxon.html}
+      `
+      : (taxon?.vernacular ? `<p class="vernacular">${escapeHtml(taxon.vernacular)}</p>` : '');
+    for (const link of container.querySelectorAll('a[data-taxon]')) {
+      if (!taxonIndex.has(link.dataset.taxon)) {
+        link.removeAttribute('data-taxon');
+      }
+    }
+    annotateGlossary(container);
+    if (children.length) {
+      const section = document.createElement('div');
+      section.className = 'infraspecific-taxa';
+      const list = document.createElement('ul');
+      list.className = 'key-links';
+      list.innerHTML = children
+        .map(
+          child =>
+            `<li><button type="button" class="link scientific_name" data-taxon="${escapeHtml(child.id)}">${escapeHtml(child.name)}</button></li>`
+        )
+        .join('');
+      section.appendChild(list);
+      container.appendChild(section);
     }
   }
-  annotateGlossary(container);
-  if (children.length) {
-    const section = document.createElement('div');
-    section.className = 'infraspecific-taxa';
-    const list = document.createElement('ul');
-    list.className = 'key-links';
-    list.innerHTML = children
-      .map(
-        child =>
-          `<li><button type="button" class="link scientific_name" data-taxon="${escapeHtml(child.id)}">${escapeHtml(child.name)}</button></li>`
-      )
-      .join('');
-    section.appendChild(list);
-    container.appendChild(section);
-  }
+
+  attachTaxonPhoto(container, token);
 }
 
 function showSpecies(taxonId) {
@@ -1098,18 +1422,210 @@ async function registerServiceWorker() {
   }
 }
 
+function renderPhotosStatus() {
+  if (!photosStatusEl) return;
+  if (photoSyncProgress && photoSyncProgress.phase !== 'done') {
+    const { loadedBytes, totalBytes } = photoSyncProgress;
+    photosStatusEl.textContent = `Syncing offline species photos (${formatBytes(loadedBytes)} / ${formatBytes(totalBytes)})…`;
+    return;
+  }
+  if (photoSyncQuotaExceeded) {
+    photosStatusEl.textContent = 'Offline species photos paused: not enough free storage on this device.';
+    return;
+  }
+  if (!photoStatus?.available) {
+    if (photoSyncSkippedReason === 'constrained-network' || photoStatus?.constrainedNetwork) {
+      photosStatusEl.innerHTML = 'Offline species photos paused on low-data connection. <button type="button" class="link" data-photo-force-sync="true">Sync now</button>';
+      return;
+    }
+    photosStatusEl.textContent = '';
+    return;
+  }
+  const sizeLabel = formatBytes(photoStatus.totalBytes);
+  const countLabel = photoStatus.taxaCount.toLocaleString();
+  const drawingDetail = photoStatus.drawingsCount
+    ? `, ${photoStatus.drawingsCount.toLocaleString()} with drawings`
+    : '';
+  const mediaLabel = photoStatus.drawingsCount ? 'photos & drawings' : 'photos';
+  if (photoStatus.synced) {
+    const persistHint = photoStatus.persisted === false
+      ? ' Add to Home Screen so Safari keeps cached photos offline.'
+      : '';
+    photosStatusEl.textContent = `Offline species ${mediaLabel} ready: ${countLabel} taxa (${sizeLabel}${drawingDetail}) stored separately from app updates.${persistHint}`;
+  } else if (!photoStatus.supported) {
+    photosStatusEl.textContent = `Species ${mediaLabel} (${countLabel} taxa) load online when connected.`;
+  } else if (photoSyncSkippedReason === 'constrained-network' || photoStatus.constrainedNetwork) {
+    photosStatusEl.innerHTML = `Offline species ${mediaLabel} paused on low-data connection (${photoStatus.matchedShardCount}/${photoStatus.shardCount} packs synced, ${escapeHtml(sizeLabel)} total). <button type="button" class="link" data-photo-force-sync="true">Sync now</button>`;
+  } else {
+    const retryNote = photoSyncLastError ? ' Will resume automatically when signal improves.' : '';
+    photosStatusEl.textContent = `Offline species ${mediaLabel}: ${photoStatus.matchedShardCount}/${photoStatus.shardCount} packs synced (${sizeLabel} total).${retryNote}`;
+  }
+}
+
+async function refreshPhotoStatus() {
+  try {
+    photoStatus = await photoStore.getStatus();
+  } catch (error) {
+    console.warn('Could not inspect photo status:', error);
+  }
+  renderPhotosStatus();
+}
+
+function refreshVisiblePhotos(imageKeys = null) {
+  const keySet = imageKeys ? new Set(imageKeys) : null;
+  const containers = [
+    !speciesElements.detail.hidden ? speciesElements.detail.querySelector('.taxon-description') : null,
+    dichElements.result.classList.contains('visible') ? dichElements.result.querySelector('.taxon-description') : null
+  ].filter(Boolean);
+
+  for (const container of containers) {
+    const token = container.dataset.renderToken;
+    if (!token || !container.dataset.photoPrimaryId) continue;
+    if (container.dataset.photoState === 'none' || container.dataset.photoState === 'offline') continue;
+    const figs = Array.from(container.querySelectorAll('.taxon-photo'));
+    if (figs.length && figs.every(fig => fig.dataset.photoOffline === 'true')) continue;
+    if (keySet && figs.length) {
+      const hasMatchingNonOffline = figs.some(
+        fig => fig.dataset.photoOffline !== 'true' && fig.dataset.photoKey && keySet.has(fig.dataset.photoKey)
+      );
+      if (!hasMatchingNonOffline) continue;
+    }
+    attachTaxonPhoto(container, token);
+  }
+}
+
+function updatePhotoProgressStatus(text) {
+  // Never stomp on key errors or non-default status messages.
+  const current = statusEl.textContent || '';
+  if (current !== READY_MESSAGE && !current.startsWith('Caching offline photos')) return;
+  setStatus(text);
+}
+
+async function waitForCoreServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise(resolve => setTimeout(resolve, 15000))
+    ]);
+  } catch {
+    // Proceed even if SW failed to register (e.g. restricted private mode).
+  }
+}
+
+async function syncPhotosInBackground({ force = false, immediate = false } = {}) {
+  const now = Date.now();
+  if (!force && !immediate && now - lastAutoSyncAttemptAt < 5000) return;
+  lastAutoSyncAttemptAt = now;
+
+  try {
+    if (!force) {
+      await waitForCoreServiceWorker();
+    }
+    photoSyncLastError = null;
+    photoSyncSkippedReason = null;
+
+    const result = await photoStore.syncPack({
+      force,
+      onProgress: progress => {
+        photoSyncProgress = progress;
+        const ts = Date.now();
+        if (progress.phase === 'done' || ts - lastStatusUpdateAt >= 500) {
+          lastStatusUpdateAt = ts;
+          renderPhotosStatus();
+          if (progress.phase !== 'done') {
+            updatePhotoProgressStatus(
+              `Caching offline photos (${formatBytes(progress.loadedBytes)} / ${formatBytes(progress.totalBytes)})…`
+            );
+          }
+        }
+      },
+      onShardComplete: ({ imageKeys }) => {
+        refreshVisiblePhotos(imageKeys);
+      }
+    });
+
+    photoSyncProgress = null;
+    photoSyncQuotaExceeded = Boolean(result.quotaExceeded);
+    photoSyncSkippedReason = result.skippedReason || null;
+    if (result.upToDate || result.synced) {
+      lastPhotoCheckAt = Date.now();
+    }
+    await refreshPhotoStatus();
+    if (result.synced) {
+      refreshVisiblePhotos();
+    }
+    if (statusEl.textContent.startsWith('Caching offline photos')) {
+      setStatus(READY_MESSAGE);
+    }
+  } catch (error) {
+    photoSyncProgress = null;
+    photoSyncLastError = error.message || 'Network interrupted';
+    console.warn('Background photo sync paused:', error);
+    await refreshPhotoStatus();
+    if (statusEl.textContent.startsWith('Caching offline photos')) {
+      setStatus(READY_MESSAGE);
+    }
+  }
+}
+
+const PHOTO_UPDATE_RECHECK_MS = 6 * 60 * 60 * 1000;
+
+function shouldCheckPhotosOnResume() {
+  if (!appBooted) return false;
+  if (!photoStatus?.synced) return true;
+  return Date.now() - lastPhotoCheckAt >= PHOTO_UPDATE_RECHECK_MS;
+}
+
+function initPhotos() {
+  window.addEventListener('online', () => {
+    if (appBooted) syncPhotosInBackground({ immediate: true });
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && shouldCheckPhotosOnResume()) {
+      syncPhotosInBackground();
+    }
+  });
+  window.addEventListener('pageshow', () => {
+    if (shouldCheckPhotosOnResume()) {
+      syncPhotosInBackground();
+    }
+  });
+  document.addEventListener('click', event => {
+    if (event.target.closest('[data-photo-force-sync]')) {
+      syncPhotosInBackground({ force: true });
+      return;
+    }
+    const loadBtn = event.target.closest('[data-load-remote-photo]');
+    if (loadBtn) {
+      const container = loadBtn.closest('.taxon-description');
+      if (container?.dataset.renderToken) {
+        attachTaxonPhoto(container, container.dataset.renderToken, { allowRemote: true, forceRemote: true });
+      }
+    }
+  });
+  initPhotoLightbox();
+  refreshPhotoStatus();
+}
+
 function init() {
   initNavigation();
   initSpecies();
+  initPhotos();
   initGlossary();
   registerServiceWorker();
   if (savedState.view && savedState.view !== currentView) {
     switchView(savedState.view);
   }
-  loadData().catch(error => {
-    console.error(error);
-    setStatus(error.message);
-  });
+  loadData()
+    .then(() => {
+      appBooted = true;
+      syncPhotosInBackground({ immediate: true });
+    })
+    .catch(error => {
+      console.error(error);
+      setStatus(error.message);
+    });
 }
 
 init();

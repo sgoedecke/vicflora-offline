@@ -1,5 +1,5 @@
 // Bump this (and .app-version in index.html) whenever app files change so the new set is installed atomically.
-const CACHE_NAME = 'vicflora-offline-v13';
+const CACHE_NAME = 'vicflora-offline-v14';
 const ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,7 @@ const ASSETS = [
   './modules/multiaccess.js',
   './modules/species.js',
   './modules/glossary.js',
+  './modules/photos.js',
   './manifest.json',
   './favicon.svg',
   './data/dichotomous-keys.json',
@@ -43,7 +44,15 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const { request } = event;
-  if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) {
+  const url = new URL(request.url);
+  if (request.method !== 'GET' || url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Photo shards and index are managed independently in IndexedDB by photos.js
+  // so app shell updates don't re-download photos, photo updates aren't pinned by
+  // CacheStorage, and shards are never stored twice on the device.
+  if (url.pathname.includes('/data/photos/')) {
     return;
   }
 

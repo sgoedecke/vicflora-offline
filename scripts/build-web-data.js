@@ -191,6 +191,58 @@ async function main() {
     await fs.writeFile(path.join(webDataDir, 'glossary.json'), '[]');
   }
 
+  // Species photo shards and index (see scripts/fetch-photos.js).
+  const crypto = require('crypto');
+  const photosSrcDir = path.join(root, 'vicflora-data', 'photos');
+  const photosDestDir = path.join(webDataDir, 'photos');
+  await fs.mkdir(photosDestDir, { recursive: true });
+  const photosIndexSrc = path.join(photosSrcDir, 'index.json');
+  if (await fileExists(photosIndexSrc)) {
+    const photosIndex = await loadJSON(photosIndexSrc);
+    const shards = photosIndex.shards || [];
+    // Validate every shard (name, size, SHA-256) BEFORE removing any existing web shards.
+    for (const shard of shards) {
+      if (typeof shard.file !== 'string' || !/^photos-\d+(?:-[a-f0-9]+)?\.bin$/.test(shard.file)) {
+        throw new Error(`Invalid photo shard filename in index.json: ${shard.file}`);
+      }
+      const srcShard = path.join(photosSrcDir, shard.file);
+      const stat = await fs.stat(srcShard).catch(() => null);
+      if (!stat || stat.size !== shard.bytes) {
+        throw new Error(
+          `Photo shard integrity check failed for ${shard.file}: expected ${shard.bytes} bytes, got ${stat ? stat.size : 'missing'}.`
+        );
+      }
+      if (shard.sha256) {
+        const bytes = await fs.readFile(srcShard);
+        const actualSha = crypto.createHash('sha256').update(bytes).digest('hex');
+        if (actualSha !== shard.sha256) {
+          throw new Error(`Photo shard SHA-256 mismatch for ${shard.file}: expected ${shard.sha256}, got ${actualSha}.`);
+        }
+      }
+    }
+
+    const expectedFiles = new Set(shards.map(s => s.file));
+    for (const shard of shards) {
+      await fs.copyFile(path.join(photosSrcDir, shard.file), path.join(photosDestDir, shard.file));
+    }
+    await fs.copyFile(photosIndexSrc, path.join(photosDestDir, 'index.json'));
+    for (const name of await fs.readdir(photosDestDir)) {
+      if (/^photos-.*\.bin$/.test(name) && !expectedFiles.has(name)) {
+        await fs.unlink(path.join(photosDestDir, name));
+      }
+    }
+  } else {
+    for (const name of await fs.readdir(photosDestDir)) {
+      if (/^photos-.*\.bin$/.test(name)) {
+        await fs.unlink(path.join(photosDestDir, name));
+      }
+    }
+    await fs.writeFile(
+      path.join(photosDestDir, 'index.json'),
+      JSON.stringify({ version: '0', totalBytes: 0, totalImages: 0, taxaCount: 0, shards: [], taxa: {} })
+    );
+  }
+
   // Copy config snapshot for reference
   await writeJSON(path.join(webDataDir, 'config.json'), config);
 

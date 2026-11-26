@@ -373,6 +373,242 @@ button.link {
   font-weight: 600;
 }
 
+.taxon-media {
+  margin: 0 0 1rem;
+}
+
+.taxon-media--pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.taxon-photo {
+  margin: 0;
+  min-width: 0;
+}
+
+.taxon-photo-trigger {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  max-width: 100%;
+  text-align: left;
+  border-radius: 0.5rem;
+}
+
+.taxon-photo-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.taxon-media--pair .taxon-photo-trigger {
+  width: 100%;
+}
+
+.taxon-photo img {
+  display: block;
+  max-width: 100%;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.taxon-media--pair .taxon-photo img {
+  width: 100%;
+  height: 220px;
+  max-height: 220px;
+  object-fit: contain;
+}
+
+.taxon-photo--drawing img {
+  background: #ffffff;
+  padding: 0.25rem;
+}
+
+.taxon-photo-caption {
+  margin: 0.3rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.taxon-photo-credit {
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.taxon-photo-offline-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+body.lightbox-open {
+  overflow: hidden;
+}
+
+.photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: rgba(2, 6, 23, 0.96);
+  color: #f8fafc;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+.photo-lightbox[hidden] {
+  display: none;
+}
+
+.photo-lightbox-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  flex-shrink: 0;
+}
+
+.photo-lightbox-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.photo-lightbox-species {
+  font-style: italic;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #f8fafc;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photo-lightbox-switch {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.photo-lightbox-switch[hidden] {
+  display: none;
+}
+
+.photo-lightbox-switch button {
+  border: 0;
+  background: transparent;
+  color: rgba(248, 250, 252, 0.8);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.photo-lightbox-switch button.active {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.photo-lightbox-close {
+  border: 0;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.photo-lightbox-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+  cursor: zoom-out;
+  overflow: hidden;
+}
+
+.photo-lightbox-img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 0.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.photo-lightbox-img.is-drawing {
+  background: #ffffff;
+  padding: 0.35rem;
+}
+
+.photo-lightbox-meta {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem 0.85rem;
+  text-align: center;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.photo-lightbox-caption {
+  margin: 0 0 0.25rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #e2e8f0;
+}
+
+.photo-lightbox-credit {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #94a3b8;
+}
+
+@media (max-width: 480px) {
+  .taxon-media--pair {
+    gap: 0.5rem;
+  }
+
+  .taxon-media--pair .taxon-photo img {
+    height: 175px;
+    max-height: 175px;
+  }
+}
+
 .taxon-description > div {
   margin-bottom: 0.75rem;
 }

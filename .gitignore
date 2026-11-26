@@ -6,6 +6,7 @@ npm-debug.log*
 
 # Local tooling
 .claude
+.cache/
 
 # Generated web assets
 web/public/data/

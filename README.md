@@ -92,6 +92,21 @@ The app marks botanical terms in key leads and descriptions with a faint dotted
 underline; tapping one shows its definition. Units, place names and everyday
 words (see `STOP_TERMS` in `web/public/modules/glossary.js`) are left unmarked.
 
+```bash
+npm run fetch:photos
+```
+
+Fetches each species and infraspecific taxon's VicFlora hero image and any
+paired botanical line drawing (Flora of Victoria illustration), downscales them
+to 400px WebP (q70, requires ImageMagick `magick`), and packs the images into
+80 stable hash-bucketed (~1.2 MB) content-hashed binary shards plus an index in
+`vicflora-data/photos/`. The web app waits for the core service worker install
+and then syncs shards automatically in the background into IndexedDB (keyed by
+image content hash and verified via SHA-256, completely separate from the
+service worker cache so app updates don't re-download photos, flaky connections
+resume shard-by-shard, and future photo updates only fetch changed buckets),
+with per-image attribution below each image and click-to-fullscreen viewing.
+
 ### 4. Offline web app / PWA bundle
 
 ```bash

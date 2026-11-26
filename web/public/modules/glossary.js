@@ -10,7 +10,7 @@ const STOP_TERMS = new Set([
   'deciduous', 'juvenile leaves', 'glandular hair', 'head', 'vein', 'opposite', 'alternate'
 ]);
 
-const SKIP_SELECTOR = 'a, .region, .scientific_name, .gloss, .taxon, .lead-dest, .vernacular, .sole-infraspecific-note, button.link';
+const SKIP_SELECTOR = 'a, .region, .scientific_name, .gloss, .taxon, .lead-dest, .vernacular, .sole-infraspecific-note, .taxon-photo, button.link';
 
 function normalize(word) {
   return word.toLowerCase().replace(/\s+/g, ' ');

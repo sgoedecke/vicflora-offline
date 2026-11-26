@@ -14,7 +14,7 @@
     <header>
       <div class="header-top">
         <h1>VicFlora Offline Keys</h1>
-        <span class="app-version" aria-label="App version">v13</span>
+        <span class="app-version" aria-label="App version">v14</span>
       </div>
       <p>Multi-access and dichotomous keys from <a target="_blank" href="https://vicflora.rbg.vic.gov.au/">VicFlora</a>.</p>
       <nav class="tabs" role="tablist">
@@ -99,6 +99,7 @@
           <p>
             This static web app bundles selected VicFlora dichotomous and multi-access keys.
           </p>
+          <p id="photos-status" class="muted"></p>
           <p>
             On iOS, open this page in Safari, tap the share button, and choose “Add to Home Screen” to keep
             it available offline.
@@ -117,6 +118,23 @@
     </main>
 
     <aside id="gloss-popover" class="gloss-popover" role="dialog" aria-label="Glossary definition" hidden></aside>
+
+    <div id="photo-lightbox" class="photo-lightbox" role="dialog" aria-modal="true" aria-label="Full-screen image viewer" hidden>
+      <div class="photo-lightbox-bar">
+        <div class="photo-lightbox-title">
+          <span class="photo-lightbox-species"></span>
+          <div class="photo-lightbox-switch" hidden></div>
+        </div>
+        <button type="button" class="photo-lightbox-close" aria-label="Close full-screen image">×</button>
+      </div>
+      <div class="photo-lightbox-stage">
+        <img class="photo-lightbox-img" alt="" />
+      </div>
+      <div class="photo-lightbox-meta">
+        <p class="photo-lightbox-caption" hidden></p>
+        <p class="photo-lightbox-credit"></p>
+      </div>
+    </div>
 
     <footer>
       <button id="about-link" type="button">About</button>
