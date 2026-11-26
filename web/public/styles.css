@@ -887,6 +887,40 @@ body.lightbox-open {
   color: var(--muted);
 }
 
+.photos-storage-box {
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.photos-storage-box p {
+  margin: 0;
+}
+
+.photos-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.photos-controls:empty {
+  display: none;
+}
+
+button.danger-subtle {
+  background: transparent;
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: #b91c1c;
+}
+
+button.danger-subtle:hover {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.65);
+}
+
 code {
   background: rgba(15,23,42,0.08);
   padding: 0.15rem 0.4rem;
@@ -923,5 +957,19 @@ code {
 
   select:focus {
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+  }
+
+  .photos-storage-box {
+    background: rgba(30, 41, 59, 0.5);
+  }
+
+  button.danger-subtle {
+    border-color: rgba(248, 113, 113, 0.45);
+    color: #fca5a5;
+  }
+
+  button.danger-subtle:hover {
+    background: rgba(248, 113, 113, 0.12);
+    border-color: rgba(248, 113, 113, 0.7);
   }
 }

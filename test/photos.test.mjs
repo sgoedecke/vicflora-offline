@@ -936,3 +936,84 @@ test('dual media: PhotoStore syncs, serves, and garbage-collects paired photos a
   assert.equal(drawOnlyMedia[0].offline, true);
 });
 
+test('drop offline images & disable resync clears storage, skips sync, and allows re-enabling', async () => {
+  const imgA = makeWebP('photo-A');
+  const s0 = makeShard('photos-00', [imgA]);
+  const indexV1 = {
+    version: 'v1',
+    format: 'image/webp',
+    cdnPrefix: 'https://cdn.example/',
+    totalBytes: s0.bytes,
+    totalImages: 1,
+    shards: [{ file: s0.file, sha256: s0.sha256, bytes: s0.bytes, count: 1 }],
+    taxa: { a: [0, 0, s0.entries[0].length, s0.entries[0].hash, 'Alice', 'a.jpg'] }
+  };
+
+  const prefsMap = new Map();
+  const prefs = {
+    getItem: k => (prefsMap.has(k) ? prefsMap.get(k) : null),
+    setItem: (k, v) => prefsMap.set(k, String(v)),
+    removeItem: k => prefsMap.delete(k)
+  };
+  let droppedDb = false;
+  const db = createMemoryDb();
+  db.dropDatabase = async () => {
+    droppedDb = true;
+    await db.clearAll();
+  };
+
+  let shardFetches = 0;
+  const store = new PhotoStore({
+    baseUrl: './data/photos',
+    db,
+    prefs,
+    urlApi: createFakeUrlApi(),
+    navigatorObj: { onLine: true },
+    fetchImpl: async url => {
+      if (url.endsWith('/index.json')) return makeJsonResponse(indexV1);
+      shardFetches += 1;
+      return makeBinaryResponse(s0.buffer);
+    }
+  });
+
+  // Initial sync populates IndexedDB.
+  const firstSync = await store.syncPack();
+  assert.equal(firstSync.synced, true);
+  assert.equal(db.images.size, 1);
+  assert.equal(shardFetches, 1);
+
+  // User drops offline images and opts out of resyncing.
+  store.setDisabled(true);
+  await store.clearPack();
+  assert.equal(droppedDb, true);
+  assert.equal(db.images.size, 0);
+  assert.equal(db.meta.size, 0);
+  assert.equal(store.isDisabled(), true);
+
+  // Status reports disabled and does not recreate IDB entries.
+  const disabledStatus = await store.getStatus();
+  assert.equal(disabledStatus.disabled, true);
+  assert.equal(disabledStatus.synced, false);
+
+  // Subsequent syncPack calls are skipped even with force: true while disabled.
+  const skipped = await store.syncPack({ force: true });
+  assert.equal(skipped.synced, false);
+  assert.equal(skipped.skippedReason, 'disabled');
+  assert.equal(shardFetches, 1);
+
+  // Online lookup still returns remote preview without writing back to IndexedDB.
+  const onlineFallback = await store.getMediaSources('a');
+  assert.equal(onlineFallback.length, 1);
+  assert.equal(onlineFallback[0].offline, false);
+  assert.equal(onlineFallback[0].src, 'https://cdn.example/a.jpg');
+  assert.equal(db.meta.size, 0);
+
+  // Re-enabling allows sync to download and store images again.
+  store.setDisabled(false);
+  const resync = await store.syncPack({ force: true });
+  assert.equal(resync.synced, true);
+  assert.equal(db.images.size, 1);
+  assert.equal(shardFetches, 2);
+});
+
+

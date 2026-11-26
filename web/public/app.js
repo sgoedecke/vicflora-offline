@@ -51,6 +51,7 @@ const speciesElements = {
 };
 
 const photosStatusEl = document.querySelector('#photos-status');
+const photosControlsEl = document.querySelector('#photos-controls');
 
 const photoStore = new PhotoStore();
 let photoStatus = null;
@@ -58,6 +59,9 @@ let photoSyncProgress = null;
 let photoSyncLastError = null;
 let photoSyncQuotaExceeded = false;
 let photoSyncSkippedReason = null;
+let photoSyncClearing = false;
+let activePhotoSyncController = null;
+let activePhotoSyncPromise = null;
 let lastStatusUpdateAt = 0;
 let lastAutoSyncAttemptAt = 0;
 let lastPhotoCheckAt = 0;
@@ -1439,23 +1443,60 @@ async function registerServiceWorker() {
   }
 }
 
+function setPhotosControls(html) {
+  if (!photosControlsEl) return;
+  photosControlsEl.innerHTML = html;
+}
+
 function renderPhotosStatus() {
   if (!photosStatusEl) return;
+  if (photoSyncClearing) {
+    photosStatusEl.textContent = 'Removing offline species photos & drawings…';
+    setPhotosControls('<button type="button" class="secondary" disabled>Removing…</button>');
+    return;
+  }
+  if (photoStore.isDisabled()) {
+    photosStatusEl.textContent =
+      'Offline species photos & drawings are off (0 MB stored). Photos still load online when you have a connection.';
+    setPhotosControls(
+      photoStatus?.supported === false
+        ? ''
+        : '<button type="button" class="secondary" data-photo-enable-sync="true">Download offline images</button>'
+    );
+    return;
+  }
   if (photoSyncProgress && photoSyncProgress.phase !== 'done') {
     const { loadedBytes, totalBytes } = photoSyncProgress;
-    photosStatusEl.textContent = `Syncing offline species photos (${formatBytes(loadedBytes)} / ${formatBytes(totalBytes)})…`;
+    photosStatusEl.textContent = `Syncing offline species photos & drawings (${formatBytes(loadedBytes)} / ${formatBytes(totalBytes)})…`;
+    setPhotosControls(
+      '<button type="button" class="danger-subtle" data-photo-drop="true">Stop &amp; drop offline images</button>'
+    );
     return;
   }
   if (photoSyncQuotaExceeded) {
     photosStatusEl.textContent = 'Offline species photos paused: not enough free storage on this device.';
+    setPhotosControls(
+      '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+    );
     return;
   }
   if (!photoStatus?.available) {
     if (photoSyncSkippedReason === 'constrained-network' || photoStatus?.constrainedNetwork) {
-      photosStatusEl.innerHTML = 'Offline species photos paused on low-data connection. <button type="button" class="link" data-photo-force-sync="true">Sync now</button>';
+      photosStatusEl.textContent = 'Offline species photos paused on low-data connection.';
+      setPhotosControls(
+        '<button type="button" class="secondary" data-photo-force-sync="true">Sync now</button>' +
+          '<button type="button" class="danger-subtle" data-photo-drop="true">Don’t store offline images</button>'
+      );
       return;
     }
-    photosStatusEl.textContent = '';
+    photosStatusEl.textContent = photoStatus?.supported === false
+      ? 'Species photos load online when connected.'
+      : 'Offline species photos & drawings have not synced yet.';
+    setPhotosControls(
+      photoStatus?.supported === false
+        ? ''
+        : '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+    );
     return;
   }
   const sizeLabel = formatBytes(photoStatus.totalBytes);
@@ -1469,13 +1510,25 @@ function renderPhotosStatus() {
       ? ' Add to Home Screen so Safari keeps cached photos offline.'
       : '';
     photosStatusEl.textContent = `Offline species ${mediaLabel} ready: ${countLabel} taxa (${sizeLabel}${drawingDetail}) stored separately from app updates.${persistHint}`;
+    setPhotosControls(
+      '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+    );
   } else if (!photoStatus.supported) {
     photosStatusEl.textContent = `Species ${mediaLabel} (${countLabel} taxa) load online when connected.`;
+    setPhotosControls('');
   } else if (photoSyncSkippedReason === 'constrained-network' || photoStatus.constrainedNetwork) {
-    photosStatusEl.innerHTML = `Offline species ${mediaLabel} paused on low-data connection (${photoStatus.matchedShardCount}/${photoStatus.shardCount} packs synced, ${escapeHtml(sizeLabel)} total). <button type="button" class="link" data-photo-force-sync="true">Sync now</button>`;
+    photosStatusEl.textContent = `Offline species ${mediaLabel} paused on low-data connection (${photoStatus.matchedShardCount}/${photoStatus.shardCount} packs synced, ${sizeLabel} total).`;
+    setPhotosControls(
+      '<button type="button" class="secondary" data-photo-force-sync="true">Sync now</button>' +
+        '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+    );
   } else {
     const retryNote = photoSyncLastError ? ' Will resume automatically when signal improves.' : '';
     photosStatusEl.textContent = `Offline species ${mediaLabel}: ${photoStatus.matchedShardCount}/${photoStatus.shardCount} packs synced (${sizeLabel} total).${retryNote}`;
+    setPhotosControls(
+      '<button type="button" class="secondary" data-photo-force-sync="true">Sync now</button>' +
+        '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+    );
   }
 }
 
@@ -1488,7 +1541,7 @@ async function refreshPhotoStatus() {
   renderPhotosStatus();
 }
 
-function refreshVisiblePhotos(imageKeys = null) {
+function refreshVisiblePhotos(imageKeys = null, { force = false } = {}) {
   const keySet = imageKeys ? new Set(imageKeys) : null;
   const containers = [
     !speciesElements.detail.hidden ? speciesElements.detail.querySelector('.taxon-description') : null,
@@ -1498,14 +1551,16 @@ function refreshVisiblePhotos(imageKeys = null) {
   for (const container of containers) {
     const token = container.dataset.renderToken;
     if (!token || !container.dataset.photoPrimaryId) continue;
-    if (container.dataset.photoState === 'none' || container.dataset.photoState === 'offline') continue;
-    const figs = Array.from(container.querySelectorAll('.taxon-photo'));
-    if (figs.length && figs.every(fig => fig.dataset.photoOffline === 'true')) continue;
-    if (keySet && figs.length) {
-      const hasMatchingNonOffline = figs.some(
-        fig => fig.dataset.photoOffline !== 'true' && fig.dataset.photoKey && keySet.has(fig.dataset.photoKey)
-      );
-      if (!hasMatchingNonOffline) continue;
+    if (!force) {
+      if (container.dataset.photoState === 'none' || container.dataset.photoState === 'offline') continue;
+      const figs = Array.from(container.querySelectorAll('.taxon-photo'));
+      if (figs.length && figs.every(fig => fig.dataset.photoOffline === 'true')) continue;
+      if (keySet && figs.length) {
+        const hasMatchingNonOffline = figs.some(
+          fig => fig.dataset.photoOffline !== 'true' && fig.dataset.photoKey && keySet.has(fig.dataset.photoKey)
+        );
+        if (!hasMatchingNonOffline) continue;
+      }
     }
     attachTaxonPhoto(container, token);
   }
@@ -1531,72 +1586,130 @@ async function waitForCoreServiceWorker() {
 }
 
 async function syncPhotosInBackground({ force = false, immediate = false } = {}) {
+  if (photoStore.isDisabled() || photoSyncClearing) return;
+  if (activePhotoSyncPromise) return activePhotoSyncPromise;
   const now = Date.now();
   if (!force && !immediate && now - lastAutoSyncAttemptAt < 5000) return;
   lastAutoSyncAttemptAt = now;
 
-  try {
-    if (!force) {
-      await waitForCoreServiceWorker();
-    }
-    photoSyncLastError = null;
-    photoSyncSkippedReason = null;
-
-    const result = await photoStore.syncPack({
-      force,
-      onProgress: progress => {
-        photoSyncProgress = progress;
-        const ts = Date.now();
-        if (progress.phase === 'done' || ts - lastStatusUpdateAt >= 500) {
-          lastStatusUpdateAt = ts;
-          renderPhotosStatus();
-          if (progress.phase !== 'done') {
-            updatePhotoProgressStatus(
-              `Caching offline photos (${formatBytes(progress.loadedBytes)} / ${formatBytes(progress.totalBytes)})…`
-            );
-          }
-        }
-      },
-      onShardComplete: ({ imageKeys }) => {
-        refreshVisiblePhotos(imageKeys);
+  const controller = new AbortController();
+  activePhotoSyncController = controller;
+  const run = (async () => {
+    try {
+      if (!force) {
+        await waitForCoreServiceWorker();
       }
-    });
+      if (controller.signal.aborted || photoStore.isDisabled()) return;
 
-    photoSyncProgress = null;
-    photoSyncQuotaExceeded = Boolean(result.quotaExceeded);
-    photoSyncSkippedReason = result.skippedReason || null;
-    if (result.upToDate || result.synced) {
-      lastPhotoCheckAt = Date.now();
+      photoSyncLastError = null;
+      photoSyncSkippedReason = null;
+
+      const result = await photoStore.syncPack({
+        force,
+        signal: controller.signal,
+        onProgress: progress => {
+          photoSyncProgress = progress;
+          const ts = Date.now();
+          if (progress.phase === 'done' || ts - lastStatusUpdateAt >= 500) {
+            lastStatusUpdateAt = ts;
+            renderPhotosStatus();
+            if (progress.phase !== 'done') {
+              updatePhotoProgressStatus(
+                `Caching offline photos (${formatBytes(progress.loadedBytes)} / ${formatBytes(progress.totalBytes)})…`
+              );
+            }
+          }
+        },
+        onShardComplete: ({ imageKeys }) => {
+          refreshVisiblePhotos(imageKeys);
+        }
+      });
+
+      photoSyncProgress = null;
+      photoSyncQuotaExceeded = Boolean(result.quotaExceeded);
+      photoSyncSkippedReason = result.skippedReason || null;
+      if (result.upToDate || result.synced) {
+        lastPhotoCheckAt = Date.now();
+      }
+      await refreshPhotoStatus();
+      if (result.synced) {
+        refreshVisiblePhotos();
+      }
+      if (statusEl.textContent.startsWith('Caching offline photos')) {
+        setStatus(READY_MESSAGE);
+      }
+    } catch (error) {
+      photoSyncProgress = null;
+      if (error?.name !== 'AbortError' && !photoStore.isDisabled()) {
+        photoSyncLastError = error.message || 'Network interrupted';
+        console.warn('Background photo sync paused:', error);
+      }
+      await refreshPhotoStatus();
+      if (statusEl.textContent.startsWith('Caching offline photos')) {
+        setStatus(READY_MESSAGE);
+      }
+    } finally {
+      if (activePhotoSyncController === controller) {
+        activePhotoSyncController = null;
+      }
+      if (activePhotoSyncPromise === run) {
+        activePhotoSyncPromise = null;
+      }
     }
-    await refreshPhotoStatus();
-    if (result.synced) {
-      refreshVisiblePhotos();
+  })();
+  activePhotoSyncPromise = run;
+  return run;
+}
+
+async function dropOfflinePhotos() {
+  if (photoSyncClearing) return;
+  photoStore.setDisabled(true);
+  photoSyncClearing = true;
+  photoSyncQuotaExceeded = false;
+  photoSyncLastError = null;
+  photoSyncSkippedReason = 'disabled';
+  renderPhotosStatus();
+
+  try {
+    activePhotoSyncController?.abort();
+    if (activePhotoSyncPromise) {
+      await activePhotoSyncPromise.catch(() => {});
     }
-    if (statusEl.textContent.startsWith('Caching offline photos')) {
-      setStatus(READY_MESSAGE);
-    }
+    await photoStore.clearPack();
   } catch (error) {
+    console.warn('Failed to clear offline photo storage:', error);
+  } finally {
     photoSyncProgress = null;
-    photoSyncLastError = error.message || 'Network interrupted';
-    console.warn('Background photo sync paused:', error);
-    await refreshPhotoStatus();
+    photoSyncClearing = false;
     if (statusEl.textContent.startsWith('Caching offline photos')) {
       setStatus(READY_MESSAGE);
     }
+    await refreshPhotoStatus();
+    refreshVisiblePhotos(null, { force: true });
   }
+}
+
+async function enableAndSyncOfflinePhotos() {
+  if (photoSyncClearing) return;
+  photoStore.setDisabled(false);
+  photoSyncSkippedReason = null;
+  photoSyncQuotaExceeded = false;
+  photoSyncLastError = null;
+  await refreshPhotoStatus();
+  syncPhotosInBackground({ force: true, immediate: true });
 }
 
 const PHOTO_UPDATE_RECHECK_MS = 6 * 60 * 60 * 1000;
 
 function shouldCheckPhotosOnResume() {
-  if (!appBooted) return false;
+  if (!appBooted || photoStore.isDisabled()) return false;
   if (!photoStatus?.synced) return true;
   return Date.now() - lastPhotoCheckAt >= PHOTO_UPDATE_RECHECK_MS;
 }
 
 function initPhotos() {
   window.addEventListener('online', () => {
-    if (appBooted) syncPhotosInBackground({ immediate: true });
+    if (appBooted && !photoStore.isDisabled()) syncPhotosInBackground({ immediate: true });
   });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && shouldCheckPhotosOnResume()) {
@@ -1609,6 +1722,14 @@ function initPhotos() {
     }
   });
   document.addEventListener('click', event => {
+    if (event.target.closest('[data-photo-drop]')) {
+      dropOfflinePhotos();
+      return;
+    }
+    if (event.target.closest('[data-photo-enable-sync]')) {
+      enableAndSyncOfflinePhotos();
+      return;
+    }
     if (event.target.closest('[data-photo-force-sync]')) {
       syncPhotosInBackground({ force: true });
       return;

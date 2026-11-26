@@ -4,6 +4,7 @@ const STORE_IMAGES = 'images';
 const STORE_META = 'meta';
 const META_KEY = 'pack';
 const INDEX_META_KEY = 'index';
+const PHOTOS_DISABLED_KEY = 'vicflora-offline-photos-disabled';
 const MAX_OBJECT_URLS = 40;
 const DEFAULT_OPEN_TIMEOUT_MS = 4000;
 const DEFAULT_LOOKUP_TIMEOUT_MS = 1500;
@@ -335,6 +336,35 @@ export function createIndexedDBAdapter(
         tx.objectStore(STORE_META).clear();
         await txDone(tx);
       });
+    },
+    async dropDatabase() {
+      // Clear stores first so data is freed even if deleteDatabase is blocked by another tab.
+      try {
+        await this.clearAll();
+      } catch {
+        // Proceed to deleteDatabase attempt.
+      }
+      if (dbPromise) {
+        try {
+          const db = await dbPromise;
+          db.close();
+        } catch {
+          // Ignore close errors.
+        }
+        dbPromise = null;
+        openSeq += 1;
+      }
+      if (typeof idb?.deleteDatabase !== 'function') return;
+      await withTimeout(
+        new Promise(resolve => {
+          const req = idb.deleteDatabase(DB_NAME);
+          req.onsuccess = () => resolve();
+          req.onerror = () => resolve();
+          req.onblocked = () => resolve();
+        }),
+        openTimeoutMs,
+        'Timed out deleting photo database.'
+      ).catch(() => {});
     }
   };
 }
@@ -452,6 +482,7 @@ export class PhotoStore {
     storage = navigatorObj?.storage,
     locks = navigatorObj?.locks,
     cryptoSubtle = globalThis.crypto?.subtle,
+    prefs = globalThis.localStorage,
     idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS,
     indexTimeoutMs = DEFAULT_INDEX_TIMEOUT_MS,
     maxShardRetries = DEFAULT_MAX_SHARD_RETRIES,
@@ -465,6 +496,7 @@ export class PhotoStore {
     this.locks = locks;
     this.cryptoSubtle = cryptoSubtle;
     this.navigator = navigatorObj;
+    this.prefs = prefs;
     this.idleTimeoutMs = idleTimeoutMs;
     this.indexTimeoutMs = indexTimeoutMs;
     this.maxShardRetries = maxShardRetries;
@@ -476,11 +508,39 @@ export class PhotoStore {
     this.lastIndexFailAt = 0;
     this.objectUrls = new Map();
     this.pendingReads = new Map();
+    this._disabledFallback = false;
+  }
+
+  isDisabled() {
+    try {
+      if (this.prefs && typeof this.prefs.getItem === 'function') {
+        return this.prefs.getItem(PHOTOS_DISABLED_KEY) === '1';
+      }
+    } catch {
+      // Fall back to in-memory flag when storage is restricted.
+    }
+    return this._disabledFallback;
+  }
+
+  setDisabled(disabled) {
+    const next = Boolean(disabled);
+    this._disabledFallback = next;
+    try {
+      if (this.prefs) {
+        if (next && typeof this.prefs.setItem === 'function') {
+          this.prefs.setItem(PHOTOS_DISABLED_KEY, '1');
+        } else if (!next && typeof this.prefs.removeItem === 'function') {
+          this.prefs.removeItem(PHOTOS_DISABLED_KEY);
+        }
+      }
+    } catch {
+      // Keep in-memory fallback.
+    }
   }
 
   async loadCachedIndex() {
     if (this.index) return this.index;
-    if (!this.db.isSupported()) return null;
+    if (this.isDisabled() || !this.db.isSupported()) return null;
     try {
       const cached = await this.db.getMeta(INDEX_META_KEY);
       if (isValidPhotoIndex(cached)) {
@@ -542,7 +602,7 @@ export class PhotoStore {
         if (!allowNetwork || this.navigator?.onLine === false) return null;
         if (this.lastIndexFailAt && Date.now() - this.lastIndexFailAt < 10000) return null;
         const fresh = await this.fetchFreshIndex({ timeoutMs });
-        if (fresh?.shards?.length && this.db.isSupported()) {
+        if (fresh?.shards?.length && this.db.isSupported() && !this.isDisabled()) {
           this.db.putMeta(INDEX_META_KEY, fresh).catch(() => {});
         }
         return fresh;
@@ -558,12 +618,32 @@ export class PhotoStore {
   }
 
   async getStatus({ allowNetwork = false } = {}) {
+    const disabled = this.isDisabled();
+    const supported = this.db.isSupported();
+    if (disabled) {
+      return {
+        supported,
+        available: false,
+        synced: false,
+        disabled: true,
+        persisted: null,
+        constrainedNetwork: isConstrainedConnection(this.navigator?.connection),
+        version: this.index?.version || null,
+        storedVersion: null,
+        matchedShardCount: 0,
+        shardCount: this.index?.shards?.length || 0,
+        totalBytes: this.index?.totalBytes || 0,
+        totalImages: this.index?.totalImages || 0,
+        taxaCount: this.index?.taxaCount || Object.keys(this.index?.taxa || {}).length,
+        drawingsCount: this.index?.drawingsCount || Object.keys(this.index?.drawings || {}).length,
+        downloadedAt: null
+      };
+    }
     let index = await this.loadCachedIndex().catch(() => null);
     if (!index && allowNetwork) {
       index = await this.loadIndex({ allowNetwork: true }).catch(() => null);
     }
     const available = Boolean(index?.shards?.length && index?.totalImages > 0);
-    const supported = this.db.isSupported();
     let stored = null;
     if (supported) {
       try {
@@ -589,6 +669,7 @@ export class PhotoStore {
       supported,
       available,
       synced,
+      disabled: false,
       persisted,
       constrainedNetwork: isConstrainedConnection(this.navigator?.connection),
       version: index?.version || null,
@@ -629,6 +710,7 @@ export class PhotoStore {
   }
 
   async readOfflineObjectUrl(key, mimeType, timeoutMs = DEFAULT_LOOKUP_TIMEOUT_MS) {
+    if (this.isDisabled()) return null;
     if (this.objectUrls.has(key)) {
       const existing = this.objectUrls.get(key);
       // Touch LRU order without revoking.
@@ -861,6 +943,9 @@ export class PhotoStore {
   }
 
   async syncPack({ onProgress, onShardComplete, signal, force = false } = {}) {
+    if (this.isDisabled()) {
+      return { synced: false, upToDate: false, downloadedBytes: 0, skippedReason: 'disabled' };
+    }
     if (!this.db.isSupported()) {
       return { synced: false, upToDate: false, downloadedBytes: 0, skippedReason: 'unsupported' };
     }
@@ -961,7 +1046,7 @@ export class PhotoStore {
           });
           downloadedBytes += bytesRead;
 
-          if (signal?.aborted) {
+          if (signal?.aborted || this.isDisabled()) {
             throw new DOMException('Sync cancelled', 'AbortError');
           }
 
@@ -1008,6 +1093,10 @@ export class PhotoStore {
             shard,
             imageKeys: batch.map(([key]) => key)
           });
+        }
+
+        if (signal?.aborted || this.isDisabled()) {
+          throw new DOMException('Sync cancelled', 'AbortError');
         }
 
         const meta = {
@@ -1073,7 +1162,11 @@ export class PhotoStore {
     this.indexPromise = null;
     this.lastIndexFailAt = 0;
     if (this.db.isSupported()) {
-      await this.db.clearAll();
+      if (typeof this.db.dropDatabase === 'function') {
+        await this.db.dropDatabase();
+      } else {
+        await this.db.clearAll();
+      }
     }
   }
 }
