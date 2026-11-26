@@ -1,9 +1,9 @@
-const LOWERCASE_WORDS = new Set(['of', 'and', 'the']);
+const LOWERCASE_WORDS = new Set(['of', 'and', 'the', 'in']);
 
 function titleCase(value) {
-  return value.replace(/\w+/g, word => {
+  return value.replace(/\w+/g, (word, index) => {
     const lower = word.toLowerCase();
-    if (LOWERCASE_WORDS.has(lower)) {
+    if (index > 0 && LOWERCASE_WORDS.has(lower)) {
       return lower;
     }
     return lower.charAt(0).toUpperCase() + lower.slice(1);
@@ -13,7 +13,12 @@ function titleCase(value) {
 function normalizeKeyTitle(title) {
   if (!title) return '';
   const pattern = /^(?:multi[\s-]*access\s+key|key)\s+to\s+(?:the\s+)?/i;
-  let cleaned = title.trim().replace(pattern, '').trim();
+  const cleaned = title
+    .trim()
+    .replace(pattern, '')
+    .replace(/_updated.*$/i, '')
+    .replace(/(\bVictoria)\d+$/i, '$1')
+    .trim();
   return cleaned ? titleCase(cleaned) : titleCase(title.trim());
 }
 

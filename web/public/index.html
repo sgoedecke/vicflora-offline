@@ -14,7 +14,7 @@
     <header>
       <div class="header-top">
         <h1>VicFlora Offline Keys</h1>
-        <span class="app-version" aria-label="App version">v15</span>
+        <span class="app-version" aria-label="App version">v16</span>
       </div>
       <p>Multi-access and dichotomous keys from <a target="_blank" href="https://vicflora.rbg.vic.gov.au/">VicFlora</a>.</p>
       <nav class="tabs" role="tablist">
@@ -51,13 +51,17 @@
       <section id="view-multi" class="view">
         <div class="panel">
           <h2>Multi-Access Keys</h2>
-          <div class="controls">
-            <label class="control-field">
-              <span>Select key:</span>
-              <select id="multi-key-select"></select>
+          <div class="controls multi-controls">
+            <label class="control-field select-field">
+              <span class="field-label">Key</span>
+              <span class="select-wrap">
+                <select id="multi-key-select"></select>
+              </span>
             </label>
-            <button id="multi-undo" class="secondary">Undo last</button>
-            <button id="multi-reset" class="secondary">Reset selections</button>
+            <div class="control-actions">
+              <button id="multi-undo" class="secondary">Undo last</button>
+              <button id="multi-reset" class="secondary">Reset selections</button>
+            </div>
           </div>
           <div id="multi-summary" class="panel-info"></div>
           <div class="split">
