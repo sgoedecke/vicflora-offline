@@ -1,11 +1,6 @@
-const fetch = require('node-fetch');
-const fs = require('fs').promises;
-
 class VicFloraClient {
   constructor() {
     this.endpoint = 'https://vicflora.rbg.vic.gov.au/graphql';
-    this.cdnBase = 'https://vicflora-cdn.rbg.vic.gov.au';
-    this.keybaseEndpoint = 'https://keybase.rbg.vic.gov.au/keys/export';
     this.requestDelay = 1000; // 1 second between requests
     this.lastRequestTime = 0;
   }
@@ -105,21 +100,6 @@ class VicFloraClient {
         await new Promise(resolve => setTimeout(resolve, 2000 * retries));
       }
     }
-  }
-
-  async fetchKeyBaseKey(id, format = 'json') {
-    const url = `${this.keybaseEndpoint}/${id}?format=${format}`;
-    const response = await this.fetchUrl(url);
-
-    if (format === 'json') {
-      try {
-        return JSON.parse(response);
-      } catch (error) {
-        throw new Error(`Failed to parse KeyBase JSON for key ${id}: ${error.message}`);
-      }
-    }
-
-    return response;
   }
 }
 

@@ -46,10 +46,6 @@ async function scrapeMultiAccessKeys() {
   console.log(`\n=== Export Results ===`);
   console.log(`Successfully scraped ${keys.length} multi-access keys`);
 
-  // Export summary
-  await exporter.exportToJSON(keys, 'all-multi-access-keys');
-  await exporter.exportMultiAccessKeysToCSV(keys);
-
   // Export individual keys
   for (const key of keys) {
     await exporter.exportCompleteKey(key);
@@ -57,9 +53,9 @@ async function scrapeMultiAccessKeys() {
 
   console.log('\n=== Analysis ===');
   keys.forEach(key => {
-    const analysis = exporter.analyzeKeyStructure(key);
+    const analysis = scraper.analyzeKeyStructure(key);
     console.log(`${analysis.title}:`);
-    console.log(`  Entities: ${analysis.totalEntities} (${analysis.scoredEntities} scored)`);
+    console.log(`  Entities: ${analysis.totalEntities}`);
     console.log(`  Characters: ${analysis.totalFeatures} (${JSON.stringify(analysis.characterTypes)})`);
     console.log(`  States: ${analysis.totalStates}`);
   });
@@ -68,7 +64,6 @@ async function scrapeMultiAccessKeys() {
 async function scrapeIdentificationKeys() {
   console.log('=== VicFlora KeyBase Downloader ===\n');
 
-  const exporter = new VicFloraExporter();
   const htmlPath = path.resolve('keybase-list.html');
   const outputDir = path.resolve('keybase-data');
 
@@ -83,8 +78,6 @@ async function scrapeIdentificationKeys() {
   if (summary.failed.length) {
     console.warn(`Failed downloads for ${summary.failed.length} keys (check log above).`);
   }
-
-  await exporter.exportToJSON(entries, 'keybase-keys');
 }
 
 async function scrapeAllKeys() {
@@ -172,7 +165,7 @@ Examples:
   node main.js analyze fabaceae
   node main.js all
 
-Data is exported to ./vicflora-data/ directory in JSON and CSV formats.
+Data is exported to ./vicflora-data/ directory in JSON format.
   `);
 }
 

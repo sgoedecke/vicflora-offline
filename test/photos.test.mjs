@@ -314,7 +314,7 @@ test('PhotoStore syncs verified shards, skips when current, incrementally update
   });
 
   // Before sync: falls back online.
-  const onlineA = await store.getPhotoSource('a');
+  const [onlineA] = await store.getMediaSources('a');
   assert.equal(onlineA.offline, false);
   assert.equal(onlineA.src, 'https://cdn.example/a.jpg');
 
@@ -340,8 +340,8 @@ test('PhotoStore syncs verified shards, skips when current, incrementally update
   assert.deepEqual(fetched, ['./data/photos/index.json']);
 
   // Offline retrieval returns exact unpacked bytes and deduplicates shared keys.
-  const offlineA = await store.getPhotoSource('a');
-  const offlineB = await store.getPhotoSource('b');
+  const [offlineA] = await store.getMediaSources('a');
+  const [offlineB] = await store.getMediaSources('b');
   assert.equal(offlineA.offline, true);
   assert.equal(offlineA.src, offlineB.src);
   assert.deepEqual(new Uint8Array(await urlApi.active.get(offlineA.src).arrayBuffer()), imgA);
@@ -424,7 +424,7 @@ test('C1 regression: manifest update without re-sync never serves wrong-species 
   });
   storeV2.index = newIndex;
 
-  const resultB = await storeV2.getPhotoSource('taxonB');
+  const [resultB] = await storeV2.getMediaSources('taxonB');
   // MUST NOT return old-species-A bytes with New Credit!
   assert.equal(resultB.offline, false);
   assert.equal(resultB.deferred, true);
@@ -525,7 +525,7 @@ test('C3 regression: full pack refresh that fails mid-way keeps previous offline
 
   // Existing offline photo A MUST still be intact in IDB!
   assert.equal(db.images.has(sOld.entries[0].hash), true);
-  const offlineA = await store.getPhotoSource('a');
+  const [offlineA] = await store.getMediaSources('a');
   assert.equal(offlineA.offline, true);
 });
 
@@ -546,9 +546,9 @@ test('H1 regression: hung IndexedDB lookup times out cleanly instead of blocking
   store.index = index;
 
   const start = Date.now();
-  const result = await store.getPhotoSource('a', { timeoutMs: 40 });
+  const result = await store.getMediaSources('a', { timeoutMs: 40 });
   const elapsed = Date.now() - start;
-  assert.equal(result, null);
+  assert.deepEqual(result, []);
   assert.ok(elapsed < 500, `lookup should time out quickly, took ${elapsed}ms`);
 });
 
@@ -640,17 +640,17 @@ test('H4/M3/M4 regressions: Save-Data deferral, cross-tab lock contention, and Q
   assert.equal(skipped.synced, false);
   assert.equal(skipped.skippedReason, 'constrained-network');
 
-  // On Save-Data with no cached index, getPhotoSource does not burn 976 KB fetching index.json.
-  const noIndexPhoto = await constrainedStore.getPhotoSource('a');
-  assert.equal(noIndexPhoto, null);
+  // On Save-Data with no cached index, getMediaSources does not burn 976 KB fetching index.json.
+  const noIndexPhoto = await constrainedStore.getMediaSources('a');
+  assert.deepEqual(noIndexPhoto, []);
 
   // Once index is cached (e.g. from earlier wifi visit), Save-Data defers remote preview unless forceRemote is set.
   constrainedStore.index = index;
-  const deferredPhoto = await constrainedStore.getPhotoSource('a');
+  const [deferredPhoto] = await constrainedStore.getMediaSources('a');
   assert.equal(deferredPhoto.deferred, true);
   assert.equal(deferredPhoto.src, null);
 
-  const forcedPhoto = await constrainedStore.getPhotoSource('a', { forceRemote: true });
+  const [forcedPhoto] = await constrainedStore.getMediaSources('a', { forceRemote: true });
   assert.equal(forcedPhoto.deferred, false);
   assert.equal(forcedPhoto.src, 'https://cdn.example/a.jpg');
 
@@ -770,7 +770,7 @@ test('QA regressions: pre-header retry, failed v2 preserves v1 index, empty inde
   // 2. Empty fallback index must NOT wipe working in-memory index.
   store.fetch = async () => makeJsonResponse({ version: '0', totalBytes: 0, totalImages: 0, shards: [], taxa: {} });
   await store.syncPack();
-  assert.equal((await store.getPhotoSource('a')).offline, true);
+  assert.equal((await store.getMediaSources('a'))[0].offline, true);
 
   // 3. Failed v2 update over working v1 pack keeps v1 index intact so taxon A (whose imgHash changed) still works offline!
   store.fetch = async url => {
@@ -779,7 +779,7 @@ test('QA regressions: pre-header retry, failed v2 preserves v1 index, empty inde
   };
   await assert.rejects(() => store.syncPack());
   store.navigator = { onLine: false };
-  const stillV1 = await store.getPhotoSource('a');
+  const [stillV1] = await store.getMediaSources('a');
   assert.equal(stillV1.offline, true);
   assert.equal(stillV1.attribution, 'Alice v1');
   assert.equal((await db.getMeta('index')).version, 'v1');
@@ -800,16 +800,16 @@ test('QA regressions: pre-header retry, failed v2 preserves v1 index, empty inde
   });
   flakyStore.index = indexV1;
 
-  const timedOut = await flakyStore.getPhotoSource('a', { timeoutMs: 30 });
-  assert.ok(timedOut === null || timedOut.offline === false);
+  const timedOut = await flakyStore.getMediaSources('a', { timeoutMs: 30 });
+  assert.ok(timedOut.length === 0 || timedOut[0].offline === false);
   // Allow inner timeout cleanup microtask, then recover IDB.
   await new Promise(r => setTimeout(r, 20));
   hangNext = false;
-  const recovered = await flakyStore.getPhotoSource('a', { timeoutMs: 200 });
+  const [recovered] = await flakyStore.getMediaSources('a', { timeoutMs: 200 });
   assert.equal(recovered.offline, true);
 });
 
-test('service worker, _redirects, and Netlify config isolate photo assets from SW precache and SPA fallback', () => {
+test('service worker and Netlify config isolate photo assets from SW precache and SPA fallback', () => {
   const sw = fs.readFileSync(new URL('../web/public/service-worker.js', import.meta.url), 'utf8');
   assert.match(sw, /'\.\/modules\/photos\.js'/);
   // index.json must NOT be in core cache.addAll ASSETS
@@ -817,11 +817,6 @@ test('service worker, _redirects, and Netlify config isolate photo assets from S
   // All /data/photos/ requests bypass the service worker
   assert.match(sw, /\/data\/photos\//);
 
-  const redirects = fs.readFileSync(new URL('../web/public/_redirects', import.meta.url), 'utf8');
-  const redirDataIdx = redirects.indexOf('/data/* /404.html 404');
-  const redirSpaIdx = redirects.indexOf('/* /index.html 200');
-  assert.ok(redirDataIdx !== -1 && redirSpaIdx !== -1 && redirDataIdx < redirSpaIdx,
-    '_redirects /data/* 404 rule must precede /* SPA fallback');
   assert.ok(fs.existsSync(new URL('../web/public/404.html', import.meta.url)),
     'web/public/404.html must exist for Netlify 404 rule');
 

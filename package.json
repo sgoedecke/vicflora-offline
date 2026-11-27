@@ -1,10 +1,10 @@
 {
-  "name": "vicflora-scraper",
+  "name": "vicflora-offline",
   "version": "1.0.0",
-  "description": "Scraper for VicFlora dichotomous keys and multi-access keys",
+  "description": "Offline PWA and data importers for VicFlora dichotomous and multi-access keys",
   "main": "main.js",
-  "bin": {
-    "vicflora-scraper": "./main.js"
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
     "start": "node main.js",
@@ -13,15 +13,9 @@
     "scrape:all": "node main.js all",
     "scrape:keybase": "node keybase-scraper-simple.js keybase-list.html keybase-data",
     "list": "node main.js list",
-    "key": "node keying-cli-simple.js",
-    "key:dichotomous": "node keybase-cli.js",
     "fetch:photos": "node scripts/fetch-photos.js",
     "build:web": "node scripts/build-web-data.js",
     "test": "node --test test/*.test.mjs"
-  },
-  "dependencies": {
-    "keypress": "^0.2.1",
-    "node-fetch": "^2.7.0"
   },
   "keywords": [
     "vicflora",

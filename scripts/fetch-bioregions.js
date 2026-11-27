@@ -11,7 +11,6 @@
 
 const fs = require('fs').promises;
 const path = require('path');
-const fetch = require('node-fetch');
 
 const ENDPOINT = 'https://vicflora.rbg.vic.gov.au/graphql';
 const BIOREGION_IDS = Array.from({ length: 28 }, (_, i) => i + 1);

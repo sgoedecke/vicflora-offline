@@ -40,8 +40,7 @@ export function createRetryableLoader(loadFn) {
 
   return {
     run,
-    isCompleted: () => completed,
-    isInFlight: () => inFlight !== null
+    isCompleted: () => completed
   };
 }
 
@@ -77,16 +76,6 @@ export function createOfflineManager({
     hasActiveWorker: Boolean(sw?.controller),
     error: null
   };
-
-  let readyResolved = false;
-  let resolveReady;
-  const readyPromise = new Promise(resolve => {
-    resolveReady = value => {
-      if (readyResolved) return;
-      readyResolved = true;
-      resolve(value);
-    };
-  });
 
   function isOffline() {
     return nav?.onLine === false;
@@ -128,7 +117,6 @@ export function createOfflineManager({
     state.hasActiveWorker = true;
     state.status = 'ready';
     state.error = null;
-    resolveReady(true);
     requestPersistentStorage();
     if (!alreadyReady) {
       emit();
@@ -140,7 +128,6 @@ export function createOfflineManager({
     const alreadyUnsupported = state.status === 'unsupported' && state.error === errorMessage;
     state.status = 'unsupported';
     state.error = errorMessage;
-    resolveReady(false);
     if (!alreadyUnsupported) {
       emit();
     }
@@ -373,7 +360,6 @@ export function createOfflineManager({
   return {
     start,
     retryNow,
-    getState: snapshot,
-    waitUntilReady: () => readyPromise
+    getState: snapshot
   };
 }

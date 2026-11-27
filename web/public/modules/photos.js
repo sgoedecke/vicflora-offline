@@ -13,10 +13,6 @@ const DEFAULT_IDLE_TIMEOUT_MS = 30000;
 const DEFAULT_MAX_SHARD_RETRIES = 3;
 const DEFAULT_RETRY_BASE_MS = 1500;
 
-export function photoKey(imgHash) {
-  return String(imgHash);
-}
-
 export function resolveOnlineUrl(index, urlOrSuffix) {
   if (!urlOrSuffix) return null;
   if (/^https?:\/\//i.test(urlOrSuffix)) return urlOrSuffix;
@@ -65,7 +61,7 @@ export function getPhotoMeta(index, taxonId) {
     shard,
     offset,
     length,
-    key: photoKey(imgHash),
+    key: String(imgHash),
     kind: rawKind === 'drawing' ? 'drawing' : 'photo',
     caption: typeof rawCaption === 'string' ? rawCaption : '',
     attribution: attribution || 'VicFlora',
@@ -82,7 +78,7 @@ export function getDrawingMeta(index, taxonId) {
     shard,
     offset,
     length,
-    key: photoKey(imgHash),
+    key: String(imgHash),
     kind: 'drawing',
     caption: typeof rawCaption === 'string' ? rawCaption : '',
     attribution: attribution || 'VicFlora',
@@ -108,7 +104,7 @@ export function groupEntriesByShard(index) {
       if (!Array.isArray(row) || row.length < 4) continue;
       const [shard, offset, length, imgHash] = row;
       if (shard < 0 || shard >= shardCount || !imgHash) continue;
-      const key = photoKey(imgHash);
+      const key = String(imgHash);
       if (!groups[shard].has(key)) {
         groups[shard].set(key, { offset, length });
       }
@@ -123,7 +119,7 @@ export function getActiveImageKeys(index) {
   for (const map of sources) {
     for (const row of Object.values(map || {})) {
       if (Array.isArray(row) && row.length >= 4 && row[3]) {
-        keys.add(photoKey(row[3]));
+        keys.add(String(row[3]));
       }
     }
   }
@@ -586,14 +582,7 @@ export class PhotoStore {
     }
   }
 
-  loadIndex({ preferNetwork = false, allowNetwork = true, timeoutMs = this.indexTimeoutMs } = {}) {
-    if (preferNetwork) {
-      return this.fetchFreshIndex({ timeoutMs }).catch(async error => {
-        const cached = await this.loadCachedIndex();
-        if (cached) return cached;
-        throw error;
-      });
-    }
+  loadIndex({ allowNetwork = true, timeoutMs = this.indexTimeoutMs } = {}) {
     if (this.index) return Promise.resolve(this.index);
     if (!this.indexPromise) {
       this.indexPromise = (async () => {
@@ -611,10 +600,6 @@ export class PhotoStore {
       });
     }
     return this.indexPromise;
-  }
-
-  getMeta(taxonId) {
-    return getPhotoMeta(this.index, taxonId);
   }
 
   async getStatus({ allowNetwork = false } = {}) {
@@ -794,28 +779,6 @@ export class PhotoStore {
       deferred: false,
       onlineUrl: meta.onlineUrl
     };
-  }
-
-  async getPhotoSource(taxonId, { timeoutMs = DEFAULT_LOOKUP_TIMEOUT_MS, allowRemote = true, forceRemote = false } = {}) {
-    try {
-      return await withTimeout(
-        this._getPhotoSourceInner(taxonId, { allowRemote, forceRemote, timeoutMs }),
-        timeoutMs,
-        'Photo lookup timed out'
-      );
-    } catch {
-      return null;
-    }
-  }
-
-  async _getPhotoSourceInner(taxonId, { allowRemote, forceRemote, timeoutMs }) {
-    const constrained = isConstrainedConnection(this.navigator?.connection);
-    const index = await this.loadIndex({
-      allowNetwork: allowRemote && (!constrained || forceRemote)
-    }).catch(() => null);
-    const meta = getPhotoMeta(index, taxonId);
-    if (!meta) return null;
-    return this._resolveMetaToSource(index, meta, { allowRemote, forceRemote, timeoutMs, constrained });
   }
 
   async getMediaSources(taxonId, { timeoutMs = DEFAULT_LOOKUP_TIMEOUT_MS, allowRemote = true, forceRemote = false } = {}) {

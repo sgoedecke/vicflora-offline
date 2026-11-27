@@ -8,11 +8,8 @@ This project imports the VicFlora keys (both dichotomous and multi-access) and h
 
 ## Prerequisites
 
-```bash
-npm install
-```
-
-All commands are Node scripts, so no additional tooling is required.
+Node.js 18 or newer (zero npm dependencies). ImageMagick (`magick`) is only
+required if you re-run `npm run fetch:photos`.
 
 ## Scraping Workflow
 
@@ -22,11 +19,8 @@ All commands are Node scripts, so no additional tooling is required.
 node main.js multi-access
 ```
 
-This fetches every available Lucid bundle, decompresses the matrices, and writes:
-
-- `vicflora-data/all-multi-access-keys.json`
-- `vicflora-data/multi-access-keys-summary.csv`
-- `vicflora-data/key-<id>-complete.json` plus supporting CSV exports per key
+This fetches every available Lucid bundle, decompresses the matrices, and writes
+each key to `vicflora-data/key-<id>-complete.json`.
 
 #### Bryophyte keys and other manual additions
 
@@ -68,7 +62,6 @@ The downloader:
    `keybase-list.html` before you run the script.
 2. Downloads each `https://keybase.rbg.vic.gov.au/keys/export/<id>?format=json`
    export into `keybase-data/<id>.json` (skipping ones that are already saved).
-3. Stores the summarised list in `vicflora-data/keybase-keys.json` for reference.
 
 ### 3. Taxon descriptions
 
@@ -113,31 +106,12 @@ with per-image attribution below each image and click-to-fullscreen viewing.
 npm run build:web
 ```
 
-This script gathers the keys referenced in `web/web-config.json`, automatically
-pulls in any linked `to_key` chains, and writes `web/public/data/*.json`. The
-`web/public/` folder is a self-contained static site: host it from any HTTP
-server (or share the files directly) and the app will install as a PWA, caching
-everything for offline use. Update `web/web-config.json` to choose the seed keys
-you want bundled, then rerun the script.
-
-## Offline CLI usage
-
-After scraping, you can run either CLI completely offline:
-
-```bash
-npm run key            # multi-access key navigation
-npm run key:dichotomous # dichotomous key navigation
-```
-
-- `keying-cli-simple.js` lists the `key-*-complete.json` files in `vicflora-data/` and guides you through choosing character states until a small taxon set remains.
-- `keybase-cli.js` starts at VicFlora key 1903 (“Key to the main groups of plants in Victoria”) and follows each `to_key` link automatically so you can progress through linked dichotomous keys without re-selecting them manually.
-
-### Offline web app
-
-- Host `web/public` (for example with `npx http-server web/public`) or open
-  `index.html` directly. The service worker precaches the bundle so you can add it
-  to your phone’s home screen and keep using it without connectivity.
-- Edit `web/web-config.json` if you want to shrink or expand the bundled keys.
+This script bundles every scraped dichotomous key in `keybase-data/` and every
+multi-access key in `vicflora-data/` along with descriptions, glossary, and
+bioregion maps into `web/public/data/*.json`. The `web/public/` folder is a
+self-contained static site: host it from any HTTP server (for example
+`npx http-server web/public`) and the app will install as a PWA, caching
+everything for offline use.
 
 ### Deploying to Netlify
 
@@ -162,8 +136,11 @@ Netlify can build and host the PWA directly from this repository. The included
 npm run scrape:multi          # node main.js multi-access
 npm run scrape:identification # node main.js identification
 npm run scrape:all            # node main.js all
-npm run key                   # node keying-cli-simple.js
-npm run key:dichotomous       # node keybase-cli.js
+npm run fetch:descriptions    # node scripts/fetch-descriptions.js
+npm run fetch:glossary        # node scripts/fetch-glossary.js
+npm run fetch:bioregions      # node scripts/fetch-bioregions.js
+npm run fetch:photos          # node scripts/fetch-photos.js
+npm run build:web             # node scripts/build-web-data.js
 npm test                      # check the web app's key logic against web/public/data
 ```
 

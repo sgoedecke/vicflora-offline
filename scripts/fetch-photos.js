@@ -18,7 +18,6 @@ const path = require('path');
 const crypto = require('crypto');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
-const fetch = require('node-fetch');
 
 const execFileAsync = promisify(execFile);
 
@@ -169,7 +168,7 @@ async function queryGraphQL(query) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'User-Agent': 'vicflora-offline' },
         body: JSON.stringify({ query }),
-        timeout: 30000
+        signal: AbortSignal.timeout(30000)
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const body = await response.json();
@@ -332,9 +331,12 @@ async function downloadAndTranscodeOne(imageId, url) {
 
   for (let attempt = 1; ; attempt += 1) {
     try {
-      const response = await fetch(url, { headers: { 'User-Agent': 'vicflora-offline' }, timeout: 30000 });
+      const response = await fetch(url, {
+        headers: { 'User-Agent': 'vicflora-offline' },
+        signal: AbortSignal.timeout(30000)
+      });
       if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
-      const buffer = await response.buffer();
+      const buffer = Buffer.from(await response.arrayBuffer());
       await fsp.writeFile(tmpSrc, buffer);
       await execFileAsync('magick', [
         tmpSrc,

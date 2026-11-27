@@ -127,16 +127,11 @@ test('OfflineManager stays not-ready when first install is interrupted, then rec
     retryDelaysMs: []
   });
 
-  let readyResolved = false;
-  manager.waitUntilReady().then(val => {
-    readyResolved = val;
-  });
-
   manager.start();
   await flushMicrotasks();
 
   assert.equal(manager.getState().status, 'installing');
-  assert.equal(readyResolved, false);
+  assert.equal(manager.getState().hasActiveWorker, false);
 
   // Simulate airplane mode interrupting the initial install
   env.nav.onLine = false;
@@ -145,7 +140,7 @@ test('OfflineManager stays not-ready when first install is interrupted, then rec
   await flushMicrotasks();
 
   assert.equal(manager.getState().status, 'offline-incomplete');
-  assert.equal(readyResolved, false);
+  assert.equal(manager.getState().hasActiveWorker, false);
   assert.equal(env.getRegisterCalls(), 1);
 
   // User turns reception back on: manager must call register() again (not update() on cleared reg1)
@@ -162,7 +157,7 @@ test('OfflineManager stays not-ready when first install is interrupted, then rec
   });
   assert.equal(manager.getState().cached, 12);
   assert.equal(manager.getState().total, 18);
-  assert.equal(readyResolved, false);
+  assert.equal(manager.getState().hasActiveWorker, false);
 
   // Second install finishes and activates
   reg2.installing = null;
@@ -172,7 +167,7 @@ test('OfflineManager stays not-ready when first install is interrupted, then rec
   await flushMicrotasks();
 
   assert.equal(manager.getState().status, 'ready');
-  assert.equal(readyResolved, true);
+  assert.equal(manager.getState().hasActiveWorker, true);
   // First-time claim must not trigger an unnecessary reload
   assert.equal(env.getReloadCount(), 0);
 });
@@ -216,7 +211,7 @@ test('OfflineManager recovers automatically if opened while offline and register
   await flushMicrotasks();
 
   assert.equal(manager.getState().status, 'ready');
-  assert.equal(await manager.waitUntilReady(), true);
+  assert.equal(manager.getState().hasActiveWorker, true);
 });
 
 test('OfflineManager recovers from transient SecurityError on reconnect/retry without premature unsupported', async () => {
@@ -227,7 +222,7 @@ test('OfflineManager recovers from transient SecurityError on reconnect/retry wi
   });
   managerUnsupported.start();
   assert.equal(managerUnsupported.getState().status, 'unsupported');
-  assert.equal(await managerUnsupported.waitUntilReady(), false);
+  assert.equal(managerUnsupported.getState().hasActiveWorker, false);
 
   const worker = createMockWorker('installing');
   const reg = createMockRegistration({ installing: worker });
@@ -244,7 +239,6 @@ test('OfflineManager recovers from transient SecurityError on reconnect/retry wi
       return reg;
     }
   });
-  let settled = false;
   const manager = createOfflineManager({
     navigator: env.nav,
     window: env.win,
@@ -254,16 +248,13 @@ test('OfflineManager recovers from transient SecurityError on reconnect/retry wi
       return timersScheduled;
     }
   });
-  manager.waitUntilReady().then(() => {
-    settled = true;
-  });
 
   manager.start();
   await flushMicrotasks();
 
-  // SecurityError must not mark unsupported, must not settle ready, and must not spin timer retries
+  // SecurityError must not mark unsupported, must not become ready, and must not spin timer retries
   assert.equal(manager.getState().status, 'failed');
-  assert.equal(settled, false);
+  assert.equal(manager.getState().hasActiveWorker, false);
   assert.equal(timersScheduled, 0);
 
   // Reconnecting after captive portal/network clears recovers cleanly
@@ -278,7 +269,7 @@ test('OfflineManager recovers from transient SecurityError on reconnect/retry wi
   await flushMicrotasks();
 
   assert.equal(manager.getState().status, 'ready');
-  assert.equal(await manager.waitUntilReady(), true);
+  assert.equal(manager.getState().hasActiveWorker, true);
 });
 
 test('OfflineManager reloads on upgrade controllerchange, and checks for updates on foreground when already ready', async () => {
@@ -300,7 +291,7 @@ test('OfflineManager reloads on upgrade controllerchange, and checks for updates
   await flushMicrotasks();
 
   assert.equal(manager.getState().status, 'ready');
-  assert.equal(await manager.waitUntilReady(), true);
+  assert.equal(manager.getState().hasActiveWorker, true);
 
   env.doc.visibilityState = 'visible';
   env.doc.dispatch('visibilitychange');
@@ -685,7 +676,7 @@ test('OfflineManager ignores redundant state when another installing worker supe
   assert.equal(manager.getState().status, 'ready');
 });
 
-test('OfflineManager transitions from checking to unsupported once and settles waitUntilReady', async () => {
+test('OfflineManager transitions from checking to unsupported once', async () => {
   const env = createMockEnv({
     online: true,
     registerImpl: () => {
@@ -707,7 +698,7 @@ test('OfflineManager transitions from checking to unsupported once and settles w
 
   assert.equal(manager.getState().status, 'unsupported');
   assert.equal(transitions.filter(s => s === 'unsupported').length, 1);
-  assert.equal(await manager.waitUntilReady(), false);
+  assert.equal(manager.getState().hasActiveWorker, false);
 });
 
 test('createRetryableLoader retries once when reconnect/SW-ready arrives during a doomed in-flight load', async () => {
@@ -730,7 +721,7 @@ test('createRetryableLoader retries once when reconnect/SW-ready arrives during 
   // Initial page load hangs on a dead socket
   const firstPromise = loader.run();
   assert.equal(calls, 1);
-  assert.equal(loader.isInFlight(), true);
+  assert.equal(loader.isCompleted(), false);
 
   // Reconnect / SW ready arrives while the first request is still pending
   const reconnectPromise = loader.run({ retryIfInFlight: true });
@@ -743,7 +734,6 @@ test('createRetryableLoader retries once when reconnect/SW-ready arrives during 
 
   assert.equal(calls, 2);
   assert.equal(loader.isCompleted(), false);
-  assert.equal(loader.isInFlight(), true);
 
   // Second attempt succeeds from fresh network / SW cache
   resolveSecond();
@@ -751,7 +741,6 @@ test('createRetryableLoader retries once when reconnect/SW-ready arrives during 
   assert.equal(r1, true);
   assert.equal(r2, true);
   assert.equal(loader.isCompleted(), true);
-  assert.equal(loader.isInFlight(), false);
 
   // Subsequent calls are no-ops once completed
   await loader.run({ retryIfInFlight: true });
