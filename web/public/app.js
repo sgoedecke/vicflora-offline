@@ -2091,10 +2091,7 @@ function renderPhotosStatus() {
     : '';
   const mediaLabel = photoStatus.drawingsCount ? 'photos & drawings' : 'photos';
   if (photoStatus.synced) {
-    const persistHint = photoStatus.persisted === false
-      ? ' Add to Home Screen so Safari keeps cached photos offline.'
-      : '';
-    photosStatusEl.textContent = `Offline species ${mediaLabel} ready: ${countLabel} taxa (${sizeLabel}${drawingDetail}) stored separately from app updates.${persistHint}`;
+    photosStatusEl.textContent = `Offline species ${mediaLabel} ready: ${countLabel} taxa (${sizeLabel}${drawingDetail}) stored separately from app updates.`;
     setPhotosControls(
       '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync them</button>'
     );
