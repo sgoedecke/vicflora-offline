@@ -1,31 +1,20 @@
-// Bump this (and .app-version in index.html) whenever app files change so the new set is installed atomically.
-const CACHE_NAME = 'vicflora-offline-v20';
-// Ordered small-to-large so resumable precaching commits the shell first, then each data bundle.
-const ASSETS = [
-  './',
-  './index.html',
-  './styles.css',
-  './app.js',
-  './modules/offline.js',
-  './modules/dichotomous.js',
-  './modules/multiaccess.js',
-  './modules/species.js',
-  './modules/glossary.js',
-  './modules/photos.js',
-  './modules/bioregions.js',
-  './manifest.json',
-  './favicon.svg',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './data/bioregions.json',
-  './data/glossary.json',
-  './data/species-index.json',
-  './data/dichotomous-keys.json',
-  './data/multi-keys.json',
-  './data/descriptions.json'
-];
+if (!self.__VICFLORA_MANIFEST__ && typeof importScripts === 'function') {
+  importScripts('./data/sw-manifest.js');
+}
+
+const MANIFEST = self.__VICFLORA_MANIFEST__ || { shellHash: 'dev', dataHash: 'dev', shell: [], data: [] };
+const SHELL_CACHE = `vicflora-shell-${MANIFEST.shellHash}`;
+const DATA_CACHE = 'vicflora-data';
+const PHOTOS_CACHE = 'vicflora-photos';
+const PERSISTENT_CACHES = new Set([DATA_CACHE, PHOTOS_CACHE]);
+const SHELL_ASSETS = MANIFEST.shell || [];
 
 const NON_HTML_EXT_RE = /\.(?:js|mjs|json|css|png|svg|ico|webp)$/i;
+const MANIFEST_PATHNAME = new URL('./data/manifest.json', self.location.href).pathname;
+const PHOTOS_PATH_PREFIX = new URL('./data/photos/', self.location.href).pathname;
+const DATA_BY_PATHNAME = new Map(
+  (MANIFEST.data || []).map(entry => [new URL(entry.path, self.location.href).pathname, entry])
+);
 
 function isValidAssetResponse(urlOrPath, response) {
   if (!response || response.status !== 200) return false;
@@ -56,49 +45,45 @@ async function broadcastToClients(message) {
   }
 }
 
-async function precacheAssets() {
-  const cache = await caches.open(CACHE_NAME);
-  const missing = [];
-  let cached = 0;
+async function precacheShell() {
+  const cache = await caches.open(SHELL_CACHE);
 
-  // CACHE_NAME is versioned per deploy, so any entry already stored here was
-  // validated for this exact version and can be reused on retry.
-  for (const asset of ASSETS) {
-    const existing = await cache.match(asset);
-    if (existing && isValidAssetResponse(asset, existing)) {
-      cached += 1;
-    } else {
-      missing.push(asset);
-    }
-  }
-
-  await broadcastToClients({
-    type: 'sw-cache-progress',
-    cached,
-    total: ASSETS.length,
-    version: CACHE_NAME
-  });
-
-  for (const asset of missing) {
-    // Revalidate with the server (cheap 304 for files the page just downloaded)
-    // rather than bypassing the HTTP cache with 'reload'.
-    const response = await fetch(new Request(asset, { cache: 'no-cache' }));
+  for (const asset of SHELL_ASSETS) {
+    const assetUrl = new URL(asset, self.location.href).href;
+    const existing = await cache.match(assetUrl);
+    if (existing && isValidAssetResponse(asset, existing)) continue;
+    const response = await fetch(new Request(assetUrl, { cache: 'no-cache' }));
     if (!isValidAssetResponse(asset, response)) {
       throw new Error(`Invalid response while caching ${asset}: HTTP ${response?.status ?? 'unknown'}`);
     }
-    await cache.put(asset, response);
-    cached += 1;
-    await broadcastToClients({
-      type: 'sw-cache-progress',
-      cached,
-      total: ASSETS.length,
-      version: CACHE_NAME
-    });
+    await cache.put(assetUrl, response);
+  }
+}
+
+async function handleDataFetch(request, entry) {
+  const cache = await caches.open(DATA_CACHE);
+  const hasQuery = request.url.includes('?');
+  const targetUrl = hasQuery ? request.url : new URL(entry.url, self.location.href).href;
+
+  const exact = await cache.match(targetUrl);
+  if (exact) return exact;
+
+  try {
+    return await fetch(request);
+  } catch (error) {
+    if (!hasQuery) {
+      // Offline mid-update fallback for unversioned data requests.
+      const fallback = await cache.match(new URL(entry.path, self.location.href).href, {
+        ignoreSearch: true
+      });
+      if (fallback) return fallback;
+    }
+    throw error;
   }
 }
 
 self.addEventListener('install', event => {
-  event.waitUntil(precacheAssets().then(() => self.skipWaiting()));
+  event.waitUntil(precacheShell().then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', event => {
@@ -107,11 +92,17 @@ self.addEventListener('activate', event => {
       .keys()
       .then(keys =>
         Promise.all(
-          keys.map(key => (key === CACHE_NAME ? null : caches.delete(key)))
+          keys.map(key => (key === SHELL_CACHE || PERSISTENT_CACHES.has(key) ? null : caches.delete(key)))
         )
       )
       .then(() => self.clients.claim())
-      .then(() => broadcastToClients({ type: 'sw-cache-ready', version: CACHE_NAME }))
+      .then(() =>
+        broadcastToClients({
+          type: 'sw-cache-ready',
+          shellHash: MANIFEST.shellHash,
+          dataHash: MANIFEST.dataHash
+        })
+      )
   );
 });
 
@@ -122,17 +113,30 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Photo shards and index are managed independently in IndexedDB by photos.js
-  // so app shell updates don't re-download photos, photo updates aren't pinned by
-  // CacheStorage, and shards are never stored twice on the device.
-  if (url.pathname.includes('/data/photos/')) {
+  // Photo index and shards are managed directly in CacheStorage ('vicflora-photos') by photos.js.
+  if (url.pathname.startsWith(PHOTOS_PATH_PREFIX)) {
     return;
   }
 
-  // Cache-first for the atomically precached versioned bundle so weak signal
-  // never blocks the app and files from different deploys are never mixed.
+  // Serve the active manifest directly from the SW so it is always offline and in sync with the SW.
+  if (url.pathname === MANIFEST_PATHNAME) {
+    event.respondWith(
+      new Response(JSON.stringify(MANIFEST), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json; charset=utf-8' }
+      })
+    );
+    return;
+  }
+
+  const dataEntry = DATA_BY_PATHNAME.get(url.pathname);
+  if (dataEntry) {
+    event.respondWith(handleDataFetch(request, dataEntry));
+    return;
+  }
+
   event.respondWith(
-    caches.open(CACHE_NAME).then(async cache => {
+    caches.open(SHELL_CACHE).then(async cache => {
       const cached =
         (await cache.match(request)) ||
         (request.mode === 'navigate' ? await cache.match(request, { ignoreSearch: true }) : null);

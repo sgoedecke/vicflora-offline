@@ -159,8 +159,10 @@ test('LocationTracker does not leak listeners for detached cards or failed/unsup
   assert.equal(failing.listeners.size, 0);
 });
 
-test('service worker precaches bioregions module and geometry data', async () => {
-  const sw = await fs.readFile(new URL('../web/public/service-worker.js', import.meta.url), 'utf8');
-  assert.match(sw, /'\.\/modules\/bioregions\.js'/);
-  assert.match(sw, /'\.\/data\/bioregions\.json'/);
+test('generated offline manifest includes bioregions module and geometry bundle', async () => {
+  const manifest = JSON.parse(
+    await fs.readFile(new URL('../web/public/data/manifest.json', import.meta.url), 'utf8')
+  );
+  assert.ok(manifest.shell.includes('./modules/bioregions.js'));
+  assert.ok(manifest.data.some(entry => entry.id === 'bioregions' && entry.path === './data/bioregions.json'));
 });

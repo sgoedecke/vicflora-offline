@@ -9,7 +9,7 @@ import {
 } from './modules/species.js';
 import { Glossary } from './modules/glossary.js';
 import { PhotoStore, formatBytes } from './modules/photos.js';
-import { createOfflineManager, createRetryableLoader } from './modules/offline.js';
+import { createDataStore, createOfflineManager, createRetryableLoader } from './modules/offline.js';
 import { createBioregionMap, ensureBioregionsLoaded } from './modules/bioregions.js';
 
 const statusEl = document.querySelector('#status');
@@ -53,11 +53,13 @@ const speciesElements = {
 
 const offlineCoreStatusEl = document.querySelector('#offline-core-status');
 const offlineCoreControlsEl = document.querySelector('#offline-core-controls');
+const appVersionEl = document.querySelector('#app-version');
 const installAppBtn = document.querySelector('#install-app-btn');
 const photosStatusEl = document.querySelector('#photos-status');
 const photosControlsEl = document.querySelector('#photos-controls');
 let deferredInstallPrompt = null;
 
+const dataStore = createDataStore();
 const photoStore = new PhotoStore();
 let photoStatus = null;
 let photoSyncProgress = null;
@@ -135,12 +137,10 @@ function saveState() {
   }
 }
 
-async function fetchJSON(url) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to load ${url}: ${response.status}`);
+function updateVersionBadge(manifest) {
+  if (appVersionEl && manifest?.shellHash) {
+    appVersionEl.textContent = `v${manifest.shellHash.slice(0, 7)}`;
   }
-  return response.json();
 }
 
 function setStatus(message, { managedByOffline = false } = {}) {
@@ -161,6 +161,9 @@ function getOfflineStatusMessage() {
   }
   if (offline.status === 'failed') {
     return 'Offline download was interrupted — retrying automatically when connected…';
+  }
+  if (Number.isFinite(offline.loadedBytes) && Number.isFinite(offline.totalBytes) && offline.totalBytes > 0) {
+    return `Downloading keys for offline use (${formatBytes(offline.loadedBytes)} / ${formatBytes(offline.totalBytes)})…`;
   }
   if (Number.isFinite(offline.cached) && Number.isFinite(offline.total) && offline.total > 0) {
     return `Downloading keys for offline use (${offline.cached}/${offline.total})…`;
@@ -188,9 +191,11 @@ function renderOfflineCoreStatus() {
   }
   if (offline.status === 'installing' || offline.status === 'checking') {
     const progress =
-      Number.isFinite(offline.cached) && Number.isFinite(offline.total) && offline.total > 0
-        ? ` (${offline.cached}/${offline.total})`
-        : '';
+      Number.isFinite(offline.loadedBytes) && Number.isFinite(offline.totalBytes) && offline.totalBytes > 0
+        ? ` (${formatBytes(offline.loadedBytes)} / ${formatBytes(offline.totalBytes)})`
+        : (Number.isFinite(offline.cached) && Number.isFinite(offline.total) && offline.total > 0
+          ? ` (${offline.cached}/${offline.total})`
+          : '');
     offlineCoreStatusEl.textContent = `Downloading keys & descriptions for offline use${progress}… Keep this app open with reception until finished.`;
     if (offlineCoreControlsEl) offlineCoreControlsEl.innerHTML = '';
     return;
@@ -212,6 +217,7 @@ function isWaitingForCoreOffline() {
 
 let lastOfflineStatus = null;
 const offlineManager = createOfflineManager({
+  dataStore,
   onStateChange(state) {
     const prevStatus = lastOfflineStatus;
     lastOfflineStatus = state.status;
@@ -903,9 +909,10 @@ function bindMultiControls(list) {
 
 async function loadData() {
   setStatus('Loading key bundles…');
+  dataStore.loadManifest().then(updateVersionBadge).catch(() => {});
   const [dichotomousBundle, speciesIndexBundle] = await Promise.all([
-    fetchJSON('./data/dichotomous-keys.json'),
-    fetchJSON('./data/species-index.json'),
+    dataStore.readJson('dichotomous'),
+    dataStore.readJson('speciesIndex'),
     loadGlossary()
   ]);
 
@@ -957,7 +964,7 @@ function ensureMultiLoaded({ retryIfInFlight = false } = {}) {
 async function loadMultiData() {
   setStatus('Loading multi-access keys…');
   multiElements.summary.textContent = 'Loading multi-access keys…';
-  const multiBundle = await fetchJSON('./data/multi-keys.json');
+  const multiBundle = await dataStore.readJson('multi');
 
   const multiList = listMultiKeys(multiBundle.keys || {});
   if (multiList.length) {
@@ -988,7 +995,7 @@ function escapeHtml(text) {
 }
 
 const descriptionsLoader = createRetryableLoader(async () => {
-  const bundle = await fetchJSON('./data/descriptions.json');
+  const bundle = await dataStore.readJson('descriptions');
   descriptions = bundle.taxa || {};
 });
 
@@ -1171,6 +1178,7 @@ function createPhotoFigure(source, displayName, onOpenFullscreen) {
   const figure = document.createElement('figure');
   figure.className = source.kind === 'drawing' ? 'taxon-photo taxon-photo--drawing' : 'taxon-photo';
   figure.dataset.photoKey = source.key || '';
+  figure.dataset.photoShard = source.shard != null ? String(source.shard) : '';
   figure.dataset.photoKind = source.kind || 'photo';
   figure.dataset.photoOffline = source.offline ? 'true' : 'false';
 
@@ -1322,7 +1330,7 @@ async function attachBioregionMap(container, taxonBioregions, token) {
   const hasProseRegions = Boolean(distEl?.querySelector('.region'));
   if (!taxonBioregions && !hasProseRegions) return;
 
-  const data = await ensureBioregionsLoaded();
+  const data = await ensureBioregionsLoaded(() => dataStore.readResponse('bioregions'));
   if (!data || !container.isConnected || container.dataset.renderToken !== token) return;
   if (container.querySelector('.bioregion-map-card')) return;
 
@@ -1484,7 +1492,7 @@ function renderSpeciesMatches() {
 
 async function loadGlossary() {
   try {
-    glossary = new Glossary(await fetchJSON('./data/glossary.json'));
+    glossary = new Glossary(await dataStore.readJson('glossary'));
   } catch (error) {
     console.warn('Could not load glossary:', error);
   }
@@ -1694,8 +1702,7 @@ async function refreshPhotoStatus() {
   renderPhotosStatus();
 }
 
-function refreshVisiblePhotos(imageKeys = null, { force = false } = {}) {
-  const keySet = imageKeys ? new Set(imageKeys) : null;
+function refreshVisiblePhotos(shardIndex = null, { force = false } = {}) {
   const containers = [
     !speciesElements.detail.hidden ? speciesElements.detail.querySelector('.taxon-description') : null,
     dichElements.result.classList.contains('visible') ? dichElements.result.querySelector('.taxon-description') : null
@@ -1708,11 +1715,12 @@ function refreshVisiblePhotos(imageKeys = null, { force = false } = {}) {
       if (container.dataset.photoState === 'none' || container.dataset.photoState === 'offline') continue;
       const figs = Array.from(container.querySelectorAll('.taxon-photo'));
       if (figs.length && figs.every(fig => fig.dataset.photoOffline === 'true')) continue;
-      if (keySet && figs.length) {
-        const hasMatchingNonOffline = figs.some(
-          fig => fig.dataset.photoOffline !== 'true' && fig.dataset.photoKey && keySet.has(fig.dataset.photoKey)
+      if (shardIndex != null && figs.length) {
+        const targetShard = String(shardIndex);
+        const hasMatchingShard = figs.some(
+          fig => fig.dataset.photoOffline !== 'true' && fig.dataset.photoShard === targetShard
         );
-        if (!hasMatchingNonOffline) continue;
+        if (!hasMatchingShard) continue;
       }
     }
     attachTaxonPhoto(container, token);
@@ -1767,8 +1775,8 @@ async function syncPhotosInBackground({ force = false, immediate = false } = {})
             }
           }
         },
-        onShardComplete: ({ imageKeys }) => {
-          refreshVisiblePhotos(imageKeys);
+        onShardComplete: ({ shardIndex }) => {
+          refreshVisiblePhotos(shardIndex);
         }
       });
 

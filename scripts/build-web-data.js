@@ -9,6 +9,25 @@ const INFRASPECIFIC_RANKS = new Set(['SUBSPECIES', 'VARIETY', 'FORM']);
 const INFRASPECIFIC_MARKER = /\b(subsp\.|var\.|f\.)\b/;
 const LOWERCASE_WORDS = new Set(['of', 'and', 'the', 'in']);
 
+const DATA_BUNDLES = [
+  { id: 'bioregions', file: 'bioregions.json' },
+  { id: 'glossary', file: 'glossary.json' },
+  { id: 'speciesIndex', file: 'species-index.json' },
+  { id: 'dichotomous', file: 'dichotomous-keys.json' },
+  { id: 'multi', file: 'multi-keys.json' },
+  { id: 'descriptions', file: 'descriptions.json' }
+];
+
+const STATIC_SHELL_FILES = [
+  'index.html',
+  'styles.css',
+  'app.js',
+  'manifest.json',
+  'favicon.svg',
+  'icons/icon-192.png',
+  'icons/icon-512.png'
+];
+
 async function fileExists(filePath) {
   try {
     await fs.access(filePath);
@@ -458,7 +477,6 @@ async function main() {
   const root = process.cwd();
   const webDataDir = path.join(root, 'web', 'public', 'data');
   await fs.mkdir(webDataDir, { recursive: true });
-  const generatedAt = new Date().toISOString();
 
   // Bundle every scraped KeyBase key directly.
   const dichotomous = {};
@@ -478,7 +496,6 @@ async function main() {
 
   const searchableKeys = buildSearchableKeys(dichotomous, editedById);
   await writeJSON(path.join(webDataDir, 'dichotomous-keys.json'), {
-    generatedAt,
     searchableKeys,
     keys: dichotomous
   });
@@ -499,11 +516,11 @@ async function main() {
     multi[id] = key;
   }
   await writeJSON(path.join(webDataDir, 'multi-keys.json'), {
-    generatedAt,
     keys: multi
   });
 
   // Build lightweight species-index.json + slimmed minified descriptions.json.
+  // Keep generated bundles deterministic (no build-time timestamps) so unchanged data hashes stay stable.
   const descriptionsPath = path.join(root, 'vicflora-data', 'taxon-descriptions.json');
   const rawDescriptions = (await fileExists(descriptionsPath))
     ? await loadJSON(descriptionsPath)
@@ -514,11 +531,10 @@ async function main() {
     rawDescriptions.taxa || {}
   );
   await writeJSON(path.join(webDataDir, 'species-index.json'), {
-    generatedAt,
     taxa: speciesIndex
   });
   await writeJSON(path.join(webDataDir, 'descriptions.json'), {
-    generatedAt: rawDescriptions.generatedAt || generatedAt,
+    ...(rawDescriptions.generatedAt ? { generatedAt: rawDescriptions.generatedAt } : {}),
     taxa: descriptions
   });
 
@@ -596,10 +612,78 @@ async function main() {
     });
   }
 
-  console.log('✅ Web data bundle generated.');
+  // Build content-addressed manifest for the Service Worker and unified offline sync.
+  const webPublicDir = path.join(root, 'web', 'public');
+  const manifest = await buildManifest(webPublicDir);
+  await writeJSON(path.join(webDataDir, 'manifest.json'), manifest);
+  await fs.writeFile(
+    path.join(webDataDir, 'sw-manifest.js'),
+    `self.__VICFLORA_MANIFEST__ = ${JSON.stringify(manifest, null, 2)};\n`
+  );
+
+  console.log(`✅ Web data bundle generated (shell ${manifest.shellHash}, data ${manifest.dataHash}).`);
+}
+
+async function hashFile(filePath) {
+  const bytes = await fs.readFile(filePath);
+  const sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
+  return { sha256, hash: sha256.slice(0, 12), bytes: bytes.byteLength };
+}
+
+async function buildManifest(webPublicDir) {
+  const modulesDir = path.join(webPublicDir, 'modules');
+  const moduleFiles = (await fs.readdir(modulesDir))
+    .filter(name => name.endsWith('.js'))
+    .sort()
+    .map(name => `modules/${name}`);
+
+  const shellRelativeFiles = [
+    ...STATIC_SHELL_FILES.slice(0, 3),
+    ...moduleFiles,
+    ...STATIC_SHELL_FILES.slice(3)
+  ];
+
+  const shellEntries = [];
+  const shellHasher = crypto.createHash('sha256');
+  for (const relPath of shellRelativeFiles) {
+    const absPath = path.join(webPublicDir, relPath);
+    if (!(await fileExists(absPath))) continue;
+    const { sha256 } = await hashFile(absPath);
+    shellEntries.push(`./${relPath}`);
+    shellHasher.update(`${relPath}:${sha256}\n`);
+  }
+
+  const dataEntries = [];
+  const dataHasher = crypto.createHash('sha256');
+  for (const bundle of DATA_BUNDLES) {
+    const relPath = `data/${bundle.file}`;
+    const absPath = path.join(webPublicDir, relPath);
+    const { sha256, hash, bytes } = await hashFile(absPath);
+    dataEntries.push({
+      id: bundle.id,
+      path: `./${relPath}`,
+      url: `./${relPath}?v=${hash}`,
+      hash,
+      sha256,
+      bytes
+    });
+    dataHasher.update(`${relPath}:${sha256}\n`);
+  }
+
+  const dataHash = dataHasher.digest('hex').slice(0, 12);
+  const shellHash = shellHasher.digest('hex').slice(0, 12);
+
+  return {
+    shellHash,
+    dataHash,
+    shell: ['./', ...shellEntries],
+    data: dataEntries
+  };
 }
 
 module.exports = {
+  DATA_BUNDLES,
+  buildManifest,
   cleanMultiKeyId,
   compileDichotomousKey,
   compileMultiKey,

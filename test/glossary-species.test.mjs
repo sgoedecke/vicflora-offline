@@ -225,11 +225,17 @@ test('compiled JSON bundles are minified and strip duplicated metadata', () => {
   assert.ok(typeof sampleDesc.html === 'string' && sampleDesc.html.length > 0);
 });
 
-test('displayed app version matches service worker cache version', () => {
+test('app version badge is derived dynamically from the generated SW manifest', () => {
   const html = fs.readFileSync(new URL('../web/public/index.html', import.meta.url), 'utf8');
   const sw = fs.readFileSync(new URL('../web/public/service-worker.js', import.meta.url), 'utf8');
-  const htmlVersion = html.match(/class="app-version"[^>]*>(v\d+)</)?.[1];
-  const swVersion = sw.match(/CACHE_NAME\s*=\s*'vicflora-offline-(v\d+)'/)?.[1];
-  assert.ok(htmlVersion, 'Expected .app-version badge in index.html');
-  assert.equal(htmlVersion, swVersion);
+  const manifest = JSON.parse(
+    fs.readFileSync(new URL('../web/public/data/manifest.json', import.meta.url), 'utf8')
+  );
+  const swManifestSrc = fs.readFileSync(new URL('../web/public/data/sw-manifest.js', import.meta.url), 'utf8');
+
+  assert.match(html, /id="app-version"[^>]*class="app-version"/);
+  assert.match(sw, /importScripts\('\.\/data\/sw-manifest\.js'\)/);
+  assert.match(sw, /vicflora-shell-\$\{MANIFEST\.shellHash\}/);
+  assert.ok(/^[a-f0-9]{12}$/.test(manifest.shellHash));
+  assert.ok(swManifestSrc.includes(manifest.shellHash));
 });

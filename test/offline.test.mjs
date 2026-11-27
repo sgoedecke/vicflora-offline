@@ -1,748 +1,362 @@
-import { test } from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import vm from 'node:vm';
-import { createOfflineManager, createRetryableLoader } from '../web/public/modules/offline.js';
 
-function createEmitter() {
+import { buildManifest, DATA_BUNDLES } from '../scripts/build-web-data.js';
+import {
+  DATA_CACHE_NAME,
+  PHOTOS_CACHE_NAME,
+  createDataStore,
+  createOfflineManager,
+  createRetryableLoader,
+  syncCachePack
+} from '../web/public/modules/offline.js';
+import { FakeCacheStorage } from './helpers/fake-caches.mjs';
+
+const ORIGIN = 'https://vicflora.test/';
+
+function sha256(buf) {
+  return crypto.createHash('sha256').update(buf).digest('hex');
+}
+
+function makeTempWebDir() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vicflora-manifest-'));
+  fs.mkdirSync(path.join(dir, 'modules'), { recursive: true });
+  fs.mkdirSync(path.join(dir, 'data'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'index.html'), '<!doctype html><html><body>v1</body></html>');
+  fs.writeFileSync(path.join(dir, 'styles.css'), 'body { color: #111; }');
+  fs.writeFileSync(path.join(dir, 'app.js'), 'console.log("app");');
+  fs.writeFileSync(path.join(dir, 'manifest.webmanifest'), '{"name":"VicFlora"}');
+  fs.writeFileSync(path.join(dir, 'modules', 'offline.js'), 'export const x = 1;');
+  for (const bundle of DATA_BUNDLES) {
+    fs.writeFileSync(path.join(dir, 'data', bundle.file), JSON.stringify({ id: bundle.id, rev: 1 }));
+  }
+  return dir;
+}
+
+function loadServiceWorker({ manifest, cachesApi, fetchImpl }) {
   const listeners = new Map();
-  return {
-    addEventListener(type, fn) {
-      if (!listeners.has(type)) listeners.set(type, new Set());
-      listeners.get(type).add(fn);
+  const posted = [];
+  const swSource = fs.readFileSync(path.resolve('web/public/service-worker.js'), 'utf8');
+  const selfObj = {
+    location: new URL('./service-worker.js', ORIGIN),
+    caches: cachesApi,
+    fetch: fetchImpl,
+    importScripts: () => {
+      selfObj.__VICFLORA_MANIFEST__ = manifest;
     },
-    removeEventListener(type, fn) {
-      listeners.get(type)?.delete(fn);
+    skipWaiting: async () => {},
+    clients: {
+      claim: async () => {},
+      matchAll: async () => [{ postMessage: msg => posted.push(msg) }]
     },
-    dispatch(type, event = {}) {
-      for (const fn of [...(listeners.get(type) || [])]) {
-        fn(event);
-      }
-    }
+    addEventListener: (type, fn) => listeners.set(type, fn)
   };
-}
-
-function createMockWorker(initialState = 'installing') {
-  const emitter = createEmitter();
-  return {
-    state: initialState,
-    addEventListener: emitter.addEventListener,
-    removeEventListener: emitter.removeEventListener,
-    setState(next) {
-      this.state = next;
-      emitter.dispatch('statechange');
-    }
-  };
-}
-
-function createMockRegistration({ active = null, waiting = null, installing = null } = {}) {
-  const emitter = createEmitter();
-  let updateCalls = 0;
-  return {
-    active,
-    waiting,
-    installing,
-    addEventListener: emitter.addEventListener,
-    dispatchUpdateFound() {
-      emitter.dispatch('updatefound');
-    },
-    async update() {
-      updateCalls += 1;
-    },
-    getUpdateCalls: () => updateCalls
-  };
-}
-
-function createMockEnv({ online = true, controller = null, registerImpl, storagePersist = null } = {}) {
-  const win = createEmitter();
-  const doc = createEmitter();
-  const sw = createEmitter();
-  let reloaded = 0;
-  let registerCalls = 0;
-  let persistCalls = 0;
-
-  win.location = {
-    reload() {
-      reloaded += 1;
-    }
-  };
-  doc.visibilityState = 'visible';
-
-  const nav = {
-    onLine: online,
-    serviceWorker: {
-      controller,
-      addEventListener: sw.addEventListener,
-      removeEventListener: sw.removeEventListener,
-      async register(url) {
-        registerCalls += 1;
-        return registerImpl(url, registerCalls);
-      }
-    }
-  };
-
-  if (storagePersist) {
-    nav.storage = {
-      async persist() {
-        persistCalls += 1;
-        return storagePersist();
-      }
-    };
-  }
-
-  return {
-    win,
-    doc,
-    nav,
-    swEmitter: sw,
-    getRegisterCalls: () => registerCalls,
-    getReloadCount: () => reloaded,
-    getPersistCalls: () => persistCalls
-  };
-}
-
-async function flushMicrotasks(n = 6) {
-  for (let i = 0; i < n; i += 1) {
-    await Promise.resolve();
-  }
-}
-
-test('OfflineManager stays not-ready when first install is interrupted, then recovers via fresh register on reconnect', async () => {
-  const worker1 = createMockWorker('installing');
-  const reg1 = createMockRegistration({ installing: worker1 });
-  const worker2 = createMockWorker('installing');
-  const reg2 = createMockRegistration({ installing: worker2 });
-
-  const env = createMockEnv({
-    online: true,
-    registerImpl: (_url, call) => (call === 1 ? reg1 : reg2)
-  });
-
-  const states = [];
-  const manager = createOfflineManager({
-    navigator: env.nav,
-    window: env.win,
-    document: env.doc,
-    onStateChange: s => states.push(s.status),
-    retryDelaysMs: []
-  });
-
-  manager.start();
-  await flushMicrotasks();
-
-  assert.equal(manager.getState().status, 'installing');
-  assert.equal(manager.getState().hasActiveWorker, false);
-
-  // Simulate airplane mode interrupting the initial install
-  env.nav.onLine = false;
-  reg1.installing = null;
-  worker1.setState('redundant');
-  await flushMicrotasks();
-
-  assert.equal(manager.getState().status, 'offline-incomplete');
-  assert.equal(manager.getState().hasActiveWorker, false);
-  assert.equal(env.getRegisterCalls(), 1);
-
-  // User turns reception back on: manager must call register() again (not update() on cleared reg1)
-  env.nav.onLine = true;
-  env.win.dispatch('online');
-  await flushMicrotasks();
-
-  assert.equal(env.getRegisterCalls(), 2);
-  assert.equal(manager.getState().status, 'installing');
-
-  // Progress message arrives from installing SW
-  env.swEmitter.dispatch('message', {
-    data: { type: 'sw-cache-progress', cached: 12, total: 18 }
-  });
-  assert.equal(manager.getState().cached, 12);
-  assert.equal(manager.getState().total, 18);
-  assert.equal(manager.getState().hasActiveWorker, false);
-
-  // Second install finishes and activates
-  reg2.installing = null;
-  reg2.active = worker2;
-  worker2.setState('activated');
-  env.swEmitter.dispatch('controllerchange');
-  await flushMicrotasks();
-
-  assert.equal(manager.getState().status, 'ready');
-  assert.equal(manager.getState().hasActiveWorker, true);
-  // First-time claim must not trigger an unnecessary reload
-  assert.equal(env.getReloadCount(), 0);
-});
-
-test('OfflineManager recovers automatically if opened while offline and register() throws', async () => {
-  const worker = createMockWorker('installing');
-  const reg = createMockRegistration({ installing: worker });
-
-  const env = createMockEnv({
-    online: false,
-    registerImpl: (_url, call) => {
-      if (call === 1) throw new TypeError('Failed to fetch');
-      return reg;
-    }
-  });
-
-  const manager = createOfflineManager({
-    navigator: env.nav,
-    window: env.win,
-    document: env.doc,
-    retryDelaysMs: []
-  });
-
-  manager.start();
-  await flushMicrotasks();
-
-  assert.equal(manager.getState().status, 'offline-incomplete');
-  assert.equal(env.getRegisterCalls(), 1);
-
-  // Reconnect triggers re-registration
-  env.nav.onLine = true;
-  env.win.dispatch('online');
-  await flushMicrotasks();
-
-  assert.equal(env.getRegisterCalls(), 2);
-  assert.equal(manager.getState().status, 'installing');
-
-  reg.installing = null;
-  reg.active = worker;
-  worker.setState('activated');
-  await flushMicrotasks();
-
-  assert.equal(manager.getState().status, 'ready');
-  assert.equal(manager.getState().hasActiveWorker, true);
-});
-
-test('OfflineManager recovers from transient SecurityError on reconnect/retry without premature unsupported', async () => {
-  const managerUnsupported = createOfflineManager({
-    navigator: {},
-    window: createEmitter(),
-    document: createEmitter()
-  });
-  managerUnsupported.start();
-  assert.equal(managerUnsupported.getState().status, 'unsupported');
-  assert.equal(managerUnsupported.getState().hasActiveWorker, false);
-
-  const worker = createMockWorker('installing');
-  const reg = createMockRegistration({ installing: worker });
-  let timersScheduled = 0;
-
-  const env = createMockEnv({
-    online: true,
-    registerImpl: (_url, call) => {
-      if (call === 1) {
-        const err = new Error('The script has an unsupported MIME type (text/html)');
-        err.name = 'SecurityError';
-        throw err;
-      }
-      return reg;
-    }
-  });
-  const manager = createOfflineManager({
-    navigator: env.nav,
-    window: env.win,
-    document: env.doc,
-    setTimeout: () => {
-      timersScheduled += 1;
-      return timersScheduled;
-    }
-  });
-
-  manager.start();
-  await flushMicrotasks();
-
-  // SecurityError must not mark unsupported, must not become ready, and must not spin timer retries
-  assert.equal(manager.getState().status, 'failed');
-  assert.equal(manager.getState().hasActiveWorker, false);
-  assert.equal(timersScheduled, 0);
-
-  // Reconnecting after captive portal/network clears recovers cleanly
-  env.win.dispatch('online');
-  await flushMicrotasks();
-  assert.equal(env.getRegisterCalls(), 2);
-  assert.equal(manager.getState().status, 'installing');
-
-  reg.installing = null;
-  reg.active = worker;
-  worker.setState('activated');
-  await flushMicrotasks();
-
-  assert.equal(manager.getState().status, 'ready');
-  assert.equal(manager.getState().hasActiveWorker, true);
-});
-
-test('OfflineManager reloads on upgrade controllerchange, and checks for updates on foreground when already ready', async () => {
-  const activeWorker = createMockWorker('activated');
-  const reg = createMockRegistration({ active: activeWorker });
-  const env = createMockEnv({
-    online: true,
-    controller: activeWorker,
-    registerImpl: () => reg
-  });
-
-  const manager = createOfflineManager({
-    navigator: env.nav,
-    window: env.win,
-    document: env.doc
-  });
-
-  manager.start();
-  await flushMicrotasks();
-
-  assert.equal(manager.getState().status, 'ready');
-  assert.equal(manager.getState().hasActiveWorker, true);
-
-  env.doc.visibilityState = 'visible';
-  env.doc.dispatch('visibilitychange');
-  assert.equal(reg.getUpdateCalls(), 1);
-
-  // New deploy takes control -> reloads once
-  env.swEmitter.dispatch('controllerchange');
-  env.swEmitter.dispatch('controllerchange');
-  assert.equal(env.getReloadCount(), 1);
-});
-
-test('service-worker.js precaches resumably, rejects HTML for data assets, and activates only after all assets succeed', async () => {
-  const swSource = fs.readFileSync(new URL('../web/public/service-worker.js', import.meta.url), 'utf8');
-  const indexHtml = fs.readFileSync(new URL('../web/public/index.html', import.meta.url), 'utf8');
-
-  // Verify cache version matches app version badge in index.html
-  const swVersionMatch = swSource.match(/const CACHE_NAME = 'vicflora-offline-(v\d+)';/);
-  const htmlVersionMatch = indexHtml.match(/class="app-version"[^>]*>(v\d+)</);
-  assert.ok(swVersionMatch, 'service-worker.js defines CACHE_NAME');
-  assert.ok(htmlVersionMatch, 'index.html displays app version');
-  assert.equal(swVersionMatch[1], htmlVersionMatch[1], 'SW cache version matches index.html app version');
-
-  // Persistent CacheStorage across simulated interrupted install + retry
-  const storeByCacheName = new Map([['vicflora-offline-v17', new Map([['./old', {}]])]]);
-  function openCache(name) {
-    if (!storeByCacheName.has(name)) storeByCacheName.set(name, new Map());
-    const map = storeByCacheName.get(name);
-    return {
-      async match(req) {
-        const key = typeof req === 'string' ? req : req.url;
-        return map.get(key);
-      },
-      async put(req, res) {
-        const key = typeof req === 'string' ? req : req.url;
-        map.set(key, res);
-      }
-    };
-  }
-
-  const cachesMock = {
-    async open(name) {
-      return openCache(name);
-    },
-    async keys() {
-      return Array.from(storeByCacheName.keys());
-    },
-    async delete(name) {
-      return storeByCacheName.delete(name);
-    }
-  };
-
-  function runServiceWorkerHarness(fetchImpl) {
-    const swListeners = {};
-    const messages = [];
-    let skipWaitingCalled = false;
-    let claimCalled = false;
-
-    const sandbox = {
-      URL,
-      Request: class MockRequest {
-        constructor(url, opts = {}) {
-          this.url = url;
-          this.cache = opts.cache || 'default';
-        }
-      },
-      caches: cachesMock,
-      fetch: fetchImpl,
-      self: null
-    };
-    sandbox.self = {
-      location: { origin: 'https://example.test', href: 'https://example.test/service-worker.js' },
-      addEventListener(type, fn) {
-        swListeners[type] = fn;
-      },
-      skipWaiting() {
-        skipWaitingCalled = true;
-        return Promise.resolve();
-      },
-      clients: {
-        async matchAll() {
-          return [{ postMessage: msg => messages.push(msg) }];
-        },
-        claim() {
-          claimCalled = true;
-          return Promise.resolve();
-        }
-      }
-    };
-
-    vm.runInNewContext(swSource, sandbox);
-
-    return {
-      async triggerInstall() {
-        let p;
-        swListeners.install({ waitUntil: promise => { p = promise; } });
-        return p;
-      },
-      async triggerActivate() {
-        let p;
-        swListeners.activate({ waitUntil: promise => { p = promise; } });
-        return p;
-      },
-      messages,
-      wasSkipWaitingCalled: () => skipWaitingCalled,
-      wasClaimCalled: () => claimCalled
-    };
-  }
-
-  function makeResponse(url, { status = 200, contentType = null, redirected = false, responseUrl = null } = {}) {
-    const inferredType =
-      contentType ??
-      (url.endsWith('.json')
-        ? 'application/json'
-        : url.endsWith('.js')
-          ? 'application/javascript'
-          : url.endsWith('.css')
-            ? 'text/css'
-            : url.endsWith('.svg')
-              ? 'image/svg+xml'
-              : url.endsWith('.png')
-                ? 'image/png'
-                : 'text/html');
-    return {
-      status,
-      redirected,
-      url: responseUrl ?? new URL(url, 'https://example.test/').href,
-      headers: { get: name => (name.toLowerCase() === 'content-type' ? inferredType : null) },
-      clone() {
-        return this;
-      }
-    };
-  }
-
-  // Attempt 1: interrupted right before multi-keys.json (also verify cache: 'no-cache')
-  const fetchedAttempt1 = [];
-  const cacheModes = new Set();
-  const sw1 = runServiceWorkerHarness(async req => {
-    fetchedAttempt1.push(req.url);
-    cacheModes.add(req.cache);
-    if (req.url === './data/multi-keys.json') {
-      throw new TypeError('Network disconnected');
-    }
-    return makeResponse(req.url);
-  });
-
-  await assert.rejects(() => sw1.triggerInstall(), /Network disconnected/);
-  assert.equal(sw1.wasSkipWaitingCalled(), false, 'must not skipWaiting when install fails');
-  assert.ok(fetchedAttempt1.includes('./data/dichotomous-keys.json'));
-  assert.deepEqual([...cacheModes], ['no-cache'], 'precacheAssets must revalidate with cache: no-cache');
-
-  // Attempt 2: captive portal serves HTML for multi-keys.json -> rejected
-  const sw2 = runServiceWorkerHarness(async req => {
-    if (req.url === './data/multi-keys.json') {
-      return makeResponse(req.url, { status: 200, contentType: 'text/html; charset=utf-8' });
-    }
-    return makeResponse(req.url);
-  });
-  await assert.rejects(() => sw2.triggerInstall(), /Invalid response/);
-  assert.equal(sw2.wasSkipWaitingCalled(), false);
-
-  // Attempt 3: captive portal redirects or returns cross-origin URL -> rejected
-  const swRedirect = runServiceWorkerHarness(async req => {
-    if (req.url === './data/multi-keys.json') {
-      return makeResponse(req.url, { redirected: true, responseUrl: 'https://portal.wifi/login' });
-    }
-    return makeResponse(req.url);
-  });
-  await assert.rejects(() => swRedirect.triggerInstall(), /Invalid response/);
-
-  const swCrossOrigin = runServiceWorkerHarness(async req => {
-    if (req.url === './data/multi-keys.json') {
-      return makeResponse(req.url, { redirected: false, responseUrl: 'https://portal.wifi/data/multi-keys.json' });
-    }
-    return makeResponse(req.url);
-  });
-  await assert.rejects(() => swCrossOrigin.triggerInstall(), /Invalid response/);
-
-  // Attempt 4: online again -> resumes from partial cache and only fetches remaining 2 files
-  const fetchedAttempt3 = [];
-  const sw3 = runServiceWorkerHarness(async req => {
-    fetchedAttempt3.push(req.url);
-    return makeResponse(req.url);
-  });
-
-  await sw3.triggerInstall();
-  assert.deepEqual(fetchedAttempt3, ['./data/multi-keys.json', './data/descriptions.json']);
-  assert.equal(sw3.wasSkipWaitingCalled(), true);
-
-  const lastProgress = sw3.messages.filter(m => m.type === 'sw-cache-progress').at(-1);
-  assert.equal(lastProgress.cached, lastProgress.total);
-
-  // Activate cleans up old v17 cache, claims clients, and broadcasts sw-cache-ready
-  await sw3.triggerActivate();
-  assert.equal(sw3.wasClaimCalled(), true);
-  assert.equal(storeByCacheName.has('vicflora-offline-v17'), false);
-  assert.equal(storeByCacheName.has(`vicflora-offline-${swVersionMatch[1]}`), true);
-  assert.ok(sw3.messages.some(m => m.type === 'sw-cache-ready'));
-});
-
-test('service-worker.js ASSETS covers every module in web/public/modules/*.js and rejects redirected HTML shell', async () => {
-  const swSource = fs.readFileSync(new URL('../web/public/service-worker.js', import.meta.url), 'utf8');
-  const modulesDir = new URL('../web/public/modules/', import.meta.url);
-  const moduleFiles = fs.readdirSync(modulesDir).filter(f => f.endsWith('.js')).sort();
-  assert.ok(moduleFiles.length > 0);
-
-  const assetsBlockMatch = swSource.match(/const ASSETS = \[([\s\S]*?)\];/);
-  assert.ok(assetsBlockMatch, 'ASSETS array found');
-  const assets = [...assetsBlockMatch[1].matchAll(/'([^']+)'/g)].map(m => m[1]);
-
-  for (const file of moduleFiles) {
-    assert.ok(
-      assets.includes(`./modules/${file}`),
-      `service-worker.js ASSETS is missing ./modules/${file}`
-    );
-  }
-
-  // Also verify redirected HTML for './' (captive portal on app shell) is rejected
-  const cacheMap = new Map();
-  const swListeners = {};
-  const sandbox = {
+  vm.runInNewContext(swSource, {
+    self: selfObj,
+    importScripts: selfObj.importScripts,
+    caches: cachesApi,
+    fetch: fetchImpl,
     URL,
-    Request: class MockRequest {
-      constructor(url, opts = {}) {
-        this.url = url;
-        this.cache = opts.cache || 'default';
-      }
+    Request,
+    Response,
+    Headers,
+    Set,
+    Promise
+  });
+  return {
+    posted,
+    dispatchLifecycle: async type => {
+      const waits = [];
+      listeners.get(type)({ waitUntil: p => waits.push(p) });
+      await Promise.all(waits);
     },
-    caches: {
-      async open() {
-        return {
-          async match(k) { return cacheMap.get(typeof k === 'string' ? k : k.url); },
-          async put(k, v) { cacheMap.set(typeof k === 'string' ? k : k.url, v); }
-        };
-      }
-    },
-    fetch: async () => ({
-      status: 200,
-      redirected: true,
-      url: 'https://captive.portal/login',
-      headers: { get: () => 'text/html' }
+    dispatchFetch: async request => {
+      let responsePromise = null;
+      listeners.get('fetch')({
+        request,
+        respondWith: p => {
+          responsePromise = p;
+        }
+      });
+      return responsePromise ? await responsePromise : null;
+    }
+  };
+}
+
+test('buildManifest isolates shell hashes from data hashes and emits deterministic manifests', async () => {
+  const dir = makeTempWebDir();
+  try {
+    const first = await buildManifest(dir);
+    const second = await buildManifest(dir);
+    assert.deepEqual(first, second);
+    assert.equal(first.data.length, DATA_BUNDLES.length);
+    assert.ok(fs.existsSync(path.resolve('web/public/data/manifest.json')));
+    assert.ok(fs.existsSync(path.resolve('web/public/data/sw-manifest.js')));
+
+    // Editing a shell file rotates shellHash only, leaving every data hash untouched.
+    fs.writeFileSync(path.join(dir, 'styles.css'), 'body { color: #222; }');
+    const afterCss = await buildManifest(dir);
+    assert.notEqual(afterCss.shellHash, first.shellHash);
+    assert.equal(afterCss.dataHash, first.dataHash);
+    assert.deepEqual(afterCss.data, first.data);
+
+    // Editing one data bundle rotates only that entry and dataHash, leaving shellHash untouched.
+    fs.writeFileSync(path.join(dir, 'data', 'glossary.json'), JSON.stringify({ id: 'glossary', rev: 2 }));
+    const afterGlossary = await buildManifest(dir);
+    assert.equal(afterGlossary.shellHash, afterCss.shellHash);
+    assert.notEqual(afterGlossary.dataHash, afterCss.dataHash);
+    const prevGloss = afterCss.data.find(d => d.id === 'glossary');
+    const nextGloss = afterGlossary.data.find(d => d.id === 'glossary');
+    assert.notEqual(nextGloss.sha256, prevGloss.sha256);
+    assert.equal(
+      afterGlossary.data.find(d => d.id === 'dichotomous').sha256,
+      afterCss.data.find(d => d.id === 'dichotomous').sha256
+    );
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('service worker precaches only the app shell, preserves data/photos caches, and serves cached data offline', async () => {
+  const cachesApi = new FakeCacheStorage(ORIGIN);
+  const oldShell = await cachesApi.open('vicflora-shell-oldoldoldold');
+  await oldShell.put('/index.html', new Response('stale'));
+  const dataCache = await cachesApi.open(DATA_CACHE_NAME);
+  await dataCache.put('/data/glossary.json?v=abc123', new Response('{"terms":1}', { headers: { 'Content-Type': 'application/json' } }));
+  const photoCache = await cachesApi.open(PHOTOS_CACHE_NAME);
+  await photoCache.put('/data/photos/photos-00.bin', new Response('webp'));
+
+  const manifest = {
+    version: 1,
+    shellHash: 'new123456789',
+    dataHash: 'data987654321',
+    shell: ['./', './index.html', './app.js'],
+    data: [{ id: 'glossary', path: './data/glossary.json', url: './data/glossary.json?v=abc123', sha256: 'abc123', bytes: 11 }]
+  };
+
+  const fetched = [];
+  const sw = loadServiceWorker({
+    manifest,
+    cachesApi,
+    fetchImpl: async req => {
+      const url = typeof req === 'string' ? req : req.url;
+      fetched.push(url);
+      const ct = url.endsWith('.js') ? 'application/javascript' : 'text/html';
+      return new Response(`body:${url}`, { status: 200, headers: { 'Content-Type': ct } });
+    }
+  });
+
+  await sw.dispatchLifecycle('install');
+  assert.deepEqual(fetched.sort(), [
+    'https://vicflora.test/',
+    'https://vicflora.test/app.js',
+    'https://vicflora.test/index.html'
+  ]);
+
+  await sw.dispatchLifecycle('activate');
+  const cacheNames = (await cachesApi.keys()).sort();
+  assert.deepEqual(cacheNames, [DATA_CACHE_NAME, PHOTOS_CACHE_NAME, 'vicflora-shell-new123456789']);
+  assert.ok(sw.posted.some(m => m.type === 'sw-cache-ready' && m.shellHash === 'new123456789'));
+
+  // Synthesized manifest matches the active SW's embedded manifest.
+  const manifestRes = await sw.dispatchFetch(new Request(`${ORIGIN}data/manifest.json`));
+  assert.deepEqual(await manifestRes.json(), manifest);
+
+  // Versioned and unversioned data reads resolve from vicflora-data without hitting the network.
+  const exactRes = await sw.dispatchFetch(new Request(`${ORIGIN}data/glossary.json?v=abc123`));
+  assert.deepEqual(await exactRes.json(), { terms: 1 });
+  const fallbackRes = await sw.dispatchFetch(new Request(`${ORIGIN}data/glossary.json`));
+  assert.deepEqual(await fallbackRes.json(), { terms: 1 });
+});
+
+test('syncCachePack verifies SHA-256/size, resumes incrementally, prunes obsolete URLs, and handles quota errors', async () => {
+  const cachesApi = new FakeCacheStorage(ORIGIN);
+  const aBytes = Buffer.from('{"a":1}');
+  const bBytes = Buffer.from('{"b":22}');
+  const items = [
+    { url: './data/a.json?v=1', bytes: aBytes.length, sha256: sha256(aBytes) },
+    { url: './data/b.json?v=2', bytes: bBytes.length, sha256: sha256(bBytes) }
+  ];
+
+  // Seed item A and an obsolete file to verify incremental resume + GC.
+  const cache = await cachesApi.open(DATA_CACHE_NAME);
+  await cache.put(new URL('./data/a.json?v=1', ORIGIN).href, new Response(aBytes));
+  await cache.put(new URL('./data/old.json?v=0', ORIGIN).href, new Response('old'));
+
+  const fetched = [];
+  const res = await syncCachePack({
+    cacheName: DATA_CACHE_NAME,
+    items,
+    cachesApi,
+    baseUrl: ORIGIN,
+    retryBaseMs: 1,
+    fetchImpl: async url => {
+      fetched.push(url);
+      return new Response(bBytes, { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+  });
+  assert.equal(res.synced, true);
+  assert.deepEqual(fetched, ['./data/b.json?v=2']);
+  assert.deepEqual(
+    (await cache.keys()).map(k => k.url).sort(),
+    [`${ORIGIN}data/a.json?v=1`, `${ORIGIN}data/b.json?v=2`]
+  );
+
+  // Rejects corrupted payload without polluting cache.
+  const badCaches = new FakeCacheStorage(ORIGIN);
+  await assert.rejects(
+    syncCachePack({
+      cacheName: DATA_CACHE_NAME,
+      items: [items[0]],
+      cachesApi: badCaches,
+      baseUrl: ORIGIN,
+      maxRetries: 1,
+      retryBaseMs: 1,
+      fetchImpl: async () => new Response(Buffer.from('{"a":9}'), { status: 200 })
     }),
-    self: {
-      location: { origin: 'https://example.test', href: 'https://example.test/service-worker.js' },
-      addEventListener(type, fn) { swListeners[type] = fn; },
-      skipWaiting: () => Promise.resolve(),
-      clients: { matchAll: async () => [], claim: () => Promise.resolve() }
-    }
-  };
-  vm.runInNewContext(swSource, sandbox);
-  let installPromise;
-  swListeners.install({ waitUntil: p => { installPromise = p; } });
-  await assert.rejects(() => installPromise, /Invalid response/);
-  assert.equal(cacheMap.size, 0);
+    /SHA-256 verification failed/
+  );
+  assert.equal((await (await badCaches.open(DATA_CACHE_NAME)).keys()).length, 0);
+
+  // Handles QuotaExceededError gracefully.
+  const quotaCaches = new FakeCacheStorage(ORIGIN);
+  const quotaCache = await quotaCaches.open(DATA_CACHE_NAME);
+  quotaCache.putError = Object.assign(new Error('Quota exceeded'), { name: 'QuotaExceededError' });
+  const quotaResult = await syncCachePack({
+    cacheName: DATA_CACHE_NAME,
+    items: [items[0]],
+    cachesApi: quotaCaches,
+    baseUrl: ORIGIN,
+    retryBaseMs: 1,
+    fetchImpl: async () => new Response(aBytes, { status: 200 })
+  });
+  assert.equal(quotaResult.quotaExceeded, true);
+  assert.equal(quotaResult.skippedReason, 'quota');
 });
 
-test('OfflineManager keeps retrying with capped backoff while visible, pauses when hidden, dedupes ready, and requests persistent storage', async () => {
-  const scheduled = [];
-  let nextTimerId = 1;
-  const setTimer = (fn, delay) => {
-    const id = nextTimerId++;
-    scheduled.push({ id, fn, delay, cleared: false });
-    return id;
-  };
-  const clearTimer = id => {
-    const entry = scheduled.find(t => t.id === id);
-    if (entry) entry.cleared = true;
+test('createDataStore deduplicates concurrent reads and falls back to prior cached version offline', async () => {
+  const cachesApi = new FakeCacheStorage(ORIGIN);
+  const payload = Buffer.from('{"glossary":["acuminate"]}');
+  const manifest = {
+    shellHash: 's1',
+    dataHash: 'd1',
+    data: [{ id: 'glossary', path: './data/glossary.json', url: './data/glossary.json?v=new', sha256: sha256(payload), bytes: payload.length }]
   };
 
-  let failCount = 4;
-  const finalWorker = createMockWorker('installing');
-  const finalReg = createMockRegistration({ installing: finalWorker });
-
-  const env = createMockEnv({
-    online: true,
-    storagePersist: () => true,
-    registerImpl: () => {
-      if (failCount > 0) {
-        failCount -= 1;
-        throw new TypeError('Flaky network');
+  let fetches = 0;
+  const store = createDataStore({
+    cachesApi,
+    baseUrl: ORIGIN,
+    fetchImpl: async url => {
+      if (String(url).includes('manifest.json')) {
+        return new Response(JSON.stringify(manifest), { status: 200 });
       }
-      return finalReg;
+      fetches += 1;
+      await new Promise(r => setTimeout(r, 10));
+      return new Response(payload, { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
   });
 
-  const emittedStatuses = [];
-  let currentTime = 10_000;
-  const manager = createOfflineManager({
-    navigator: env.nav,
-    window: env.win,
-    document: env.doc,
-    retryDelaysMs: [3000, 6000, 12000],
-    setTimeout: setTimer,
-    clearTimeout: clearTimer,
-    now: () => currentTime,
-    onStateChange: s => emittedStatuses.push(s.status)
-  });
+  const [r1, r2] = await Promise.all([store.readJson('glossary'), store.readJson('glossary')]);
+  assert.deepEqual(r1, { glossary: ['acuminate'] });
+  assert.deepEqual(r2, { glossary: ['acuminate'] });
+  assert.equal(fetches, 1);
 
-  manager.start();
-  await flushMicrotasks();
-
-  // First 3 failures back off 3000 -> 6000 -> 12000, 4th stays capped at 12000 (doesn't stop)
-  assert.equal(scheduled.at(-1).delay, 3000);
-  scheduled.at(-1).fn();
-  await flushMicrotasks();
-  assert.equal(scheduled.at(-1).delay, 6000);
-  scheduled.at(-1).fn();
-  await flushMicrotasks();
-  assert.equal(scheduled.at(-1).delay, 12000);
-  scheduled.at(-1).fn();
-  await flushMicrotasks();
-  assert.equal(scheduled.at(-1).delay, 12000);
-
-  // Going hidden cancels the pending retry timer
-  env.doc.visibilityState = 'hidden';
-  env.doc.dispatch('visibilitychange');
-  assert.equal(scheduled.at(-1).cleared, true);
-
-  // Returning to foreground retries immediately and succeeds
-  env.doc.visibilityState = 'visible';
-  env.doc.dispatch('visibilitychange');
-  await flushMicrotasks();
-  assert.equal(manager.getState().status, 'installing');
-
-  // Multiple ready signals should only emit 'ready' once and call storage.persist() once
-  finalReg.installing = null;
-  finalReg.active = finalWorker;
-  finalWorker.setState('activated');
-  env.swEmitter.dispatch('controllerchange');
-  env.swEmitter.dispatch('message', { data: { type: 'sw-cache-ready' } });
-  await flushMicrotasks();
-
-  assert.equal(emittedStatuses.filter(s => s === 'ready').length, 1);
-  assert.equal(env.getPersistCalls(), 1);
-
-  // Simultaneous pageshow + visibilitychange only triggers one registration.update()
-  env.win.dispatch('pageshow');
-  env.doc.dispatch('visibilitychange');
-  assert.equal(finalReg.getUpdateCalls(), 1);
-
-  // After throttle window passes, foregrounding checks for update again
-  currentTime += 2000;
-  env.doc.dispatch('visibilitychange');
-  assert.equal(finalReg.getUpdateCalls(), 2);
-});
-
-test('OfflineManager ignores redundant state when another installing worker superseded it', async () => {
-  const worker1 = createMockWorker('installing');
-  const worker2 = createMockWorker('installing');
-  const reg = createMockRegistration({ installing: worker1 });
-
-  const env = createMockEnv({
-    online: true,
-    registerImpl: () => reg
-  });
-
-  const statuses = [];
-  const manager = createOfflineManager({
-    navigator: env.nav,
-    window: env.win,
-    document: env.doc,
-    retryDelaysMs: [3000],
-    onStateChange: s => statuses.push(s.status)
-  });
-
-  manager.start();
-  await flushMicrotasks();
-  assert.equal(manager.getState().status, 'installing');
-
-  // Browser starts installing a newer worker and marks the old one redundant
-  reg.installing = worker2;
-  worker1.setState('redundant');
-  await flushMicrotasks();
-
-  assert.ok(!statuses.includes('failed'), 'must not flash failed when superseded');
-  assert.equal(manager.getState().status, 'installing');
-
-  reg.installing = null;
-  reg.active = worker2;
-  worker2.setState('activated');
-  await flushMicrotasks();
-
-  assert.equal(manager.getState().status, 'ready');
-});
-
-test('OfflineManager transitions from checking to unsupported once', async () => {
-  const env = createMockEnv({
-    online: true,
-    registerImpl: () => {
-      const err = new Error('Blocked');
-      err.name = 'NotSupportedError';
-      throw err;
+  // Offline fallback when manifest points to a newer URL not yet cached.
+  const offlineStore = createDataStore({
+    cachesApi,
+    baseUrl: ORIGIN,
+    navigatorObj: { onLine: false },
+    retryBaseMs: 1,
+    fetchImpl: async url => {
+      if (String(url).includes('manifest.json')) {
+        return new Response(
+          JSON.stringify({
+            shellHash: 's2',
+            dataHash: 'd2',
+            data: [{ id: 'glossary', path: './data/glossary.json', url: './data/glossary.json?v=newer', sha256: 'deadbeef', bytes: 99 }]
+          }),
+          { status: 200 }
+        );
+      }
+      throw new TypeError('Offline');
     }
   });
-  const transitions = [];
-  const manager = createOfflineManager({
-    navigator: env.nav,
-    window: env.win,
-    document: env.doc,
-    onStateChange: s => transitions.push(s.status)
-  });
-
-  manager.start();
-  await flushMicrotasks();
-
-  assert.equal(manager.getState().status, 'unsupported');
-  assert.equal(transitions.filter(s => s === 'unsupported').length, 1);
-  assert.equal(manager.getState().hasActiveWorker, false);
+  assert.deepEqual(await offlineStore.readJson('glossary'), { glossary: ['acuminate'] });
 });
 
-test('createRetryableLoader retries once when reconnect/SW-ready arrives during a doomed in-flight load', async () => {
+test('createOfflineManager waits for both active SW and data sync, and reloads once on SW update', async () => {
+  const cachesApi = new FakeCacheStorage(ORIGIN);
+  const payload = Buffer.from('{"keys":[]}');
+  const manifest = {
+    shellHash: 's1',
+    dataHash: 'd1',
+    data: [{ id: 'dichotomous', path: './data/dichotomous-keys.json', url: './data/dichotomous-keys.json?v=1', sha256: sha256(payload), bytes: payload.length }]
+  };
+  const dataStore = createDataStore({
+    cachesApi,
+    baseUrl: ORIGIN,
+    fetchImpl: async url =>
+      new Response(String(url).includes('manifest.json') ? JSON.stringify(manifest) : payload, { status: 200 })
+  });
+
+  const swListeners = new Map();
+  const worker = { state: 'installing', addEventListener: (e, fn) => { worker._cb = fn; } };
+  const sw = {
+    controller: null,
+    register: async () => ({ installing: worker, addEventListener: () => {} }),
+    addEventListener: (e, fn) => swListeners.set(e, fn)
+  };
+
+  let reloads = 0;
+  const states = [];
+  const mgr = createOfflineManager({
+    dataStore,
+    navigator: { onLine: true, serviceWorker: sw },
+    window: { addEventListener: () => {} },
+    document: { visibilityState: 'visible', addEventListener: () => {} },
+    onStateChange: s => states.push(s.status),
+    onReload: () => { reloads += 1; },
+    retryDelaysMs: []
+  });
+
+  mgr.start();
+  await new Promise(r => setTimeout(r, 20));
+  assert.notEqual(mgr.getState().status, 'ready'); // Still waiting on worker activation
+
+  worker.state = 'activated';
+  worker._cb();
+  await mgr.waitUntilReady();
+  assert.equal(mgr.getState().status, 'ready');
+  assert.equal(reloads, 0);
+
+  // First controllerchange claims initial client (no reload); second is an update (reloads once).
+  swListeners.get('controllerchange')();
+  assert.equal(reloads, 0);
+  swListeners.get('controllerchange')();
+  swListeners.get('controllerchange')();
+  assert.equal(reloads, 1);
+});
+
+test('createRetryableLoader coalesces calls and retries an in-flight failure when requested', async () => {
   let calls = 0;
   let rejectFirst;
-  let resolveSecond;
-
   const loader = createRetryableLoader(() => {
     calls += 1;
-    if (calls === 1) {
-      return new Promise((_, reject) => {
-        rejectFirst = reject;
-      });
-    }
-    return new Promise(resolve => {
-      resolveSecond = resolve;
-    });
+    if (calls === 1) return new Promise((_, reject) => { rejectFirst = reject; });
+    return Promise.resolve();
   });
 
-  // Initial page load hangs on a dead socket
-  const firstPromise = loader.run();
-  assert.equal(calls, 1);
-  assert.equal(loader.isCompleted(), false);
-
-  // Reconnect / SW ready arrives while the first request is still pending
-  const reconnectPromise = loader.run({ retryIfInFlight: true });
-  assert.equal(reconnectPromise, firstPromise);
-  assert.equal(calls, 1);
-
-  // Old hanging request finally rejects -> loader must automatically start one follow-up attempt
-  rejectFirst(new TypeError('Failed to fetch'));
-  await flushMicrotasks();
-
+  const p1 = loader.run();
+  const p2 = loader.run({ retryIfInFlight: true });
+  rejectFirst(new Error('transient'));
+  assert.equal(await p1, true);
+  assert.equal(await p2, true);
   assert.equal(calls, 2);
-  assert.equal(loader.isCompleted(), false);
-
-  // Second attempt succeeds from fresh network / SW cache
-  resolveSecond();
-  const [r1, r2] = await Promise.all([firstPromise, reconnectPromise]);
-  assert.equal(r1, true);
-  assert.equal(r2, true);
   assert.equal(loader.isCompleted(), true);
-
-  // Subsequent calls are no-ops once completed
-  await loader.run({ retryIfInFlight: true });
-  assert.equal(calls, 2);
 });

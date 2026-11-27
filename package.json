@@ -15,7 +15,8 @@
     "list": "node main.js list",
     "fetch:photos": "node scripts/fetch-photos.js",
     "build:web": "node scripts/build-web-data.js",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "test:e2e": "node test/offline-browser.e2e.mjs"
   },
   "keywords": [
     "vicflora",
