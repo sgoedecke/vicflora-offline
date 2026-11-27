@@ -1,30 +1,43 @@
-import { createNavigatorFromData, listSearchableKeys } from './modules/dichotomous.js';
+import { createNavigatorFromData } from './modules/dichotomous.js';
 import { MultiAccessSession, listMultiKeys } from './modules/multiaccess.js';
 import {
   findInfraspecificTaxa,
   findSoleInfraspecificProfile,
   loadSpeciesIndex,
-  searchTaxa,
   taxonUrlFromId
 } from './modules/species.js';
 import { Glossary } from './modules/glossary.js';
 import { PhotoStore, formatBytes } from './modules/photos.js';
 import { createDataStore, createOfflineManager, createRetryableLoader } from './modules/offline.js';
 import { createBioregionMap, ensureBioregionsLoaded } from './modules/bioregions.js';
+import { parseRoute, formatRoute } from './modules/router.js';
+import { createSearchIndex, searchUnified } from './modules/search.js';
+
+const DEFAULT_DICH_KEY_ID = '1903';
 
 const statusEl = document.querySelector('#status');
-const viewButtons = document.querySelectorAll('header nav button');
 const aboutLink = document.querySelector('#about-link');
 const views = {
-  dichotomous: document.querySelector('#view-dichotomous'),
+  home: document.querySelector('#view-home'),
+  key: document.querySelector('#view-dichotomous'),
   multi: document.querySelector('#view-multi'),
-  species: document.querySelector('#view-species'),
+  taxon: document.querySelector('#view-species'),
   about: document.querySelector('#view-about')
 };
 
+const searchElements = {
+  shell: document.querySelector('#unified-search-shell'),
+  input: document.querySelector('#unified-search'),
+  clear: document.querySelector('#unified-search-clear'),
+  results: document.querySelector('#unified-search-results')
+};
+
+const homeElements = {
+  content: document.querySelector('#home-content'),
+  multiList: document.querySelector('#home-multi-list')
+};
+
 const dichElements = {
-  search: document.querySelector('#dichotomous-key-search'),
-  datalist: document.querySelector('#dichotomous-key-list'),
   header: document.querySelector('#dichotomous-header'),
   options: document.querySelector('#dichotomous-options'),
   result: document.querySelector('#dichotomous-result'),
@@ -46,9 +59,8 @@ const multiElements = {
 };
 
 const speciesElements = {
-  search: document.querySelector('#species-search'),
-  matches: document.querySelector('#species-matches'),
-  detail: document.querySelector('#species-detail')
+  detail: document.querySelector('#species-detail'),
+  rankBadge: document.querySelector('#species-rank-badge')
 };
 
 const offlineCoreStatusEl = document.querySelector('#offline-core-status');
@@ -77,29 +89,43 @@ let lastAutoSyncAttemptAt = 0;
 let lastPhotoCheckAt = 0;
 let appBooted = false;
 let dichControlsBound = false;
+let multiControlsBound = false;
 let statusOwnedByOffline = false;
 let descriptionRenderSeq = 0;
+let routeRenderSeq = 0;
+
+let unifiedSearchIndex = null;
+let multiKeyMetaList = [];
+let dichKeyMetaById = new Map();
 
 let dichNavigator = null;
-let multiSession = null;
 let globalDichKeys = {};
+let dichResult = null;
+const lastStepByKey = new Map();
+
+let multiKeyList = [];
+const multiSessions = new Map();
+let multiSession = null;
 let multiState = {
   currentCharacterId: null,
   currentKey: null,
   currentKeyInfo: null
 };
-let currentView = 'dichotomous';
-let dichResultItemId = null;
-let dichResult = null;
+
 let descriptions = {};
 let taxonIndex = new Map();
 let currentSpeciesId = null;
 let glossary = null;
 const glossaryPopover = document.querySelector('#gloss-popover');
 
+let currentRoute = { view: 'home' };
+let previousRoute = null;
+let hasInAppHistory = false;
+let floatingSearchOpen = false;
+let activeSearchIndex = -1;
+
 const READY_MESSAGE = 'Ready to use offline. Add to Home Screen for easy access.';
 const READY_INSTALLED_MESSAGE = 'Ready to use offline.';
-const STORAGE_KEY = 'vicflora-offline-state-v1';
 
 function isRunningStandalone() {
   return Boolean(
@@ -108,36 +134,12 @@ function isRunningStandalone() {
   );
 }
 
-// Progress is saved so it survives Android killing the app in the background
-// (e.g. while switching to the camera). `savedState` is the snapshot from
-// launch; `persisted` is what gets written back as the user goes.
-function readSavedState() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    return {};
-  }
+function escapeHtml(text) {
+  return String(text ?? '').replace(/[&<>"']/g, ch => `&#${ch.charCodeAt(0)};`);
 }
 
-const savedState = readSavedState();
-const persisted = { ...savedState };
-let dichMode = savedState.dichMode === 'bracketed' ? 'bracketed' : 'interactive';
-
-function saveState() {
-  persisted.view = currentView;
-  persisted.dichMode = dichMode;
-  persisted.speciesId = currentSpeciesId;
-  if (dichNavigator) {
-    persisted.dich = { ...dichNavigator.serialize(), resultItemId: dichResultItemId };
-  }
-  if (multiSession && multiState.currentKey) {
-    persisted.multi = { key: multiState.currentKey, selections: multiSession.serialize() };
-  }
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
-  } catch {
-    // Storage can be unavailable (private browsing, quota); progress just won't persist.
-  }
+function routesEqual(a, b) {
+  return Boolean(a && b && formatRoute(a) === formatRoute(b));
 }
 
 function updateVersionBadge(manifest) {
@@ -148,7 +150,9 @@ function updateVersionBadge(manifest) {
 
 function setStatus(message, { managedByOffline = false } = {}) {
   statusOwnedByOffline = managedByOffline;
-  statusEl.textContent = message || '';
+  if (statusEl) {
+    statusEl.textContent = message || '';
+  }
 }
 
 function getOfflineStatusMessage() {
@@ -308,72 +312,421 @@ function formatMeasurement(value) {
   });
 }
 
-function switchView(view) {
-  if (!views[view]) return;
-  currentView = view;
-  Object.entries(views).forEach(([name, section]) => {
-    const isActive = name === view;
-    section.classList.toggle('visible', isActive);
-    const button = Array.from(viewButtons).find(btn => btn.dataset.view === name);
-    if (button) {
-      button.classList.toggle('active', isActive);
-      button.setAttribute('aria-selected', isActive ? 'true' : 'false');
-    }
+// ---------------------------------------------------------------------------
+// Data loaders (all backed by Cache Storage via dataStore)
+// ---------------------------------------------------------------------------
+
+async function loadGlossary() {
+  try {
+    glossary = new Glossary(await dataStore.readJson('glossary'));
+  } catch (error) {
+    console.warn('Could not load glossary:', error);
+  }
+}
+
+async function loadCoreData() {
+  setStatus('Loading search index…');
+  dataStore.loadManifest().then(updateVersionBadge).catch(() => {});
+  const [searchIndexBundle, speciesIndexBundle] = await Promise.all([
+    dataStore.readJson('searchIndex'),
+    dataStore.readJson('speciesIndex'),
+    loadGlossary()
+  ]);
+
+  taxonIndex = loadSpeciesIndex(speciesIndexBundle);
+  unifiedSearchIndex = createSearchIndex(searchIndexBundle, taxonIndex);
+  multiKeyMetaList = unifiedSearchIndex.multiAccessKeys;
+  dichKeyMetaById = unifiedSearchIndex.dichKeyById;
+
+  renderHomeQuickStart();
+  renderUnifiedSearch();
+  setOfflineStatus();
+}
+
+const dichLoader = createRetryableLoader(async () => {
+  setStatus('Loading dichotomous keys…');
+  const bundle = await dataStore.readJson('dichotomous');
+  globalDichKeys = bundle.keys || {};
+  setOfflineStatus();
+});
+
+function ensureDichotomousLoaded({ retryIfInFlight = false } = {}) {
+  return dichLoader.run({ retryIfInFlight }).catch(error => {
+    console.error(error);
+    const msg =
+      navigator.onLine === false
+        ? 'Offline — dichotomous keys have not finished downloading yet. Reconnect to load.'
+        : error.message;
+    setStatus(msg);
+    throw error;
   });
+}
 
+const multiLoader = createRetryableLoader(async () => {
+  setStatus('Loading multi-access keys…');
+  multiElements.summary.textContent = 'Loading multi-access keys…';
+  const multiBundle = await dataStore.readJson('multi');
+  multiKeyList = listMultiKeys(multiBundle.keys || {});
+  if (multiKeyList.length) {
+    populateMultiSelect(multiKeyList);
+    bindMultiControls();
+  } else {
+    multiElements.summary.textContent = '';
+  }
+  setOfflineStatus();
+});
+
+function ensureMultiLoaded({ retryIfInFlight = false } = {}) {
+  return multiLoader.run({ retryIfInFlight }).catch(error => {
+    console.error(error);
+    const msg =
+      navigator.onLine === false
+        ? 'Offline — multi-access keys have not finished downloading yet. Reconnect to load.'
+        : error.message;
+    multiElements.summary.textContent = msg;
+    setStatus(msg);
+    throw error;
+  });
+}
+
+const descriptionsLoader = createRetryableLoader(async () => {
+  const bundle = await dataStore.readJson('descriptions');
+  descriptions = bundle.taxa || {};
+});
+
+function ensureDescriptionsLoaded({ retryIfInFlight = false } = {}) {
+  return descriptionsLoader.run({ retryIfInFlight }).catch(error => {
+    console.warn('Could not load descriptions:', error);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Hash router
+// ---------------------------------------------------------------------------
+
+function navigateTo(route, { replace = false } = {}) {
+  const nextHash = formatRoute(route);
+  const currentHash = window.location.hash || '#/';
+  if (replace) {
+    window.history.replaceState(null, '', nextHash);
+    applyHashChange({ recordHistory: false });
+    return;
+  }
+  if (currentHash === nextHash) {
+    renderRoute(parseRoute(nextHash));
+    return;
+  }
+  window.location.hash = nextHash;
+}
+
+function setActiveView(viewName) {
+  Object.entries(views).forEach(([name, section]) => {
+    if (!section) return;
+    section.classList.toggle('visible', name === viewName);
+  });
   if (aboutLink) {
-    aboutLink.classList.toggle('active', view === 'about');
+    aboutLink.classList.toggle('active', viewName === 'about');
   }
+}
 
-  if (view === 'multi') {
-    ensureMultiLoaded();
+function applyHashChange({ recordHistory = true } = {}) {
+  hideGlossaryTerm();
+  const nextRoute = parseRoute(window.location.hash);
+  if (recordHistory && !routesEqual(currentRoute, nextRoute)) {
+    previousRoute = currentRoute;
+    hasInAppHistory = true;
   }
-  if (view === 'species') {
-    if (currentSpeciesId) ensureDescriptionsLoaded();
-    refreshPhotoStatus();
-    if (!currentSpeciesId) speciesElements.search.focus();
+  currentRoute = nextRoute;
+  if (currentRoute.view !== 'home') {
+    floatingSearchOpen = false;
   }
-  if (view === 'about') {
+  renderUnifiedSearch();
+  renderRoute(currentRoute);
+}
+
+async function renderRoute(route) {
+  const seq = ++routeRenderSeq;
+  setActiveView(route.view);
+
+  if (route.view === 'home') {
+    renderUnifiedSearch();
+    return;
+  }
+  if (route.view === 'about') {
     if (updateCheckState.phase === 'done') {
       updateCheckState = { phase: 'idle', message: null };
     }
     renderOfflineCoreStatus();
     refreshPhotoStatus();
+    return;
   }
-  saveState();
+  if (route.view === 'key') {
+    await renderDichotomousRoute(route, seq);
+    return;
+  }
+  if (route.view === 'multi') {
+    await renderMultiRoute(route, seq);
+    return;
+  }
+  if (route.view === 'taxon') {
+    await renderTaxonRoute(route, seq);
+  }
 }
 
-function initNavigation() {
-  viewButtons.forEach(button => {
-    button.addEventListener('click', () => switchView(button.dataset.view));
+// ---------------------------------------------------------------------------
+// Unified instant search UI & Home quick-start
+// ---------------------------------------------------------------------------
+
+function renderHomeQuickStart() {
+  if (!homeElements.multiList) return;
+  if (!multiKeyMetaList.length) {
+    homeElements.multiList.innerHTML = '<p class="muted">No multi-access keys bundled.</p>';
+    return;
+  }
+  homeElements.multiList.innerHTML = multiKeyMetaList
+    .map(
+      entry => `
+        <a class="quick-key-card" href="${escapeHtml(formatRoute({ view: 'multi', keyId: entry.id }))}">
+          <strong>${escapeHtml(entry.title)}</strong>
+        </a>
+      `
+    )
+    .join('');
+}
+
+function formatRankBadge(rank) {
+  if (!rank) return 'Taxon';
+  const normalized = String(rank).toLowerCase();
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function renderSearchGroup(title, itemsHtml) {
+  return `
+    <div class="search-group">
+      <div class="search-group-header"><span>${escapeHtml(title)}</span></div>
+      <ul class="search-group-list" role="presentation">${itemsHtml}</ul>
+    </div>
+  `;
+}
+
+function updateActiveSearchHighlight() {
+  const links = Array.from(searchElements.results.querySelectorAll('.search-result-item'));
+  if (!links.length) {
+    activeSearchIndex = -1;
+    return;
+  }
+  if (activeSearchIndex >= links.length) activeSearchIndex = 0;
+  if (activeSearchIndex < -1) activeSearchIndex = links.length - 1;
+  links.forEach((el, idx) => {
+    const active = idx === activeSearchIndex;
+    el.classList.toggle('is-active', active);
+    if (active) el.scrollIntoView({ block: 'nearest' });
+  });
+}
+
+function renderUnifiedSearch() {
+  const query = searchElements.input.value;
+  const trimmed = query.trim();
+  const onHome = currentRoute.view === 'home';
+
+  searchElements.clear.hidden = query.length === 0;
+
+  const shouldShow = trimmed.length >= 2 && (onHome || floatingSearchOpen);
+  if (homeElements.content) {
+    homeElements.content.hidden = onHome && trimmed.length >= 2;
+  }
+
+  searchElements.results.classList.toggle('is-inline', onHome);
+  searchElements.results.classList.toggle('is-floating', !onHome);
+
+  if (!shouldShow) {
+    searchElements.results.hidden = true;
+    searchElements.results.innerHTML = '';
+    searchElements.input.setAttribute('aria-expanded', 'false');
+    activeSearchIndex = -1;
+    return;
+  }
+
+  searchElements.results.hidden = false;
+  searchElements.input.setAttribute('aria-expanded', 'true');
+
+  if (!unifiedSearchIndex) {
+    searchElements.results.innerHTML = '<p class="search-empty">Loading search index…</p>';
+    return;
+  }
+
+  const { multiAccessKeys, dichotomousKeys, taxa } = searchUnified(unifiedSearchIndex, trimmed, {
+    multiLimit: 5,
+    dichLimit: 8,
+    taxonLimit: 20
   });
 
-  aboutLink?.addEventListener('click', () => switchView('about'));
-}
+  const groups = [];
 
-function populateDichotomousSelect(dichotomousBundle) {
-  const entries = listSearchableKeys(dichotomousBundle);
-
-  const index1903 = entries.findIndex(entry => entry.id === '1903');
-  if (index1903 > 0) {
-    const [primary] = entries.splice(index1903, 1);
-    entries.unshift(primary);
+  if (multiAccessKeys.length) {
+    const items = multiAccessKeys
+      .map(
+        entry => `
+          <li>
+            <a class="search-result-item" role="option" href="${escapeHtml(formatRoute({ view: 'multi', keyId: entry.id }))}">
+              <span class="search-result-main">
+                <span class="search-result-title">${escapeHtml(entry.title)}</span>
+              </span>
+              <span class="search-result-badges">
+                <span class="result-badge result-badge--multi">Multi-access</span>
+              </span>
+            </a>
+          </li>
+        `
+      )
+      .join('');
+    groups.push(renderSearchGroup(`Multi-Access Keys (${multiAccessKeys.length})`, items));
   }
 
-  dichElements.datalist.innerHTML = '';
-  entries.forEach(entry => {
-    const option = document.createElement('option');
-    option.value = `${entry.title} [${entry.id}]`;
-    option.dataset.keyId = entry.id;
-    dichElements.datalist.appendChild(option);
-  });
-  return entries;
+  if (dichotomousKeys.length) {
+    const items = dichotomousKeys
+      .map(entry => {
+        const showScope =
+          entry.scope && entry.scope.toLowerCase() !== (entry.title || '').toLowerCase();
+        return `
+          <li>
+            <a class="search-result-item" role="option" href="${escapeHtml(formatRoute({ view: 'key', keyId: entry.id }))}">
+              <span class="search-result-main">
+                <span class="search-result-title">${escapeHtml(entry.title)}</span>
+                ${showScope ? `<span class="search-result-sub">${escapeHtml(entry.scope)}</span>` : ''}
+              </span>
+              <span class="search-result-badges">
+                <span class="result-badge result-badge--dich">Key ${escapeHtml(entry.id)}</span>
+              </span>
+            </a>
+          </li>
+        `;
+      })
+      .join('');
+    groups.push(renderSearchGroup(`Dichotomous Keys (${dichotomousKeys.length})`, items));
+  }
+
+  if (taxa.length) {
+    const items = taxa
+      .map(
+        entry => `
+          <li>
+            <a class="search-result-item" role="option" href="${escapeHtml(formatRoute({ view: 'taxon', taxonId: entry.id }))}">
+              <span class="search-result-main">
+                <span class="search-result-title scientific_name">${escapeHtml(entry.name)}</span>
+                ${entry.vernacular ? `<span class="search-result-sub">${escapeHtml(entry.vernacular)}</span>` : ''}
+              </span>
+              <span class="search-result-badges">
+                ${entry.toKey ? '<span class="result-badge result-badge--has-key">Has key</span>' : ''}
+                <span class="result-badge result-badge--taxon">${escapeHtml(formatRankBadge(entry.rank))}</span>
+              </span>
+            </a>
+          </li>
+        `
+      )
+      .join('');
+    groups.push(renderSearchGroup(`Taxa & Species (${taxa.length})`, items));
+  }
+
+  if (!groups.length) {
+    searchElements.results.innerHTML =
+      `<p class="search-empty">No keys or taxa matching “${escapeHtml(trimmed)}”.</p>`;
+    activeSearchIndex = -1;
+    return;
+  }
+
+  searchElements.results.innerHTML = groups.join('');
+  activeSearchIndex = -1;
 }
 
-function setDichotomousSearchValue(keyId) {
-  const title = globalDichKeys[keyId]?.title || `Key ${keyId}`;
-  dichElements.search.value = `${title} [${keyId}]`;
+function clearUnifiedSearch({ focus = false } = {}) {
+  searchElements.input.value = '';
+  floatingSearchOpen = false;
+  activeSearchIndex = -1;
+  renderUnifiedSearch();
+  if (focus) searchElements.input.focus();
 }
+
+function initUnifiedSearch() {
+  searchElements.input.addEventListener('input', () => {
+    if (currentRoute.view !== 'home') {
+      floatingSearchOpen = searchElements.input.value.trim().length >= 2;
+    }
+    renderUnifiedSearch();
+  });
+
+  searchElements.input.addEventListener('focus', () => {
+    if (currentRoute.view !== 'home' && searchElements.input.value.trim().length >= 2) {
+      floatingSearchOpen = true;
+      renderUnifiedSearch();
+    }
+  });
+
+  searchElements.input.addEventListener('keydown', event => {
+    const links = Array.from(searchElements.results.querySelectorAll('.search-result-item'));
+    if (event.key === 'ArrowDown' && links.length) {
+      event.preventDefault();
+      activeSearchIndex = activeSearchIndex < links.length - 1 ? activeSearchIndex + 1 : 0;
+      updateActiveSearchHighlight();
+      return;
+    }
+    if (event.key === 'ArrowUp' && links.length) {
+      event.preventDefault();
+      activeSearchIndex = activeSearchIndex > 0 ? activeSearchIndex - 1 : links.length - 1;
+      updateActiveSearchHighlight();
+      return;
+    }
+    if (event.key === 'Enter' && !searchElements.results.hidden && links.length) {
+      event.preventDefault();
+      const target = links[activeSearchIndex >= 0 ? activeSearchIndex : 0];
+      if (target) {
+        floatingSearchOpen = false;
+        searchElements.input.blur();
+        const href = target.getAttribute('href');
+        if (href) navigateTo(parseRoute(href));
+      }
+      return;
+    }
+    if (event.key === 'Escape') {
+      if (currentRoute.view !== 'home' && floatingSearchOpen) {
+        event.preventDefault();
+        floatingSearchOpen = false;
+        renderUnifiedSearch();
+        searchElements.input.blur();
+      } else if (currentRoute.view === 'home' && searchElements.input.value) {
+        event.preventDefault();
+        clearUnifiedSearch({ focus: true });
+      }
+    }
+  });
+
+  searchElements.clear.addEventListener('click', () => {
+    clearUnifiedSearch({ focus: true });
+  });
+
+  searchElements.results.addEventListener('click', event => {
+    const link = event.target.closest('.search-result-item');
+    if (link) {
+      floatingSearchOpen = false;
+      searchElements.input.blur();
+    }
+  });
+
+  document.addEventListener('click', event => {
+    if (floatingSearchOpen && searchElements.shell && !searchElements.shell.contains(event.target)) {
+      floatingSearchOpen = false;
+      renderUnifiedSearch();
+    }
+    const clearTrigger = event.target.closest('[data-clear-search="true"]');
+    if (clearTrigger) {
+      clearUnifiedSearch();
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Dichotomous key view
+// ---------------------------------------------------------------------------
 
 function itemLabel(item, via) {
   if (!item) return '';
@@ -383,32 +736,101 @@ function itemLabel(item, via) {
   return `${name}${viaName}${key ? ` (see key ${key})` : ''}`;
 }
 
-function renderDichotomous() {
+async function renderDichotomousRoute(route, seq) {
+  const meta = dichKeyMetaById.get(route.keyId);
+  const hideHeader = route.keyId === DEFAULT_DICH_KEY_ID;
+  if (!dichLoader.isCompleted()) {
+    dichElements.header.hidden = hideHeader;
+    dichElements.header.innerHTML = hideHeader
+      ? ''
+      : `<strong>${escapeHtml(meta?.title || `Key ${route.keyId}`)}</strong>`;
+    dichElements.options.hidden = false;
+    dichElements.bracketed.hidden = true;
+    dichElements.options.innerHTML = '<p class="muted">Loading dichotomous key…</p>';
+    dichElements.result.classList.remove('visible');
+    dichElements.result.innerHTML = '';
+  }
+
+  try {
+    await ensureDichotomousLoaded();
+  } catch {
+    if (seq !== routeRenderSeq) return;
+    dichElements.options.innerHTML =
+      '<p>Could not load dichotomous keys. <button type="button" class="secondary" data-offline-retry="true">Retry</button></p>';
+    return;
+  }
+  if (seq !== routeRenderSeq) return;
+
+  if (!globalDichKeys[route.keyId]) {
+    dichNavigator = null;
+    dichElements.header.hidden = false;
+    dichElements.header.innerHTML = `<strong>Key ${escapeHtml(route.keyId)} not found</strong>`;
+    dichElements.options.hidden = false;
+    dichElements.bracketed.hidden = true;
+    dichElements.options.innerHTML =
+      '<p>That key ID is not in the bundled dataset. <a href="#/">Return home</a> or try searching above.</p>';
+    dichElements.result.classList.remove('visible');
+    dichElements.result.innerHTML = '';
+    return;
+  }
+
+  try {
+    if (!dichNavigator || dichNavigator.currentKeyId !== route.keyId) {
+      dichNavigator = createNavigatorFromData(globalDichKeys, route.keyId);
+    }
+
+    if (route.mode !== 'bracketed') {
+      const targetLeadId = route.leadId || dichNavigator.rootNodeId;
+      const ok = dichNavigator.goToLead(targetLeadId);
+      if (!ok) {
+        dichNavigator.reset();
+      }
+      if (dichNavigator.currentNodeId !== dichNavigator.rootNodeId) {
+        lastStepByKey.set(route.keyId, dichNavigator.currentNodeId);
+      } else {
+        lastStepByKey.delete(route.keyId);
+      }
+    } else {
+      const remembered = lastStepByKey.get(route.keyId);
+      if (remembered) {
+        dichNavigator.goToLead(remembered);
+      } else {
+        dichNavigator.reset();
+      }
+    }
+  } catch (error) {
+    setStatus(error.message);
+    return;
+  }
+
+  bindDichotomousControls();
+  renderDichotomous(route.mode);
+}
+
+function renderDichotomous(mode) {
   if (!dichNavigator) return;
-  dichResultItemId = null;
   dichResult = null;
   const header = dichNavigator.getHeader();
-
-  dichElements.header.innerHTML = `
-    <strong>${header.keyTitle}</strong>
-    ${header.scope ? `<br/><span>${header.scope}</span>` : ''}
-    <br/><small>Depth ${header.depth}</small>
-  `;
+  const hideHeader = dichNavigator.currentKeyId === DEFAULT_DICH_KEY_ID;
+  dichElements.header.hidden = hideHeader;
+  dichElements.header.innerHTML = hideHeader ? '' : `<strong>${escapeHtml(header.keyTitle)}</strong>`;
 
   dichElements.modeButtons.forEach(button => {
-    button.setAttribute('aria-pressed', String(button.dataset.dichMode === dichMode));
+    const isCurrent =
+      (button.dataset.dichMode === 'bracketed' && mode === 'bracketed') ||
+      (button.dataset.dichMode === 'interactive' && mode !== 'bracketed');
+    button.setAttribute('aria-pressed', String(isCurrent));
   });
 
   dichElements.options.innerHTML = '';
   dichElements.result.classList.remove('visible');
   dichElements.result.innerHTML = '';
 
-  const bracketed = dichMode === 'bracketed';
+  const bracketed = mode === 'bracketed';
   dichElements.options.hidden = bracketed;
   dichElements.bracketed.hidden = !bracketed;
   if (bracketed) {
     renderBracketed();
-    saveState();
     return;
   }
   dichElements.bracketed.innerHTML = '';
@@ -416,7 +838,6 @@ function renderDichotomous() {
   const options = dichNavigator.getOptions();
   if (options.length === 0) {
     dichElements.options.innerHTML = '<p>No leads available. Use back or restart.</p>';
-    saveState();
     return;
   }
 
@@ -426,13 +847,12 @@ function renderDichotomous() {
     button.dataset.index = index;
     button.innerHTML = `
       <strong>${index + 1}. ${option.lead.text}</strong>
-      ${option.item ? `<br/><span>${itemLabel(option.item, option.via)}</span>` : ''}
+      ${option.item ? `<br/><span>${escapeHtml(itemLabel(option.item, option.via))}</span>` : ''}
     `;
     button.addEventListener('click', () => handleDichotomousChoice(index));
     annotateGlossary(button.querySelector('strong'));
     dichElements.options.appendChild(button);
   });
-  saveState();
 }
 
 const LEAD_MARKS = ['', '′', '″', '‴'];
@@ -483,19 +903,31 @@ function renderBracketed() {
         dest.append(button);
       } else if (lead.item) {
         const keyTarget = lead.item.toKey || lead.via?.toKey;
-        const name = document.createElement(keyTarget ? 'button' : 'span');
-        name.className = 'taxon';
-        if (keyTarget) {
-          name.type = 'button';
-          name.classList.add('link');
-          name.dataset.openKey = keyTarget;
-          name.title = `Open key ${keyTarget}`;
-        }
-        name.textContent = lead.via
+        const taxonId = lead.via?.taxonId || lead.item.taxonId;
+        const labelText = lead.via
           ? `${lead.item.name} → ${lead.via.name}`
           : lead.item.name || '';
-        if (keyTarget) name.append(' ›');
-        dest.append(name);
+
+        if (keyTarget) {
+          const link = document.createElement('a');
+          link.className = 'taxon link';
+          link.href = formatRoute({ view: 'key', keyId: String(keyTarget), mode: 'bracketed' });
+          link.title = `Open key ${keyTarget}`;
+          link.textContent = `${labelText} ›`;
+          dest.append(link);
+        } else if (taxonId) {
+          const link = document.createElement('a');
+          link.className = 'taxon link';
+          link.href = formatRoute({ view: 'taxon', taxonId });
+          link.title = `Open profile for ${labelText}`;
+          link.textContent = labelText;
+          dest.append(link);
+        } else {
+          const name = document.createElement('span');
+          name.className = 'taxon';
+          name.textContent = labelText;
+          dest.append(name);
+        }
       }
 
       row.append(label, text, dest);
@@ -521,152 +953,154 @@ function scrollToCouplet(number, { flash = true, smooth = true } = {}) {
   }
 }
 
-function setDichMode(mode) {
-  if (mode === dichMode) return;
-  const result = dichResult;
-  dichMode = mode;
-  renderDichotomous();
-  if (mode === 'interactive' && result) {
-    showResult(result.item, result.via);
-  }
-}
-
 function showResult(item, via = null) {
-  dichResultItemId = item.id ?? null;
   dichResult = { item, via };
   dichElements.result.classList.add('visible');
+  const taxonId = via?.taxonId || item.taxonId;
+  const nextKey = item.toKey || via?.toKey;
   const lines = [];
-  if (item.toKey) {
+
+  if (nextKey) {
+    const href = formatRoute({ view: 'key', keyId: String(nextKey) });
     lines.push(
-      `<h3><button type="button" class="link" data-next-key="${item.toKey}">${item.name || 'Result'}</button></h3>`
+      `<h3><a class="link" href="${escapeHtml(href)}">${escapeHtml(item.name || 'Result')}</a></h3>`
+    );
+  } else if (taxonId) {
+    const href = formatRoute({ view: 'taxon', taxonId });
+    lines.push(
+      `<h3><a class="link scientific_name" href="${escapeHtml(href)}">${escapeHtml(item.name || 'Result')}</a></h3>`
     );
   } else {
-    lines.push(`<h3>${item.name || 'Result'}</h3>`);
+    lines.push(`<h3>${escapeHtml(item.name || 'Result')}</h3>`);
   }
+
   if (via) {
-    lines.push(`<p>Represented in Victoria by <strong>${via.name || ''}</strong>.</p>`);
+    lines.push(`<p>Represented in Victoria by <strong>${escapeHtml(via.name || '')}</strong>.</p>`);
   }
   lines.push('<div class="taxon-description"></div>');
+
+  if (nextKey) {
+    const href = formatRoute({ view: 'key', keyId: String(nextKey) });
+    lines.push(
+      `<p><a class="btn-link btn-secondary" href="${escapeHtml(href)}">Continue in key ${escapeHtml(nextKey)} →</a></p>`
+    );
+  }
+  if (taxonId) {
+    const href = formatRoute({ view: 'taxon', taxonId });
+    lines.push(`<p><a href="${escapeHtml(href)}">Open full taxon profile →</a></p>`);
+  }
   const itemUrl = item.taxonId ? taxonUrlFromId(item.taxonId) : item.url;
   const viaUrl = via?.taxonId ? taxonUrlFromId(via.taxonId) : via?.url;
   if (itemUrl) {
-    lines.push(`<p><a href="${itemUrl}" target="_blank" rel="noopener">Open VicFlora entry</a></p>`);
+    lines.push(`<p><a href="${escapeHtml(itemUrl)}" target="_blank" rel="noopener">Open VicFlora entry</a></p>`);
   }
   if (viaUrl) {
-    lines.push(`<p><a href="${viaUrl}" target="_blank" rel="noopener">Open VicFlora entry for ${via.name || ''}</a></p>`);
+    lines.push(
+      `<p><a href="${escapeHtml(viaUrl)}" target="_blank" rel="noopener">Open VicFlora entry for ${escapeHtml(via.name || '')}</a></p>`
+    );
   }
-  if (item.toKey) {
-    lines.push(`<p>Leads to key ${item.toKey}.</p>`);
-  }
-  dichElements.result.innerHTML = lines.join('');
-  fillDescription(
-    dichElements.result.querySelector('.taxon-description'),
-    via?.taxonId || item.taxonId
-  );
-  saveState();
 
-  const linkButton = dichElements.result.querySelector('button[data-next-key]');
-  if (linkButton) {
-    linkButton.addEventListener('click', () => {
-      const nextKey = linkButton.dataset.nextKey;
-      try {
-        dichNavigator = createNavigatorFromData(globalDichKeys, String(nextKey));
-        setDichotomousSearchValue(String(nextKey));
-        renderDichotomous();
-      } catch (error) {
-        setStatus(error.message);
-      }
-    });
-  }
+  dichElements.result.innerHTML = lines.join('');
+  fillDescription(dichElements.result.querySelector('.taxon-description'), taxonId);
 }
 
 function handleDichotomousChoice(index) {
   if (!dichNavigator) return;
-  try {
-    const outcome = dichNavigator.chooseOption(index);
-    if (outcome.type === 'result') {
-      showResult(outcome.item, outcome.via);
-    } else if (outcome.type === 'key-transition') {
-      showResult(outcome.item);
-      renderDichotomous();
-    } else {
-      renderDichotomous();
-    }
-  } catch (error) {
-    setStatus(error.message);
+  const options = dichNavigator.getOptions();
+  const chosen = options[index];
+  if (!chosen) return;
+
+  const { lead, item, via } = chosen;
+  const linkedKeyId = item?.toKey || via?.toKey;
+  if (linkedKeyId && globalDichKeys[String(linkedKeyId)]) {
+    navigateTo({ view: 'key', keyId: String(linkedKeyId), mode: 'interactive', leadId: null });
+    return;
   }
+  if (item) {
+    showResult(item, via);
+    return;
+  }
+
+  const leadId = String(lead.id);
+  navigateTo({ view: 'key', keyId: dichNavigator.currentKeyId, mode: 'interactive', leadId });
 }
 
 function bindDichotomousControls() {
   if (dichControlsBound) return;
   dichControlsBound = true;
-  // Clear on focus so the full key list shows; restore if nothing is picked.
-  dichElements.search.addEventListener('focus', () => {
-    dichElements.search.placeholder = dichElements.search.value || 'Start typing a key…';
-    dichElements.search.value = '';
-  });
-  dichElements.search.addEventListener('blur', () => {
-    if (dichNavigator) setDichotomousSearchValue(dichNavigator.startKeyId);
-  });
-
-  dichElements.search.addEventListener('change', event => {
-    const value = event.target.value;
-    if (!value) return;
-    const match = Array.from(dichElements.datalist.options).find(option => option.value === value);
-    const keyId = match?.dataset.keyId || value.replace(/.*\[(\d+)\]$/, '$1');
-    if (!globalDichKeys[keyId]) return;
-    try {
-      dichNavigator = createNavigatorFromData(globalDichKeys, keyId);
-      renderDichotomous();
-    } catch (error) {
-      setStatus(error.message);
-    }
-  });
 
   dichElements.back.addEventListener('click', () => {
-    if (!dichNavigator) return;
-    if (dichMode === 'bracketed') {
-      if (dichNavigator.exitKey()) {
-        renderDichotomous();
+    if (!dichNavigator || currentRoute.view !== 'key') return;
+    if (currentRoute.mode === 'bracketed') {
+      if (hasInAppHistory) {
+        window.history.back();
       } else {
-        setStatus('Already in the starting key.');
+        navigateTo({ view: 'home' });
       }
       return;
     }
-    if (!dichNavigator.back()) {
-      setStatus('Already at root of the starting key.');
+
+    const parentLeadId = dichNavigator.getParentLeadId();
+    if (parentLeadId) {
+      const isRoot = parentLeadId === dichNavigator.rootNodeId;
+      const targetRoute = {
+        view: 'key',
+        keyId: currentRoute.keyId,
+        mode: 'interactive',
+        leadId: isRoot ? null : String(parentLeadId)
+      };
+      if (previousRoute && routesEqual(previousRoute, targetRoute)) {
+        window.history.back();
+      } else {
+        navigateTo(targetRoute);
+      }
+      return;
+    }
+
+    if (hasInAppHistory) {
+      window.history.back();
     } else {
-      renderDichotomous();
+      setStatus('Already at the start of this key.');
     }
   });
 
   dichElements.modeButtons.forEach(button => {
-    button.addEventListener('click', () => setDichMode(button.dataset.dichMode));
+    button.addEventListener('click', () => {
+      if (currentRoute.view !== 'key') return;
+      const targetMode = button.dataset.dichMode === 'bracketed' ? 'bracketed' : 'interactive';
+      if (targetMode === currentRoute.mode) return;
+      const leadId =
+        targetMode === 'interactive' ? lastStepByKey.get(currentRoute.keyId) || null : null;
+      navigateTo(
+        { view: 'key', keyId: currentRoute.keyId, mode: targetMode, leadId },
+        { replace: true }
+      );
+    });
   });
 
   dichElements.bracketed.addEventListener('click', event => {
-    const target = event.target.closest('button');
-    if (!target) return;
-    if (target.dataset.goto) {
+    const target = event.target.closest('button[data-goto]');
+    if (target) {
       scrollToCouplet(target.dataset.goto);
-    } else if (target.dataset.openKey) {
-      try {
-        dichNavigator.openKey(target.dataset.openKey);
-        renderDichotomous();
-        dichElements.header.scrollIntoView({ block: 'start' });
-      } catch (error) {
-        setStatus(error.message);
-      }
     }
   });
 
   dichElements.restart.addEventListener('click', () => {
-    if (dichNavigator) {
+    if (currentRoute.view !== 'key') return;
+    lastStepByKey.delete(currentRoute.keyId);
+    dichResult = null;
+    if (currentRoute.leadId) {
+      navigateTo({ view: 'key', keyId: currentRoute.keyId, mode: currentRoute.mode, leadId: null });
+    } else if (dichNavigator) {
       dichNavigator.reset();
-      renderDichotomous();
+      renderDichotomous(currentRoute.mode);
     }
   });
 }
+
+// ---------------------------------------------------------------------------
+// Multi-access key view
+// ---------------------------------------------------------------------------
 
 function populateMultiSelect(list) {
   multiElements.select.innerHTML = '';
@@ -680,12 +1114,62 @@ function populateMultiSelect(list) {
   return list;
 }
 
+function resolveMultiKeyInfo(requestedId) {
+  if (!multiKeyList.length) return null;
+  if (!requestedId) return multiKeyList[0];
+  return (
+    multiKeyList.find(entry => entry.id === requestedId) ||
+    multiKeyList.find(entry => `key-${entry.id}-complete.json` === requestedId) ||
+    null
+  );
+}
+
+async function renderMultiRoute(route, seq) {
+  try {
+    await ensureMultiLoaded();
+  } catch {
+    return;
+  }
+  if (seq !== routeRenderSeq) return;
+
+  const keyInfo = resolveMultiKeyInfo(route.keyId);
+  if (!keyInfo) {
+    multiElements.summary.innerHTML = `<strong>Multi-access key not found.</strong> <a href="#/">Return home</a>`;
+    multiElements.characters.innerHTML = '';
+    multiElements.states.innerHTML = '';
+    multiElements.selections.innerHTML = '';
+    multiElements.remaining.innerHTML = '';
+    return;
+  }
+
+  if (!route.keyId || route.keyId !== keyInfo.id) {
+    navigateTo({ view: 'multi', keyId: keyInfo.id }, { replace: true });
+    return;
+  }
+
+  let cached = multiSessions.get(keyInfo.id);
+  if (!cached) {
+    cached = {
+      session: new MultiAccessSession(keyInfo.data),
+      currentCharacterId: null
+    };
+    multiSessions.set(keyInfo.id, cached);
+  }
+
+  multiSession = cached.session;
+  multiState.currentKey = keyInfo.id;
+  multiState.currentKeyInfo = keyInfo;
+  multiState.currentCharacterId = cached.currentCharacterId;
+  multiElements.select.value = keyInfo.id;
+  renderMultiAll(multiSession);
+}
+
 function renderMultiSummary(session, keyInfo) {
   const totalTaxa = session.possibleTaxa.size + session.eliminatedTaxa.size;
   const remaining = session.possibleTaxa.size;
   const progress = totalTaxa ? Math.round(((totalTaxa - remaining) / totalTaxa) * 100) : 0;
   multiElements.summary.innerHTML = `
-    <strong>${keyInfo.title}</strong><br/>
+    <strong>${escapeHtml(keyInfo.title)}</strong><br/>
     ${keyInfo.entities} taxa · ${keyInfo.characters} characters<br/>
     Remaining: ${remaining} (${progress}% filtered)
   `;
@@ -704,6 +1188,8 @@ function renderMultiCharacters(session) {
     }
     button.addEventListener('click', () => {
       multiState.currentCharacterId = char.id;
+      const cached = multiSessions.get(multiState.currentKey);
+      if (cached) cached.currentCharacterId = char.id;
       renderMultiStates(session, char.id);
     });
     multiElements.characters.appendChild(button);
@@ -852,14 +1338,19 @@ function renderMultiRemaining(session) {
   sample.forEach(taxon => {
     const item = document.createElement('li');
     const taxonId = taxon.taxonId;
-    if (taxonId) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'link';
-      button.dataset.taxon = taxonId;
-      button.dataset.fallbackUrl = taxon.url || taxonUrlFromId(taxonId);
-      button.textContent = taxon.name;
-      item.appendChild(button);
+    if (taxonId && taxonIndex.has(taxonId)) {
+      const link = document.createElement('a');
+      link.className = 'link scientific_name';
+      link.href = formatRoute({ view: 'taxon', taxonId });
+      link.textContent = taxon.name;
+      item.appendChild(link);
+    } else if (taxonId) {
+      const link = document.createElement('a');
+      link.href = taxon.url || taxonUrlFromId(taxonId);
+      link.textContent = taxon.name;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      item.appendChild(link);
     } else if (taxon.url) {
       const link = document.createElement('a');
       link.href = taxon.url;
@@ -887,32 +1378,24 @@ function renderMultiAll(session) {
   }
   renderMultiSelections(session);
   renderMultiRemaining(session);
-  saveState();
 }
 
-function startMultiSession(keyInfo) {
-  multiSession = new MultiAccessSession(keyInfo.data);
-  multiState.currentKey = keyInfo.id;
-  multiState.currentKeyInfo = keyInfo;
-  multiState.currentCharacterId = null;
-}
+function bindMultiControls() {
+  if (multiControlsBound) return;
+  multiControlsBound = true;
 
-function bindMultiControls(list) {
   multiElements.select.addEventListener('change', event => {
     const id = event.target.value;
-    const keyInfo = list.find(entry => entry.id === id);
-    if (!keyInfo) {
-      setStatus('Key not found in dataset');
-      return;
-    }
-    startMultiSession(keyInfo);
-    renderMultiAll(multiSession);
+    if (!id) return;
+    navigateTo({ view: 'multi', keyId: id });
   });
 
   multiElements.reset.addEventListener('click', () => {
     if (!multiSession) return;
     multiSession.reset();
     multiState.currentCharacterId = null;
+    const cached = multiSessions.get(multiState.currentKey);
+    if (cached) cached.currentCharacterId = null;
     renderMultiAll(multiSession);
   });
 
@@ -924,6 +1407,9 @@ function bindMultiControls(list) {
       return;
     }
     multiState.currentCharacterId = undone.characterId;
+    const cached = multiSessions.get(multiState.currentKey);
+    if (cached) cached.currentCharacterId = undone.characterId;
+
     const characterName = multiSession.getCharacterDisplayName
       ? multiSession.getCharacterDisplayName(undone.characterId)
       : (multiSession.getCharacterById?.(undone.characterId)?.name || undone.characterId);
@@ -941,104 +1427,9 @@ function bindMultiControls(list) {
   });
 }
 
-async function loadData() {
-  setStatus('Loading key bundles…');
-  dataStore.loadManifest().then(updateVersionBadge).catch(() => {});
-  const [dichotomousBundle, speciesIndexBundle] = await Promise.all([
-    dataStore.readJson('dichotomous'),
-    dataStore.readJson('speciesIndex'),
-    loadGlossary()
-  ]);
-
-  globalDichKeys = dichotomousBundle.keys || {};
-  taxonIndex = loadSpeciesIndex(speciesIndexBundle);
-  const dichEntries = populateDichotomousSelect(dichotomousBundle);
-  if (dichEntries.length) {
-    dichNavigator = createNavigatorFromData(globalDichKeys, dichEntries[0].id);
-    const saved = savedState.dich;
-    if (saved) {
-      try {
-        const restored = createNavigatorFromData(globalDichKeys, String(saved.startKeyId));
-        restored.restore(saved);
-        dichNavigator = restored;
-      } catch (error) {
-        console.warn('Could not restore saved dichotomous progress:', error);
-      }
-    }
-    setDichotomousSearchValue(dichNavigator.startKeyId);
-    renderDichotomous();
-    const savedResult = saved?.resultItemId != null ? dichNavigator.findItem(saved.resultItemId) : null;
-    if (savedResult && !savedResult.toKey) {
-      showResult(savedResult);
-    }
-  }
-  bindDichotomousControls();
-  if (savedState.speciesId && taxonIndex.has(savedState.speciesId)) {
-    showSpecies(savedState.speciesId);
-  }
-
-  setOfflineStatus();
-}
-
-const multiLoader = createRetryableLoader(loadMultiData);
-
-// The multi-access bundle is large, so it is only parsed when that tab is used.
-function ensureMultiLoaded({ retryIfInFlight = false } = {}) {
-  return multiLoader.run({ retryIfInFlight }).catch(error => {
-    console.error(error);
-    const msg =
-      navigator.onLine === false
-        ? 'Offline — multi-access keys have not finished downloading yet. Reconnect to load.'
-        : error.message;
-    multiElements.summary.textContent = msg;
-    setStatus(msg);
-  });
-}
-
-async function loadMultiData() {
-  setStatus('Loading multi-access keys…');
-  multiElements.summary.textContent = 'Loading multi-access keys…';
-  const multiBundle = await dataStore.readJson('multi');
-
-  const multiList = listMultiKeys(multiBundle.keys || {});
-  if (multiList.length) {
-    populateMultiSelect(multiList);
-    const saved = savedState.multi;
-    const savedInfo =
-      saved &&
-      multiList.find(
-        entry => entry.id === saved.key || `key-${entry.id}-complete.json` === saved.key
-      );
-    const keyInfo = savedInfo || multiList[0];
-    startMultiSession(keyInfo);
-    if (savedInfo) {
-      multiSession.restore(saved.selections);
-    }
-    multiElements.select.value = keyInfo.id;
-    renderMultiAll(multiSession);
-  } else {
-    multiElements.summary.textContent = '';
-  }
-  bindMultiControls(multiList);
-
-  setOfflineStatus();
-}
-
-function escapeHtml(text) {
-  return String(text ?? '').replace(/[&<>"']/g, ch => `&#${ch.charCodeAt(0)};`);
-}
-
-const descriptionsLoader = createRetryableLoader(async () => {
-  const bundle = await dataStore.readJson('descriptions');
-  descriptions = bundle.taxa || {};
-});
-
-// Descriptions are only fetched when first needed (a key result or the Species tab).
-function ensureDescriptionsLoaded({ retryIfInFlight = false } = {}) {
-  return descriptionsLoader.run({ retryIfInFlight }).catch(error => {
-    console.warn('Could not load descriptions:', error);
-  });
-}
+// ---------------------------------------------------------------------------
+// Descriptions, photos, bioregions & taxon profile view
+// ---------------------------------------------------------------------------
 
 const INFRASPECIFIC_RANK_LABELS = {
   SUBSPECIES: 'subspecies',
@@ -1411,20 +1802,22 @@ async function fillDescription(container, taxonId) {
   container.dataset.photoFallbackId = fallbackPhotoId;
   container.dataset.photoDisplayName = displayName;
 
-  // Render text immediately without waiting on IndexedDB or photo index network fetches.
   if (soleChild) {
     const vernacular = entry?.vernacular || soleChild.entry.vernacular;
     const rankLabel = INFRASPECIFIC_RANK_LABELS[soleChild.entry.rank] || 'infraspecific taxon';
     const parentNotes = extractNotesHtml(taxon?.html);
+    const childHref = formatRoute({ view: 'taxon', taxonId: soleChild.entry.id });
     container.innerHTML = `
       ${vernacular ? `<p class="vernacular">${escapeHtml(vernacular)}</p>` : ''}
-      <p class="sole-infraspecific-note">Only 1 ${rankLabel} in Victoria — showing <button type="button" class="link scientific_name" data-taxon="${escapeHtml(soleChild.entry.id)}">${escapeHtml(soleChild.entry.name)}</button></p>
+      <p class="sole-infraspecific-note">Only 1 ${rankLabel} in Victoria — showing <a class="link scientific_name" href="${escapeHtml(childHref)}">${escapeHtml(soleChild.entry.name)}</a></p>
       ${soleChild.taxon.html}
       ${parentNotes ? `<div class="species-notes">${parentNotes}</div>` : ''}
     `;
     for (const link of container.querySelectorAll('a[data-taxon]')) {
       if (!taxonIndex.has(link.dataset.taxon)) {
         link.removeAttribute('data-taxon');
+      } else {
+        link.setAttribute('href', formatRoute({ view: 'taxon', taxonId: link.dataset.taxon }));
       }
     }
     annotateGlossary(container);
@@ -1445,6 +1838,8 @@ async function fillDescription(container, taxonId) {
     for (const link of container.querySelectorAll('a[data-taxon]')) {
       if (!taxonIndex.has(link.dataset.taxon)) {
         link.removeAttribute('data-taxon');
+      } else {
+        link.setAttribute('href', formatRoute({ view: 'taxon', taxonId: link.dataset.taxon }));
       }
     }
     annotateGlossary(container);
@@ -1454,83 +1849,86 @@ async function fillDescription(container, taxonId) {
       const list = document.createElement('ul');
       list.className = 'key-links';
       list.innerHTML = children
-        .map(
-          child =>
-            `<li><button type="button" class="link scientific_name" data-taxon="${escapeHtml(child.id)}">${escapeHtml(child.name)}</button></li>`
-        )
+        .map(child => {
+          const href = formatRoute({ view: 'taxon', taxonId: child.id });
+          return `<li><a class="link scientific_name" href="${escapeHtml(href)}">${escapeHtml(child.name)}</a></li>`;
+        })
         .join('');
       section.appendChild(list);
       container.appendChild(section);
     }
+  } else {
+    container.innerHTML = '<p class="muted">No description bundled for this taxon.</p>';
   }
 
   attachBioregionMap(container, taxon?.bioregions || null, token);
   attachTaxonPhoto(container, token);
 }
 
-function showSpecies(taxonId) {
-  const entry = taxonIndex.get(taxonId);
-  if (!entry) return;
-  currentSpeciesId = taxonId;
-  speciesElements.matches.innerHTML = '';
-  const detail = speciesElements.detail;
-  detail.hidden = false;
+function getKeyTitle(keyId) {
+  const id = String(keyId);
+  return dichKeyMetaById.get(id)?.title || globalDichKeys[id]?.title || `Key ${id}`;
+}
 
-  const keyButtons = entry.keys
+async function renderTaxonRoute(route, seq) {
+  const taxonId = route.taxonId;
+  refreshPhotoStatus();
+
+  if (!taxonIndex.size && !appBooted) {
+    speciesElements.detail.innerHTML = '<p class="muted">Loading taxon profile…</p>';
+    await bootData().catch(() => {});
+    if (seq !== routeRenderSeq) return;
+  }
+
+  const entry = taxonIndex.get(taxonId);
+  if (!entry) {
+    currentSpeciesId = null;
+    if (speciesElements.rankBadge) speciesElements.rankBadge.textContent = 'Taxon';
+    speciesElements.detail.innerHTML = `
+      <h3>Taxon not found</h3>
+      <p class="muted">No bundled taxon matches <code>${escapeHtml(taxonId)}</code>.</p>
+      <p><a href="#/">Return home</a> or search above.</p>
+    `;
+    return;
+  }
+
+  currentSpeciesId = taxonId;
+  if (speciesElements.rankBadge) {
+    speciesElements.rankBadge.textContent = formatRankBadge(entry.rank);
+  }
+  const detail = speciesElements.detail;
+
+  const keyLinks = (entry.keys || [])
     .map(keyId => {
-      const title = globalDichKeys[keyId]?.title || `Key ${keyId}`;
-      return `<li><button type="button" class="link" data-open-key="${escapeHtml(keyId)}">${escapeHtml(title)}</button></li>`;
+      const href = formatRoute({ view: 'key', keyId: String(keyId) });
+      return `<li><a class="link" href="${escapeHtml(href)}">${escapeHtml(getKeyTitle(keyId))}</a></li>`;
     })
     .join('');
-  const ownKey = entry.toKey && globalDichKeys[entry.toKey]
-    ? `<p><button type="button" class="secondary" data-open-key="${escapeHtml(entry.toKey)}">Open key to ${escapeHtml(globalDichKeys[entry.toKey].title)}</button></p>`
+
+  const ownKey = entry.toKey
+    ? `<p><a class="btn-link btn-secondary" href="${escapeHtml(formatRoute({ view: 'key', keyId: String(entry.toKey) }))}">Open key to ${escapeHtml(getKeyTitle(entry.toKey))} →</a></p>`
     : '';
-  const appearsIn = keyButtons
-    ? `<h4>Appears in</h4><ul class="key-links">${keyButtons}</ul>`
+  const appearsIn = keyLinks
+    ? `<h4>Appears in</h4><ul class="key-links">${keyLinks}</ul>`
     : '';
 
   detail.innerHTML = `
-    <h3>${escapeHtml(entry.name)}</h3>
-    <div class="taxon-description"><p class="muted">No description bundled for this taxon.</p></div>
+    <h3 class="scientific_name">${escapeHtml(entry.name)}</h3>
+    <div class="taxon-description">
+      ${entry.vernacular ? `<p class="vernacular">${escapeHtml(entry.vernacular)}</p>` : ''}
+      <p class="muted">Loading description…</p>
+    </div>
     ${ownKey}
     ${appearsIn}
     <p><a href="${escapeHtml(taxonUrlFromId(taxonId))}" target="_blank" rel="noopener">Open VicFlora entry</a></p>
   `;
   fillDescription(detail.querySelector('.taxon-description'), taxonId);
-  saveState();
+  window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
-function openDichotomousKey(keyId) {
-  try {
-    dichNavigator = createNavigatorFromData(globalDichKeys, String(keyId));
-    setDichotomousSearchValue(String(keyId));
-    switchView('dichotomous');
-    renderDichotomous();
-  } catch (error) {
-    setStatus(error.message);
-  }
-}
-
-function renderSpeciesMatches() {
-  const results = searchTaxa(taxonIndex, speciesElements.search.value);
-  speciesElements.matches.innerHTML = results
-    .map(entry => {
-      const vernacular = entry.vernacular;
-      return `<li><button type="button" data-taxon="${escapeHtml(entry.id)}">
-        <span class="scientific_name">${escapeHtml(entry.name)}</span>
-        ${vernacular ? `<small>${escapeHtml(vernacular)}</small>` : ''}
-      </button></li>`;
-    })
-    .join('');
-}
-
-async function loadGlossary() {
-  try {
-    glossary = new Glossary(await dataStore.readJson('glossary'));
-  } catch (error) {
-    console.warn('Could not load glossary:', error);
-  }
-}
+// ---------------------------------------------------------------------------
+// Glossary popover
+// ---------------------------------------------------------------------------
 
 function annotateGlossary(root) {
   glossary?.annotate(root);
@@ -1603,32 +2001,24 @@ function initGlossary() {
   });
 }
 
-function initSpecies() {
-  speciesElements.search.addEventListener('input', () => {
-    renderSpeciesMatches();
-  });
-
-  // Taxon links can appear in search results, multi-access results, and inside description notes.
+function initSpeciesLinks() {
   document.addEventListener('click', event => {
     const taxonLink = event.target.closest('[data-taxon]');
-    if (taxonLink) {
-      const id = taxonLink.dataset.taxon;
+    if (!taxonLink) return;
+    const id = taxonLink.dataset.taxon;
+    if (id && taxonIndex.has(id)) {
       event.preventDefault();
-      if (taxonIndex.has(id)) {
-        switchView('species');
-        showSpecies(id);
-        speciesElements.detail.scrollIntoView({ block: 'start' });
-      } else if (taxonLink.dataset.fallbackUrl) {
-        window.open(taxonLink.dataset.fallbackUrl, '_blank', 'noopener,noreferrer');
-      }
-      return;
-    }
-    const keyButton = event.target.closest('#species-detail [data-open-key]');
-    if (keyButton) {
-      openDichotomousKey(keyButton.dataset.openKey);
+      navigateTo({ view: 'taxon', taxonId: id });
+    } else if (taxonLink.dataset.fallbackUrl) {
+      event.preventDefault();
+      window.open(taxonLink.dataset.fallbackUrl, '_blank', 'noopener,noreferrer');
     }
   });
 }
+
+// ---------------------------------------------------------------------------
+// Offline photo storage & manual update check
+// ---------------------------------------------------------------------------
 
 function setPhotosControls(html) {
   photoControlsHtml = html || '';
@@ -1738,8 +2128,10 @@ async function refreshPhotoStatus() {
 
 function refreshVisiblePhotos(shardIndex = null, { force = false } = {}) {
   const containers = [
-    !speciesElements.detail.hidden ? speciesElements.detail.querySelector('.taxon-description') : null,
-    dichElements.result.classList.contains('visible') ? dichElements.result.querySelector('.taxon-description') : null
+    currentRoute.view === 'taxon' ? speciesElements.detail.querySelector('.taxon-description') : null,
+    currentRoute.view === 'key' && dichElements.result.classList.contains('visible')
+      ? dichElements.result.querySelector('.taxon-description')
+      : null
   ].filter(Boolean);
 
   for (const container of containers) {
@@ -1763,7 +2155,7 @@ function refreshVisiblePhotos(shardIndex = null, { force = false } = {}) {
 
 function updatePhotoProgressStatus(text) {
   // Never stomp on key errors, incomplete core caching, or user action messages.
-  const current = statusEl.textContent || '';
+  const current = statusEl?.textContent || '';
   if (
     !(statusOwnedByOffline && offlineManager.getState().status === 'ready') &&
     !current.startsWith('Caching offline photos')
@@ -1832,7 +2224,7 @@ async function syncPhotosInBackground({ force = false, immediate = false } = {})
       if (result.synced) {
         refreshVisiblePhotos();
       }
-      if (statusEl.textContent.startsWith('Caching offline photos')) {
+      if (statusEl?.textContent.startsWith('Caching offline photos')) {
         setOfflineStatus();
       }
       if (result.quotaExceeded) return { status: 'quota' };
@@ -1848,7 +2240,7 @@ async function syncPhotosInBackground({ force = false, immediate = false } = {})
         console.warn('Background photo sync paused:', error);
       }
       await refreshPhotoStatus();
-      if (statusEl.textContent.startsWith('Caching offline photos')) {
+      if (statusEl?.textContent.startsWith('Caching offline photos')) {
         setOfflineStatus();
       }
       return aborted
@@ -2005,7 +2397,7 @@ async function dropOfflinePhotos() {
   } finally {
     photoSyncProgress = null;
     photoSyncClearing = false;
-    if (statusEl.textContent.startsWith('Caching offline photos')) {
+    if (statusEl?.textContent.startsWith('Caching offline photos')) {
       setOfflineStatus();
     }
     await refreshPhotoStatus();
@@ -2079,8 +2471,12 @@ function initPhotos() {
   refreshPhotoStatus();
 }
 
+// ---------------------------------------------------------------------------
+// Boot & offline recovery
+// ---------------------------------------------------------------------------
+
 const bootLoader = createRetryableLoader(async () => {
-  await loadData();
+  await loadCoreData();
   appBooted = true;
   setOfflineStatus();
   syncPhotosInBackground({ immediate: true });
@@ -2092,10 +2488,10 @@ function bootData({ retryIfInFlight = false } = {}) {
     const offlineMsg =
       navigator.onLine === false
         ? 'Offline — keys have not finished downloading yet. Reconnect to load automatically.'
-        : `Could not load keys (${error.message}).`;
+        : `Could not load search index (${error.message}).`;
     setStatus(offlineMsg);
-    if (!dichNavigator) {
-      dichElements.options.innerHTML =
+    if (homeElements.multiList && !multiKeyMetaList.length) {
+      homeElements.multiList.innerHTML =
         `<p>${escapeHtml(offlineMsg)} <button type="button" class="secondary" data-offline-retry="true">Retry</button></p>`;
     }
   });
@@ -2105,27 +2501,27 @@ function retryMissingViewData({ retryIfInFlight = false } = {}) {
   if (!appBooted) {
     bootData({ retryIfInFlight });
   }
-  if (currentView === 'multi' && !multiLoader.isCompleted()) {
-    ensureMultiLoaded({ retryIfInFlight });
+  if (currentRoute.view === 'key' && !dichLoader.isCompleted()) {
+    renderRoute(currentRoute);
   }
-  if (currentView === 'species' && currentSpeciesId && !descriptionsLoader.isCompleted()) {
-    ensureDescriptionsLoaded({ retryIfInFlight }).then(() => {
-      if (currentSpeciesId) showSpecies(currentSpeciesId);
-    });
+  if (currentRoute.view === 'multi' && !multiLoader.isCompleted()) {
+    renderRoute(currentRoute);
+  }
+  if (currentRoute.view === 'taxon' && currentSpeciesId && !descriptionsLoader.isCompleted()) {
+    renderRoute(currentRoute);
   }
 }
 
 function init() {
-  initNavigation();
+  initUnifiedSearch();
   initInstallPrompt();
-  initSpecies();
+  initSpeciesLinks();
   initPhotos();
   initGlossary();
   offlineManager.start();
   renderOfflineCoreStatus();
-  if (savedState.view && savedState.view !== currentView) {
-    switchView(savedState.view);
-  }
+
+  window.addEventListener('hashchange', () => applyHashChange({ recordHistory: true }));
   window.addEventListener('online', () => {
     retryMissingViewData({ retryIfInFlight: true });
   });
@@ -2134,6 +2530,8 @@ function init() {
       retryMissingViewData({ retryIfInFlight: true });
     }
   });
+
+  applyHashChange({ recordHistory: false });
   bootData();
 }
 

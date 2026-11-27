@@ -12,39 +12,66 @@
   </head>
   <body>
     <header>
-      <div class="header-top">
-        <h1>VicFlora Offline Keys</h1>
-        <div class="header-meta">
-          <button id="install-app-btn" type="button" class="secondary install-app-btn" hidden>Install app</button>
-          <span id="app-version" class="app-version" aria-label="App version"></span>
+      <div class="header-inner">
+        <div class="header-top">
+          <h1><a href="#/" id="brand-home-link" class="brand-link">VicFlora Offline</a></h1>
+          <div class="header-meta">
+            <button id="install-app-btn" type="button" class="secondary install-app-btn" hidden>Install app</button>
+          </div>
+        </div>
+        <p class="header-subtitle">Offline keys &amp; profiles from <a target="_blank" rel="noopener" href="https://vicflora.rbg.vic.gov.au/">VicFlora</a>.</p>
+        <div class="search-shell" id="unified-search-shell">
+          <div class="search-input-wrap">
+            <svg class="search-icon" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+              <circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8" />
+              <line x1="12.7" y1="12.7" x2="17" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+            <input
+              id="unified-search"
+              type="search"
+              placeholder="Search species, common names, or keys…"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="Search species, common names, or keys"
+              aria-controls="unified-search-results"
+              aria-expanded="false"
+            />
+            <button id="unified-search-clear" type="button" class="search-clear" aria-label="Clear search" hidden>×</button>
+          </div>
+          <div id="unified-search-results" class="search-results" role="region" aria-label="Search results" hidden></div>
         </div>
       </div>
-      <p>Multi-access and dichotomous keys from <a target="_blank" href="https://vicflora.rbg.vic.gov.au/">VicFlora</a>.</p>
-      <nav class="tabs" role="tablist">
-        <button data-view="dichotomous" class="tab active" role="tab" aria-selected="true">Dichotomous Keys</button>
-        <button data-view="multi" class="tab" role="tab" aria-selected="false">Multi-Access Keys</button>
-        <button data-view="species" class="tab" role="tab" aria-selected="false">Species Search</button>
-      </nav>
     </header>
 
     <main>
-      <section id="status" aria-live="polite"></section>
+      <section id="view-home" class="view visible">
+        <div id="home-content" class="home-grid">
+          <a href="#/key/1903" class="btn-link btn-primary home-dich-btn">Dichotomous Key</a>
 
-      <section id="view-dichotomous" class="view visible">
+          <div class="panel home-multi">
+            <h2 class="home-multi-heading">Multi-access keys</h2>
+            <div id="home-multi-list" class="quick-key-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-dichotomous" class="view">
         <div class="panel">
-          <h2>Dichotomous Keys</h2>
-          <div class="controls">
-            <label for="dichotomous-key-search">Search key:</label>
-            <input id="dichotomous-key-search" list="dichotomous-key-list" placeholder="Start typing a key…" />
-            <datalist id="dichotomous-key-list"></datalist>
-            <button id="dichotomous-restart" class="secondary">Restart</button>
-            <button id="dichotomous-back" class="secondary">Back</button>
+          <div class="view-nav-bar">
+            <a href="#/" class="back-home" data-clear-search="true">← Home</a>
+            <span class="view-badge view-badge--dich">Dichotomous key</span>
           </div>
-          <div class="segmented" role="group" aria-label="Key layout">
-            <button type="button" class="secondary" data-dich-mode="interactive" aria-pressed="true">Step by step</button>
-            <button type="button" class="secondary" data-dich-mode="bracketed" aria-pressed="false">Bracketed</button>
+          <div id="dichotomous-header" class="panel-info dich-header"></div>
+          <div class="dich-toolbar">
+            <div class="control-actions">
+              <button id="dichotomous-back" type="button" class="secondary">Back</button>
+              <button id="dichotomous-restart" type="button" class="secondary">Restart</button>
+            </div>
+            <div class="segmented" role="group" aria-label="Key layout">
+              <button type="button" class="secondary" data-dich-mode="interactive" aria-pressed="true">Step by step</button>
+              <button type="button" class="secondary" data-dich-mode="bracketed" aria-pressed="false">Bracketed</button>
+            </div>
           </div>
-          <div id="dichotomous-header" class="panel-info"></div>
           <div id="dichotomous-options" class="card-list"></div>
           <div id="dichotomous-result" class="result"></div>
           <ol id="dichotomous-bracketed" class="bracketed" hidden></ol>
@@ -53,7 +80,10 @@
 
       <section id="view-multi" class="view">
         <div class="panel">
-          <h2>Multi-Access Keys</h2>
+          <div class="view-nav-bar">
+            <a href="#/" class="back-home" data-clear-search="true">← Home</a>
+            <span class="view-badge view-badge--multi">Multi-access key</span>
+          </div>
           <div class="controls multi-controls">
             <label class="control-field select-field">
               <span class="field-label">Key</span>
@@ -62,8 +92,8 @@
               </span>
             </label>
             <div class="control-actions">
-              <button id="multi-undo" class="secondary">Undo last</button>
-              <button id="multi-reset" class="secondary">Reset selections</button>
+              <button id="multi-undo" type="button" class="secondary">Undo last</button>
+              <button id="multi-reset" type="button" class="secondary">Reset selections</button>
             </div>
           </div>
           <div id="multi-summary" class="panel-info"></div>
@@ -90,18 +120,20 @@
 
       <section id="view-species" class="view">
         <div class="panel">
-          <h2>Species Search</h2>
-          <div class="controls">
-            <label for="species-search">Look up:</label>
-            <input id="species-search" type="search" placeholder="Scientific or common name…" autocomplete="off" />
+          <div class="view-nav-bar">
+            <a href="#/" class="back-home" data-clear-search="true">← Home</a>
+            <span id="species-rank-badge" class="view-badge view-badge--taxon">Taxon</span>
           </div>
-          <ul id="species-matches" class="species-matches"></ul>
-          <article id="species-detail" class="taxon-detail" hidden></article>
+          <article id="species-detail" class="taxon-detail"></article>
         </div>
       </section>
 
       <section id="view-about" class="view">
         <div class="panel">
+          <div class="view-nav-bar">
+            <a href="#/" class="back-home" data-clear-search="true">← Home</a>
+            <span class="view-badge">About</span>
+          </div>
           <h2>About</h2>
           <p>
             This static web app bundles VicFlora dichotomous and multi-access keys for offline use.
@@ -148,7 +180,11 @@
     </div>
 
     <footer>
-      <button id="about-link" type="button">About</button>
+      <section id="status" aria-live="polite"></section>
+      <div class="footer-row">
+        <a id="about-link" href="#/about">About &amp; Offline Storage</a>
+        <span id="app-version" class="app-version" aria-label="App version"></span>
+      </div>
     </footer>
 
     <script type="module" src="./app.js"></script>

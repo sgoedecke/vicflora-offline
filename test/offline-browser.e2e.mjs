@@ -319,30 +319,31 @@ async function run() {
     const offlineBoot = await waitFor(
       () =>
         cdp.eval(`(() => {
-          const opts = document.querySelectorAll('#dichotomous-options button').length;
+          const homeVisible = document.getElementById('view-home')?.classList.contains('visible');
+          const multiCards = document.querySelectorAll('#home-multi-list .quick-key-card').length;
           const ver = document.getElementById('app-version')?.textContent?.trim() || '';
-          const header = document.getElementById('dichotomous-header')?.textContent?.trim() || '';
-          return opts > 0 && ver && header ? { opts, ver, header, onLine: navigator.onLine } : null;
+          return homeVisible && multiCards > 0 && ver ? { multiCards, ver, onLine: navigator.onLine } : null;
         })()`),
       { timeoutMs: 15000, label: 'offline hard-reload boot' }
     );
     assert.equal(offlineBoot.onLine, false);
     assert.equal(offlineBoot.ver, `v${manifest.shellHash.slice(0, 7)}`);
-    console.log(`   Offline hard reload booted cleanly (${offlineBoot.ver}, ${offlineBoot.opts} root leads).`);
+    console.log(`   Offline hard reload booted cleanly (${offlineBoot.ver}, ${offlineBoot.multiCards} multi-access quick-start cards).`);
 
-    // 3. Walk dichotomous key across a linked key transition, test Back + Bracketed view + Restart.
+    // 3. Open Dichotomous Key from Home, walk across a linked key transition, test Bracketed view + Back + Restart.
     console.log('3. Walking dichotomous key offline across a linked key transition...');
-    const initialKeyTitle = await cdp.eval(`document.querySelector('#dichotomous-header strong').textContent.trim()`);
+    await cdp.eval(`document.querySelector('.home-dich-btn').click()`);
+    await waitFor(
+      () => cdp.eval(`document.querySelectorAll('#dichotomous-options > button[data-index]').length > 0`),
+      { timeoutMs: 10000, label: 'dichotomous root options' }
+    );
     let linkedTitle = null;
     for (let step = 0; step < 15; step += 1) {
       const state = await cdp.eval(`(() => {
-        const title = document.querySelector('#dichotomous-header strong')?.textContent?.trim() || '';
-        if (title && title !== ${JSON.stringify(initialKeyTitle)}) return { transitioned: true, title };
-        const nextKeyBtn = document.querySelector('#dichotomous-result button[data-next-key]');
-        if (nextKeyBtn) {
-          nextKeyBtn.click();
-          return { transitioned: false, clicked: nextKeyBtn.textContent.trim() };
-        }
+        const hash = window.location.hash;
+        const header = document.getElementById('dichotomous-header');
+        const title = !header?.hidden ? (header.querySelector('strong')?.textContent?.trim() || '') : '';
+        if (title && !hash.startsWith('#/key/1903')) return { transitioned: true, title };
         const btns = Array.from(document.querySelectorAll('#dichotomous-options > button[data-index]'));
         const linkedBtn = btns.find(b => b.textContent.includes('(see key'));
         const seedBtn = ${step === 0 ? "btns.find(b => /reproducing by seeds/i.test(b.textContent))" : 'null'};
@@ -355,14 +356,19 @@ async function run() {
         return { transitioned: false, done: true };
       })()`);
       await new Promise(r => setTimeout(r, 40));
-      const nowTitle = await cdp.eval(`document.querySelector('#dichotomous-header strong')?.textContent?.trim() || ''`);
-      if (nowTitle && nowTitle !== initialKeyTitle) {
-        linkedTitle = nowTitle;
+      const check = await cdp.eval(`(() => {
+        const hash = window.location.hash;
+        const header = document.getElementById('dichotomous-header');
+        const title = !header?.hidden ? (header.querySelector('strong')?.textContent?.trim() || '') : '';
+        return { hash, title };
+      })()`);
+      if (check.title && !check.hash.startsWith('#/key/1903')) {
+        linkedTitle = check.title;
         break;
       }
       if (state.done) break;
     }
-    assert.ok(linkedTitle && linkedTitle !== initialKeyTitle, 'Expected dichotomous walk to transition into a linked key');
+    assert.ok(linkedTitle, 'Expected dichotomous walk to transition into a linked key');
 
     // Toggle Bracketed view and verify couplets render, then Back and Restart.
     await cdp.eval(`document.querySelector('[data-dich-mode="bracketed"]').click()`);
@@ -372,13 +378,18 @@ async function run() {
     );
     assert.ok(bracketedCount > 0);
     await cdp.eval(`document.querySelector('[data-dich-mode="interactive"]').click()`);
-    await cdp.eval(`document.getElementById('dichotomous-back').click()`);
     await cdp.eval(`document.getElementById('dichotomous-restart').click()`);
-    console.log(`   Linked key transition OK ("${initialKeyTitle.split('\n')[0]}" -> "${linkedTitle.split('\n')[0]}"), bracketed (${bracketedCount} rows), back & restart OK.`);
+    await cdp.eval(`document.getElementById('dichotomous-back').click()`);
+    console.log(`   Linked key transition OK ("Key 1903" -> "${linkedTitle.split('\n')[0]}"), bracketed (${bracketedCount} rows), back & restart OK.`);
 
-    // 4. Multi-access key offline.
+    // 4. Multi-access key offline via Home quick-start card.
     console.log('4. Testing Multi-Access key offline...');
-    await cdp.eval(`document.querySelector('button.tab[data-view="multi"]').click()`);
+    await cdp.eval(`document.querySelector('#view-dichotomous .back-home').click()`);
+    await waitFor(() => cdp.eval(`document.querySelectorAll('#home-multi-list .quick-key-card').length > 0`), {
+      timeoutMs: 5000,
+      label: 'home multi cards'
+    });
+    await cdp.eval(`document.querySelector('#home-multi-list .quick-key-card').click()`);
     const multiInitial = await waitFor(
       () =>
         cdp.eval(`(() => {
@@ -408,20 +419,20 @@ async function run() {
     await cdp.eval(`document.getElementById('multi-reset').click()`);
     console.log(`   Multi-access key OK (${multiInitial.chars} characters; filter/undo/reset verified).`);
 
-    // 5. Species search + profile + offline photo + drawing + lightbox + glossary popover + bioregion SVG.
-    console.log(`5. Opening "${richSpecies.name}" offline and verifying photo, drawing, glossary & bioregion map...`);
-    await cdp.eval(`document.querySelector('button.tab[data-view="species"]').click()`);
+    // 5. Unified search + species profile + offline photo + drawing + lightbox + glossary popover + bioregion SVG.
+    console.log(`5. Opening "${richSpecies.name}" offline via unified search and verifying photo, drawing, glossary & bioregion map...`);
     await cdp.eval(`(() => {
-      const input = document.getElementById('species-search');
+      const input = document.getElementById('unified-search');
+      input.focus();
       input.value = ${JSON.stringify(richSpecies.name)};
       input.dispatchEvent(new Event('input', { bubbles: true }));
     })()`);
 
     await waitFor(
-      () => cdp.eval(`document.querySelectorAll('#species-matches button').length > 0`),
-      { timeoutMs: 10000, label: 'species search matches' }
+      () => cdp.eval(`document.querySelectorAll('#unified-search-results a.search-result-item[href^="#/taxon/"]').length > 0`),
+      { timeoutMs: 10000, label: 'unified search taxon matches' }
     );
-    await cdp.eval(`document.querySelector('#species-matches button').click()`);
+    await cdp.eval(`document.querySelector('#unified-search-results a.search-result-item[href^="#/taxon/"]').click()`);
 
     const profileCheck = await waitFor(
       () =>

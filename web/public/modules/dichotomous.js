@@ -2,9 +2,11 @@ const START_KEY_DEFAULT = '1903';
 
 function buildIndex(keyData) {
   const leadsByParent = new Map();
+  const leadsById = new Map();
   const items = new Map();
 
   (keyData.leads || []).forEach(lead => {
+    leadsById.set(String(lead.id), lead);
     if (!leadsByParent.has(lead.parent)) {
       leadsByParent.set(lead.parent, []);
     }
@@ -15,7 +17,7 @@ function buildIndex(keyData) {
     items.set(item.id, item);
   });
 
-  return { leadsByParent, items };
+  return { leadsByParent, leadsById, items };
 }
 
 function keyContextFromData(keyId, keyData) {
@@ -23,13 +25,14 @@ function keyContextFromData(keyId, keyData) {
   if (!root) {
     throw new Error(`Key ${keyId} missing root`);
   }
-  const { leadsByParent, items } = buildIndex(keyData);
+  const { leadsByParent, leadsById, items } = buildIndex(keyData);
   return {
     keyId,
     keyTitle: keyData.title || `Key ${keyId}`,
     taxonomicScope: keyData.scope?.name || null,
     root,
     leadsByParent,
+    leadsById,
     items,
     raw: keyData
   };
@@ -110,6 +113,18 @@ export class DichotomousNavigator {
     return this.stack[this.stack.length - 1];
   }
 
+  get currentKeyId() {
+    return this.currentState().context.keyId;
+  }
+
+  get rootNodeId() {
+    return this.currentState().context.root;
+  }
+
+  get currentNodeId() {
+    return this.currentState().currentLeadId;
+  }
+
   getOptions() {
     const state = this.currentState();
     const { context, currentLeadId } = state;
@@ -132,8 +147,56 @@ export class DichotomousNavigator {
       keyId: state.context.keyId,
       keyTitle: state.context.keyTitle,
       scope: state.context.taxonomicScope,
-      depth: this.stack.length
+      depth: this.stack.length,
+      currentLeadId: state.currentLeadId,
+      rootNodeId: state.context.root,
+      step: state.history.length + 1
     };
+  }
+
+  // Navigate directly to a lead node within the current key (for URL deep links),
+  // reconstructing the ancestor path from root so Back and Bracketed views work.
+  goToLead(leadId) {
+    const state = this.currentState();
+    const { context } = state;
+    const rootStr = String(context.root);
+    const targetStr = leadId ? String(leadId) : rootStr;
+    if (targetStr === rootStr) {
+      state.currentLeadId = context.root;
+      state.history = [];
+      return true;
+    }
+    const targetLead = context.leadsById.get(targetStr);
+    if (!targetLead || !context.leadsByParent.has(targetLead.id)) {
+      return false;
+    }
+
+    const ancestors = [];
+    const seen = new Set([targetStr]);
+    let cursor = targetLead;
+    while (cursor && String(cursor.parent) !== rootStr) {
+      const parentStr = String(cursor.parent);
+      if (seen.has(parentStr)) return false;
+      seen.add(parentStr);
+      const parentLead = context.leadsById.get(parentStr);
+      if (!parentLead) return false;
+      ancestors.push(parentLead.id);
+      cursor = parentLead;
+    }
+    ancestors.push(context.root);
+    ancestors.reverse();
+
+    state.currentLeadId = targetLead.id;
+    state.history = ancestors;
+    return true;
+  }
+
+  getParentLeadId() {
+    const state = this.currentState();
+    if (state.history.length) {
+      return state.history[state.history.length - 1];
+    }
+    return null;
   }
 
   chooseOption(index) {

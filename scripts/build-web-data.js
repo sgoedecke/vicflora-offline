@@ -12,6 +12,7 @@ const LOWERCASE_WORDS = new Set(['of', 'and', 'the', 'in']);
 const DATA_BUNDLES = [
   { id: 'bioregions', file: 'bioregions.json' },
   { id: 'glossary', file: 'glossary.json' },
+  { id: 'searchIndex', file: 'search-index.json' },
   { id: 'speciesIndex', file: 'species-index.json' },
   { id: 'dichotomous', file: 'dichotomous-keys.json' },
   { id: 'multi', file: 'multi-keys.json' },
@@ -518,6 +519,28 @@ async function main() {
   await writeJSON(path.join(webDataDir, 'multi-keys.json'), {
     keys: multi
   });
+
+  // Compact key directory for instant unified search (taxa come from species-index.json).
+  const searchIndex = {
+    multiAccessKeys: Object.entries(multi)
+      .map(([id, entry]) => ({
+        id,
+        title: entry.title || id,
+        entities: Array.isArray(entry.entities) ? entry.entities.length : 0
+      }))
+      .sort((a, b) => a.title.localeCompare(b.title)),
+    dichotomousKeys: searchableKeys
+      .map(({ id, title }) => {
+        const scope = dichotomous[id]?.scope?.name || null;
+        return scope ? { id, title, scope } : { id, title };
+      })
+      .sort((a, b) => {
+        if (a.id === '1903') return -1;
+        if (b.id === '1903') return 1;
+        return a.title.localeCompare(b.title);
+      })
+  };
+  await writeJSON(path.join(webDataDir, 'search-index.json'), searchIndex);
 
   // Build lightweight species-index.json + slimmed minified descriptions.json.
   // Keep generated bundles deterministic (no build-time timestamps) so unchanged data hashes stay stable.
