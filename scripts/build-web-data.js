@@ -191,6 +191,14 @@ async function main() {
     await fs.writeFile(path.join(webDataDir, 'glossary.json'), '[]');
   }
 
+  // Bioregion map geometry (see scripts/fetch-bioregions.js).
+  const bioregionsPath = path.join(root, 'vicflora-data', 'bioregions.json');
+  if (await fileExists(bioregionsPath)) {
+    await fs.copyFile(bioregionsPath, path.join(webDataDir, 'bioregions.json'));
+  } else {
+    await fs.writeFile(path.join(webDataDir, 'bioregions.json'), JSON.stringify({ regions: [] }));
+  }
+
   // Species photo shards and index (see scripts/fetch-photos.js).
   const crypto = require('crypto');
   const photosSrcDir = path.join(root, 'vicflora-data', 'photos');

@@ -15,6 +15,8 @@ const fs = require('fs').promises;
 const path = require('path');
 const fetch = require('node-fetch');
 
+const { summarizeTaxonBioregions } = require('./fetch-bioregions');
+
 const ENDPOINT = 'https://vicflora.rbg.vic.gov.au/graphql';
 const BATCH_SIZE = 50;
 const CHILDREN_BATCH_SIZE = 100;
@@ -145,6 +147,7 @@ async function fetchBatch(ids) {
         taxonName { fullName }
         preferredVernacularName { name }
         currentProfile { profile }
+        bioregions { bioregionCode occurrenceStatus establishmentMeans }
       }`
     )
     .join('\n');
@@ -222,11 +225,13 @@ async function fetchAndStore(store, ids, fallbackNames, { acceptedOnly = false }
       const taxon = results[index];
       if (acceptedOnly && (!taxon || taxon.taxonomicStatus !== 'ACCEPTED')) return;
       const profile = taxon?.currentProfile?.profile;
+      const bioregions = summarizeTaxonBioregions(taxon?.bioregions);
       store.taxa[id] = {
         name: taxon?.taxonName?.fullName || fallbackNames.get(id) || null,
         rank: taxon?.taxonRank || null,
         vernacular: taxon?.preferredVernacularName?.name || null,
-        html: profile ? sanitizeProfile(profile) : null
+        html: profile ? sanitizeProfile(profile) : null,
+        bioregions
       };
       stored += 1;
     });

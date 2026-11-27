@@ -11,6 +11,7 @@ import {
 import { Glossary } from './modules/glossary.js';
 import { PhotoStore, formatBytes } from './modules/photos.js';
 import { createOfflineManager, createRetryableLoader } from './modules/offline.js';
+import { createBioregionMap, ensureBioregionsLoaded } from './modules/bioregions.js';
 
 const statusEl = document.querySelector('#status');
 const viewButtons = document.querySelectorAll('header nav button');
@@ -1319,6 +1320,38 @@ async function attachTaxonPhoto(container, token, { allowRemote = true, forceRem
   }
 }
 
+async function attachBioregionMap(container, taxonBioregions, token) {
+  if (!container) return;
+  const distEl = container.querySelector('.distribution-habitat');
+  const hasProseRegions = Boolean(distEl?.querySelector('.region'));
+  if (!taxonBioregions && !hasProseRegions) return;
+
+  const data = await ensureBioregionsLoaded();
+  if (!data || !container.isConnected || container.dataset.renderToken !== token) return;
+  if (container.querySelector('.bioregion-map-card')) return;
+
+  const mapCard = createBioregionMap(data, taxonBioregions, { proseContainer: distEl });
+  if (!mapCard) return;
+
+  if (distEl) {
+    distEl.classList.add('has-bioregion-map');
+    distEl.replaceChildren(mapCard);
+  } else {
+    const placeholderOnly =
+      container.children.length === 1 &&
+      container.firstElementChild?.classList.contains('muted');
+    if (placeholderOnly) container.innerHTML = '';
+
+    const section = document.createElement('div');
+    section.className = 'distribution-habitat has-bioregion-map';
+    section.append(mapCard);
+
+    const infraEl = container.querySelector('.infraspecific-taxa');
+    if (infraEl) infraEl.before(section);
+    else container.append(section);
+  }
+}
+
 async function fillDescription(container, taxonId) {
   if (!container || !taxonId) return;
   const token = String(++descriptionRenderSeq);
@@ -1356,6 +1389,7 @@ async function fillDescription(container, taxonId) {
       }
     }
     annotateGlossary(container);
+    attachBioregionMap(container, soleChild.taxon.bioregions || taxon?.bioregions || null, token);
     attachTaxonPhoto(container, token);
     return;
   }
@@ -1390,6 +1424,7 @@ async function fillDescription(container, taxonId) {
     }
   }
 
+  attachBioregionMap(container, taxon?.bioregions || null, token);
   attachTaxonPhoto(container, token);
 }
 

@@ -1,5 +1,5 @@
 // Bump this (and .app-version in index.html) whenever app files change so the new set is installed atomically.
-const CACHE_NAME = 'vicflora-offline-v18';
+const CACHE_NAME = 'vicflora-offline-v19';
 // Ordered small-to-large so resumable precaching commits the shell first, then each data bundle.
 const ASSETS = [
   './',
@@ -12,10 +12,12 @@ const ASSETS = [
   './modules/species.js',
   './modules/glossary.js',
   './modules/photos.js',
+  './modules/bioregions.js',
   './manifest.json',
   './favicon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './data/bioregions.json',
   './data/glossary.json',
   './data/dichotomous-keys.json',
   './data/multi-keys.json',

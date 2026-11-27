@@ -753,6 +753,10 @@ body.lightbox-open {
   content: 'Distribution & habitat';
 }
 
+.taxon-description .distribution-habitat.has-bioregion-map::before {
+  content: 'Distribution';
+}
+
 .taxon-description .notes::before {
   content: 'Notes';
 }
@@ -778,6 +782,133 @@ body.lightbox-open {
 .taxon-description .region {
   text-decoration: underline dotted;
   cursor: help;
+}
+
+.bioregion-map-card {
+  --map-bg: #f8fafc;
+  --map-absent: #e2e8f0;
+  --map-native: #15803d;
+  --map-introduced: #d97706;
+  --map-uncertain: #0284c7;
+  --map-present: #15803d;
+  --map-user: #2563eb;
+
+  margin: 0.35rem 0 0.75rem;
+  padding: 0.35rem 0.25rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--map-bg);
+}
+
+.bioregion-map-stage {
+  width: 100%;
+}
+
+.bioregion-map-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.bioregion-shape {
+  stroke-width: 0.85;
+  stroke-linejoin: round;
+}
+
+.bioregion-shape[data-status='absent'] {
+  fill: var(--map-absent);
+  stroke: var(--map-absent);
+}
+
+.bioregion-shape[data-status='native'],
+.bioregion-shape[data-status='present'] {
+  fill: var(--map-native);
+  stroke: var(--map-native);
+}
+
+.bioregion-shape[data-status='introduced'] {
+  fill: var(--map-introduced);
+  stroke: var(--map-introduced);
+}
+
+.bioregion-shape[data-status='uncertain'] {
+  fill: var(--map-uncertain);
+  stroke: var(--map-uncertain);
+}
+
+.bioregion-user-layer {
+  pointer-events: none;
+}
+
+.bioregion-user-layer[hidden] {
+  display: none;
+}
+
+.bioregion-user-halo {
+  fill: var(--map-user);
+  fill-opacity: 0.24;
+}
+
+.bioregion-user-dot {
+  fill: var(--map-user);
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+.bioregion-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.85rem;
+  margin-top: 0.35rem;
+  padding: 0 0.5rem;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.bioregion-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+}
+
+.bioregion-legend-user[hidden] {
+  display: none;
+}
+
+.bioregion-swatch {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 0.18rem;
+  flex-shrink: 0;
+}
+
+.bioregion-swatch--native,
+.bioregion-swatch--present {
+  background: var(--map-native);
+}
+
+.bioregion-swatch--introduced {
+  background: var(--map-introduced);
+}
+
+.bioregion-swatch--uncertain {
+  background: var(--map-uncertain);
+}
+
+.bioregion-swatch--absent {
+  background: var(--map-absent);
+}
+
+.bioregion-swatch--user {
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 999px;
+  background: var(--map-user);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
 }
 
 .taxon-description a[data-taxon] {
@@ -989,5 +1120,19 @@ code {
   button.danger-subtle:hover {
     background: rgba(248, 113, 113, 0.12);
     border-color: rgba(248, 113, 113, 0.7);
+  }
+
+  .bioregion-map-card {
+    --map-bg: rgba(15, 23, 42, 0.55);
+    --map-absent: #243247;
+    --map-native: #22c55e;
+    --map-introduced: #f59e0b;
+    --map-uncertain: #38bdf8;
+    --map-present: #22c55e;
+    --map-user: #60a5fa;
+  }
+
+  .bioregion-user-dot {
+    stroke: #0f172a;
   }
 }
