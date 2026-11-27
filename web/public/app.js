@@ -52,12 +52,13 @@ const speciesElements = {
 };
 
 const offlineCoreStatusEl = document.querySelector('#offline-core-status');
-const offlineCoreControlsEl = document.querySelector('#offline-core-controls');
+const offlineControlsEl = document.querySelector('#offline-controls');
 const appVersionEl = document.querySelector('#app-version');
 const installAppBtn = document.querySelector('#install-app-btn');
 const photosStatusEl = document.querySelector('#photos-status');
-const photosControlsEl = document.querySelector('#photos-controls');
 let deferredInstallPrompt = null;
+let coreControlsHtml = '';
+let photoControlsHtml = '';
 
 const dataStore = createDataStore();
 const photoStore = new PhotoStore();
@@ -69,6 +70,8 @@ let photoSyncSkippedReason = null;
 let photoSyncClearing = false;
 let activePhotoSyncController = null;
 let activePhotoSyncPromise = null;
+let activeUpdateCheckPromise = null;
+let updateCheckState = { phase: 'idle', message: null };
 let lastStatusUpdateAt = 0;
 let lastAutoSyncAttemptAt = 0;
 let lastPhotoCheckAt = 0;
@@ -175,18 +178,49 @@ function setOfflineStatus() {
   setStatus(getOfflineStatusMessage(), { managedByOffline: true });
 }
 
+function renderOfflineControls() {
+  if (!offlineControlsEl) return;
+  offlineControlsEl.innerHTML = `${coreControlsHtml}${photoControlsHtml}`;
+}
+
+function setCoreControls(html) {
+  coreControlsHtml = html || '';
+  renderOfflineControls();
+}
+
 function renderOfflineCoreStatus() {
   if (!offlineCoreStatusEl) return;
   const offline = offlineManager.getState();
   if (offline.status === 'ready') {
-    offlineCoreStatusEl.textContent = 'Offline keys & descriptions ready.';
-    if (offlineCoreControlsEl) offlineCoreControlsEl.innerHTML = '';
+    if (offline.updating) {
+      offlineCoreStatusEl.textContent = 'Downloading app & keys update… The app will reload once finished.';
+      setCoreControls('<button type="button" class="secondary" disabled>Updating…</button>');
+      return;
+    }
+    if (updateCheckState.phase === 'checking') {
+      offlineCoreStatusEl.textContent = 'Checking for updates…';
+      setCoreControls('<button type="button" class="secondary" disabled>Checking…</button>');
+      return;
+    }
+    if (updateCheckState.phase === 'checking-photos') {
+      offlineCoreStatusEl.textContent =
+        photoSyncProgress && photoSyncProgress.phase !== 'done'
+          ? 'App & keys are up to date. Downloading updated photos…'
+          : 'App & keys are up to date. Checking photos…';
+      setCoreControls('<button type="button" class="secondary" disabled>Checking…</button>');
+      return;
+    }
+    offlineCoreStatusEl.textContent =
+      updateCheckState.phase === 'done' && updateCheckState.message
+        ? updateCheckState.message
+        : 'Offline keys & descriptions ready.';
+    setCoreControls('<button type="button" class="secondary" data-check-updates="true">Check for updates</button>');
     return;
   }
   if (offline.status === 'unsupported') {
     offlineCoreStatusEl.textContent =
       'Offline caching is unavailable in this browser (e.g. private browsing or an in-app browser). Open in Safari or Chrome to use offline.';
-    if (offlineCoreControlsEl) offlineCoreControlsEl.innerHTML = '';
+    setCoreControls('');
     return;
   }
   if (offline.status === 'installing' || offline.status === 'checking') {
@@ -197,17 +231,14 @@ function renderOfflineCoreStatus() {
           ? ` (${offline.cached}/${offline.total})`
           : '');
     offlineCoreStatusEl.textContent = `Downloading keys & descriptions for offline use${progress}… Keep this app open with reception until finished.`;
-    if (offlineCoreControlsEl) offlineCoreControlsEl.innerHTML = '';
+    setCoreControls('');
     return;
   }
   offlineCoreStatusEl.textContent =
     offline.status === 'offline-incomplete'
       ? 'Offline keys & descriptions have not finished downloading yet. Reconnect to finish.'
       : 'Offline download was interrupted before finishing.';
-  if (offlineCoreControlsEl) {
-    offlineCoreControlsEl.innerHTML =
-      '<button type="button" class="secondary" data-offline-retry="true">Retry offline download</button>';
-  }
+  setCoreControls('<button type="button" class="secondary" data-offline-retry="true">Retry offline download</button>');
 }
 
 function isWaitingForCoreOffline() {
@@ -303,6 +334,9 @@ function switchView(view) {
     if (!currentSpeciesId) speciesElements.search.focus();
   }
   if (view === 'about') {
+    if (updateCheckState.phase === 'done') {
+      updateCheckState = { phase: 'idle', message: null };
+    }
     renderOfflineCoreStatus();
     refreshPhotoStatus();
   }
@@ -1597,8 +1631,8 @@ function initSpecies() {
 }
 
 function setPhotosControls(html) {
-  if (!photosControlsEl) return;
-  photosControlsEl.innerHTML = html;
+  photoControlsHtml = html || '';
+  renderOfflineControls();
 }
 
 function renderPhotosStatus() {
@@ -1629,7 +1663,7 @@ function renderPhotosStatus() {
   if (photoSyncQuotaExceeded) {
     photosStatusEl.textContent = 'Offline species photos paused: not enough free storage on this device.';
     setPhotosControls(
-      '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+      '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync them</button>'
     );
     return;
   }
@@ -1637,7 +1671,7 @@ function renderPhotosStatus() {
     photosStatusEl.textContent = 'Waiting for offline keys to finish before syncing photos…';
     setPhotosControls(
       '<button type="button" class="secondary" disabled>Sync now</button>' +
-        '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+        '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync them</button>'
     );
     return;
   }
@@ -1656,7 +1690,7 @@ function renderPhotosStatus() {
     setPhotosControls(
       photoStatus?.supported === false
         ? ''
-        : '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+        : '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync them</button>'
     );
     return;
   }
@@ -1672,7 +1706,7 @@ function renderPhotosStatus() {
       : '';
     photosStatusEl.textContent = `Offline species ${mediaLabel} ready: ${countLabel} taxa (${sizeLabel}${drawingDetail}) stored separately from app updates.${persistHint}`;
     setPhotosControls(
-      '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+      '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync them</button>'
     );
   } else if (!photoStatus.supported) {
     photosStatusEl.textContent = `Species ${mediaLabel} (${countLabel} taxa) load online when connected.`;
@@ -1681,14 +1715,14 @@ function renderPhotosStatus() {
     photosStatusEl.textContent = `Offline species ${mediaLabel} paused on low-data connection (${photoStatus.matchedShardCount}/${photoStatus.shardCount} packs synced, ${sizeLabel} total).`;
     setPhotosControls(
       '<button type="button" class="secondary" data-photo-force-sync="true">Sync now</button>' +
-        '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+        '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync them</button>'
     );
   } else {
     const retryNote = photoSyncLastError ? ' Will resume automatically when signal improves.' : '';
     photosStatusEl.textContent = `Offline species ${mediaLabel}: ${photoStatus.matchedShardCount}/${photoStatus.shardCount} packs synced (${sizeLabel} total).${retryNote}`;
     setPhotosControls(
       '<button type="button" class="secondary" data-photo-force-sync="true">Sync now</button>' +
-        '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+        '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync them</button>'
     );
   }
 }
@@ -1740,21 +1774,26 @@ function updatePhotoProgressStatus(text) {
 }
 
 async function syncPhotosInBackground({ force = false, immediate = false } = {}) {
-  if (photoStore.isDisabled() || photoSyncClearing) return;
+  if (photoStore.isDisabled()) return { status: 'disabled' };
+  if (photoSyncClearing) return { status: 'busy' };
   if (isWaitingForCoreOffline()) {
     renderPhotosStatus();
-    return;
+    return { status: 'waiting-core' };
   }
   if (activePhotoSyncPromise) return activePhotoSyncPromise;
   const now = Date.now();
-  if (!force && !immediate && now - lastAutoSyncAttemptAt < 5000) return;
+  if (!force && !immediate && now - lastAutoSyncAttemptAt < 5000) {
+    return { status: 'throttled' };
+  }
   lastAutoSyncAttemptAt = now;
 
   const controller = new AbortController();
   activePhotoSyncController = controller;
   const run = (async () => {
     try {
-      if (controller.signal.aborted || photoStore.isDisabled()) return;
+      if (controller.signal.aborted || photoStore.isDisabled()) {
+        return { status: 'aborted' };
+      }
 
       photoSyncLastError = null;
       photoSyncSkippedReason = null;
@@ -1768,6 +1807,9 @@ async function syncPhotosInBackground({ force = false, immediate = false } = {})
           if (progress.phase === 'done' || ts - lastStatusUpdateAt >= 500) {
             lastStatusUpdateAt = ts;
             renderPhotosStatus();
+            if (updateCheckState.phase === 'checking-photos') {
+              renderOfflineCoreStatus();
+            }
             if (progress.phase !== 'done') {
               updatePhotoProgressStatus(
                 `Caching offline photos (${formatBytes(progress.loadedBytes)} / ${formatBytes(progress.totalBytes)})…`
@@ -1793,9 +1835,15 @@ async function syncPhotosInBackground({ force = false, immediate = false } = {})
       if (statusEl.textContent.startsWith('Caching offline photos')) {
         setOfflineStatus();
       }
+      if (result.quotaExceeded) return { status: 'quota' };
+      if (result.synced) return { status: 'updated', downloadedBytes: result.downloadedBytes };
+      if (result.upToDate) return { status: 'up-to-date' };
+      if (result.skippedReason) return { status: 'skipped', reason: result.skippedReason };
+      return { status: 'up-to-date' };
     } catch (error) {
       photoSyncProgress = null;
-      if (error?.name !== 'AbortError' && !photoStore.isDisabled()) {
+      const aborted = error?.name === 'AbortError' || photoStore.isDisabled();
+      if (!aborted) {
         photoSyncLastError = error.message || 'Network interrupted';
         console.warn('Background photo sync paused:', error);
       }
@@ -1803,6 +1851,9 @@ async function syncPhotosInBackground({ force = false, immediate = false } = {})
       if (statusEl.textContent.startsWith('Caching offline photos')) {
         setOfflineStatus();
       }
+      return aborted
+        ? { status: 'aborted' }
+        : { status: 'error', error: error.message || 'Network interrupted' };
     } finally {
       if (activePhotoSyncController === controller) {
         activePhotoSyncController = null;
@@ -1814,6 +1865,124 @@ async function syncPhotosInBackground({ force = false, immediate = false } = {})
   })();
   activePhotoSyncPromise = run;
   return run;
+}
+
+async function checkForUpdates() {
+  if (activeUpdateCheckPromise) return activeUpdateCheckPromise;
+
+  const run = (async () => {
+    if (navigator.onLine === false) {
+      updateCheckState = {
+        phase: 'done',
+        message: 'You’re offline — connect to the internet to check for updates.'
+      };
+      renderOfflineCoreStatus();
+      return;
+    }
+
+    updateCheckState = { phase: 'checking', message: null };
+    renderOfflineCoreStatus();
+
+    const swResult = await offlineManager.checkForUpdate();
+
+    if (swResult.status === 'updated') {
+      updateCheckState = {
+        phase: 'done',
+        message: 'Update downloaded — reloading…'
+      };
+      renderOfflineCoreStatus();
+      return;
+    }
+
+    if (swResult.status === 'offline') {
+      updateCheckState = {
+        phase: 'done',
+        message: 'You’re offline — connect to the internet to check for updates.'
+      };
+      renderOfflineCoreStatus();
+      return;
+    }
+
+    if (swResult.status === 'unsupported') {
+      updateCheckState = { phase: 'idle', message: null };
+      renderOfflineCoreStatus();
+      return;
+    }
+
+    if (swResult.status === 'error') {
+      updateCheckState = {
+        phase: 'done',
+        message: 'Could not check for app updates — check your connection and try again.'
+      };
+      renderOfflineCoreStatus();
+      return;
+    }
+
+    if (photoStore.isDisabled() || photoStatus?.supported === false) {
+      updateCheckState = {
+        phase: 'done',
+        message: 'App & keys are up to date.'
+      };
+      renderOfflineCoreStatus();
+      return;
+    }
+
+    updateCheckState = { phase: 'checking-photos', message: null };
+    renderOfflineCoreStatus();
+
+    const photoResult = await syncPhotosInBackground({ force: true, immediate: true });
+
+    if (photoResult?.status === 'updated') {
+      updateCheckState = {
+        phase: 'done',
+        message: 'Updated offline photos — everything is up to date.'
+      };
+    } else if (photoResult?.status === 'up-to-date') {
+      updateCheckState = {
+        phase: 'done',
+        message: 'Everything is up to date (keys & photos).'
+      };
+    } else if (photoResult?.status === 'quota') {
+      updateCheckState = {
+        phase: 'done',
+        message: 'App & keys are up to date, but photos could not update (not enough storage).'
+      };
+    } else if (
+      photoResult?.status === 'disabled' ||
+      photoResult?.status === 'aborted' ||
+      (photoResult?.status === 'skipped' && photoResult.reason === 'unsupported')
+    ) {
+      updateCheckState = {
+        phase: 'done',
+        message: 'App & keys are up to date.'
+      };
+    } else if (photoResult?.status === 'skipped' && photoResult.reason === 'locked') {
+      updateCheckState = {
+        phase: 'done',
+        message: 'App & keys are up to date. Photos are syncing in another tab.'
+      };
+    } else if (photoResult?.status === 'skipped' && photoResult.reason === 'offline') {
+      updateCheckState = {
+        phase: 'done',
+        message: 'App & keys are up to date, but you went offline before photos could be checked.'
+      };
+    } else {
+      updateCheckState = {
+        phase: 'done',
+        message: 'App & keys are up to date, but could not check photos — try again later.'
+      };
+    }
+    renderOfflineCoreStatus();
+  })();
+
+  activeUpdateCheckPromise = run;
+  try {
+    return await run;
+  } finally {
+    if (activeUpdateCheckPromise === run) {
+      activeUpdateCheckPromise = null;
+    }
+  }
 }
 
 async function dropOfflinePhotos() {
@@ -1880,6 +2049,10 @@ function initPhotos() {
     if (event.target.closest('[data-offline-retry]')) {
       offlineManager.retryNow();
       retryMissingViewData({ retryIfInFlight: true });
+      return;
+    }
+    if (event.target.closest('[data-check-updates]')) {
+      checkForUpdates();
       return;
     }
     if (event.target.closest('[data-photo-drop]')) {

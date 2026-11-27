@@ -1048,6 +1048,10 @@ body.lightbox-open {
   margin: 0;
 }
 
+.photos-storage-box p:not(:empty) + p:not(:empty) {
+  margin-top: 0.45rem;
+}
+
 .photos-controls {
   display: flex;
   flex-wrap: wrap;

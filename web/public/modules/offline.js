@@ -4,6 +4,7 @@ export const PHOTOS_CACHE_NAME = 'vicflora-photos';
 const PERMANENT_REGISTER_ERRORS = new Set(['NotSupportedError']);
 const DEFAULT_RETRY_DELAYS_MS = [3000, 6000, 12000, 24000, 48000, 60000];
 const UPDATE_THROTTLE_MS = 1000;
+const DEFAULT_UPDATE_TIMEOUT_MS = 15000;
 const DEFAULT_IDLE_TIMEOUT_MS = 30000;
 const DEFAULT_MAX_RETRIES = 3;
 const DEFAULT_RETRY_BASE_MS = 1500;
@@ -482,6 +483,7 @@ export function createOfflineManager({
   onStateChange = null,
   onReload = null,
   retryDelaysMs = DEFAULT_RETRY_DELAYS_MS,
+  updateTimeoutMs = DEFAULT_UPDATE_TIMEOUT_MS,
   setTimeout: setTimer = globalThis.setTimeout,
   clearTimeout: clearTimer = globalThis.clearTimeout,
   now = () => Date.now()
@@ -492,6 +494,7 @@ export function createOfflineManager({
   let registration = null;
   let registerInFlight = null;
   let dataSyncInFlight = null;
+  let manualUpdateInFlight = null;
   let retryTimer = null;
   let retryAttempt = 0;
   let refreshing = false;
@@ -509,6 +512,7 @@ export function createOfflineManager({
     totalBytes: null,
     hasActiveWorker: Boolean(sw?.controller),
     dataReady: !dataStore,
+    updating: false,
     error: null
   };
 
@@ -545,8 +549,9 @@ export function createOfflineManager({
     if (!state.hasActiveWorker || !state.dataReady) return false;
     clearRetryTimer();
     retryAttempt = 0;
-    const alreadyReady = state.status === 'ready';
+    const alreadyReady = state.status === 'ready' && !state.updating;
     state.status = 'ready';
+    state.updating = false;
     state.error = null;
     resolveReady(true);
     requestPersistentStorage();
@@ -594,8 +599,14 @@ export function createOfflineManager({
     const handleState = () => {
       if (worker.state === 'activated') return markWorkerActive();
       if (worker.state === 'installing' || worker.state === 'installed' || worker.state === 'activating') {
-        if (state.status !== 'ready' && state.status !== 'installing') {
-          state.status = 'installing';
+        if (!state.hasActiveWorker) {
+          if (state.status !== 'ready' && state.status !== 'installing') {
+            state.status = 'installing';
+            state.error = null;
+            emit();
+          }
+        } else if (!state.updating) {
+          state.updating = true;
           state.error = null;
           emit();
         }
@@ -603,12 +614,12 @@ export function createOfflineManager({
       }
       if (worker.state === 'redundant') {
         const reg = registration;
-        if (reg?.active) return markWorkerActive();
         const replacement =
           (reg?.installing && reg.installing !== worker && reg.installing) ||
           (reg?.waiting && reg.waiting !== worker && reg.waiting) ||
           null;
         if (replacement) return watchWorker(replacement);
+        if (reg?.active) return markWorkerActive();
         if (reg && !reg.active && !reg.waiting && !reg.installing) registration = null;
         markIncomplete('Offline caching was interrupted.');
       }
@@ -618,12 +629,150 @@ export function createOfflineManager({
     handleState();
   }
 
-  function checkForUpdate() {
+  function checkForUpdateInBackground() {
     if (!registration?.update) return;
     const ts = now();
     if (ts - lastUpdateCheckAt < UPDATE_THROTTLE_MS) return;
     lastUpdateCheckAt = ts;
     registration.update().catch(() => {});
+  }
+
+  function waitForUpdateWorker(initialWorker) {
+    return new Promise(resolve => {
+      let current = initialWorker;
+      let settled = false;
+
+      function finish(result) {
+        if (settled) return;
+        settled = true;
+        current?.removeEventListener?.('statechange', onStateChange);
+        sw?.removeEventListener?.('controllerchange', onControllerChange);
+        resolve(result);
+      }
+
+      function onControllerChange() {
+        finish({ status: 'updated' });
+      }
+
+      function onStateChange() {
+        if (!current) {
+          finish({ status: 'error', error: 'App update was interrupted.' });
+          return;
+        }
+        if (current.state === 'activated') {
+          finish({ status: 'updated' });
+          return;
+        }
+        if (current.state === 'redundant') {
+          const reg = registration;
+          const replacement =
+            (reg?.installing && reg.installing !== current && reg.installing) ||
+            (reg?.waiting && reg.waiting !== current && reg.waiting) ||
+            null;
+          if (replacement) {
+            current.removeEventListener?.('statechange', onStateChange);
+            current = replacement;
+            watchWorker(current);
+            current.addEventListener?.('statechange', onStateChange);
+            onStateChange();
+            return;
+          }
+          finish({ status: 'error', error: 'App update was interrupted.' });
+        }
+      }
+
+      sw?.addEventListener?.('controllerchange', onControllerChange);
+      watchWorker(current);
+      current.addEventListener?.('statechange', onStateChange);
+      onStateChange();
+    });
+  }
+
+  function awaitWithTimeout(promise, ms, label) {
+    if (!Number.isFinite(ms) || ms <= 0) return promise;
+    return new Promise((resolve, reject) => {
+      const timer = setTimer(() => reject(new Error(label)), ms);
+      promise.then(
+        value => {
+          clearTimer(timer);
+          resolve(value);
+        },
+        error => {
+          clearTimer(timer);
+          reject(error);
+        }
+      );
+    });
+  }
+
+  function checkForUpdate() {
+    if (!sw || !hasCacheSupport || state.status === 'unsupported') {
+      return Promise.resolve({ status: 'unsupported' });
+    }
+    if (isOffline()) {
+      return Promise.resolve({ status: 'offline' });
+    }
+    if (manualUpdateInFlight) return manualUpdateInFlight;
+
+    manualUpdateInFlight = (async () => {
+      try {
+        if (!registration) {
+          await ensureRegistered();
+        }
+        const reg = registration;
+        if (!reg) {
+          return {
+            status: 'error',
+            error: state.error || 'Could not reach the service worker.'
+          };
+        }
+
+        if (!state.hasActiveWorker) {
+          const pending = reg.installing || reg.waiting;
+          if (pending) {
+            return await waitForUpdateWorker(pending);
+          }
+          return {
+            status: 'error',
+            error: state.error || 'Offline setup has not finished yet.'
+          };
+        }
+
+        let pending = reg.installing || reg.waiting;
+        if (!pending && typeof reg.update === 'function') {
+          let discovered = null;
+          const onUpdateFound = () => {
+            if (reg.installing) discovered = reg.installing;
+          };
+          reg.addEventListener?.('updatefound', onUpdateFound);
+          lastUpdateCheckAt = now();
+          try {
+            await awaitWithTimeout(reg.update(), updateTimeoutMs, 'Update check timed out.');
+          } finally {
+            reg.removeEventListener?.('updatefound', onUpdateFound);
+          }
+          pending = discovered || reg.installing || reg.waiting;
+        }
+
+        if (!pending) {
+          if (dataStore && !state.dataReady) {
+            await ensureDataSynced();
+          }
+          return { status: 'up-to-date' };
+        }
+
+        return await waitForUpdateWorker(pending);
+      } catch (error) {
+        return {
+          status: 'error',
+          error: error?.message || 'Could not check for updates.'
+        };
+      } finally {
+        manualUpdateInFlight = null;
+      }
+    })();
+
+    return manualUpdateInFlight;
   }
 
   function attachRegistration(reg) {
@@ -655,7 +804,7 @@ export function createOfflineManager({
 
     registerInFlight = (async () => {
       try {
-        const reg = await sw.register(serviceWorkerUrl);
+        const reg = await sw.register(serviceWorkerUrl, { updateViaCache: 'none' });
         attachRegistration(reg);
         if (!reg.active && !reg.waiting && !reg.installing) {
           markIncomplete('Service worker did not start installing.');
@@ -752,7 +901,7 @@ export function createOfflineManager({
     clearRetryTimer();
     if (!state.hasActiveWorker) ensureOfflineReady();
     else {
-      checkForUpdate();
+      checkForUpdateInBackground();
       if (!state.dataReady) ensureDataSynced();
     }
   }
@@ -763,7 +912,7 @@ export function createOfflineManager({
       retryAttempt = 0;
       clearRetryTimer();
       ensureOfflineReady();
-    } else if (registration) checkForUpdate();
+    } else if (registration) checkForUpdateInBackground();
     else ensureRegistered();
   }
 
@@ -810,6 +959,7 @@ export function createOfflineManager({
       clearRetryTimer();
       return ensureOfflineReady();
     },
+    checkForUpdate,
     getState: snapshot,
     waitUntilReady: () => readyPromise
   };

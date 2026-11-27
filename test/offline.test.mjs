@@ -360,3 +360,128 @@ test('createRetryableLoader coalesces calls and retries an in-flight failure whe
   assert.equal(calls, 2);
   assert.equal(loader.isCompleted(), true);
 });
+
+test('createOfflineManager.checkForUpdate reports offline, up-to-date, timeout, and installing updates', async () => {
+  function makeWorker(initialState = 'installing') {
+    const listeners = new Set();
+    return {
+      state: initialState,
+      addEventListener(event, fn) {
+        if (event === 'statechange') listeners.add(fn);
+      },
+      removeEventListener(event, fn) {
+        if (event === 'statechange') listeners.delete(fn);
+      },
+      setState(next) {
+        this.state = next;
+        for (const fn of Array.from(listeners)) fn();
+      }
+    };
+  }
+
+  let online = false;
+  let updateImpl = async () => {};
+  let updateCalls = 0;
+  const swListeners = new Map();
+  const regListeners = new Set();
+  const activeWorker = makeWorker('activated');
+  const reg = {
+    active: activeWorker,
+    waiting: null,
+    installing: null,
+    addEventListener(event, fn) {
+      if (event === 'updatefound') regListeners.add(fn);
+    },
+    removeEventListener(event, fn) {
+      if (event === 'updatefound') regListeners.delete(fn);
+    },
+    async update() {
+      updateCalls += 1;
+      return updateImpl();
+    }
+  };
+  const sw = {
+    controller: activeWorker,
+    register: async () => reg,
+    addEventListener(event, fn) {
+      if (!swListeners.has(event)) swListeners.set(event, new Set());
+      swListeners.get(event).add(fn);
+    },
+    removeEventListener(event, fn) {
+      swListeners.get(event)?.delete(fn);
+    }
+  };
+
+  const snapshots = [];
+  const mgr = createOfflineManager({
+    navigator: { get onLine() { return online; }, serviceWorker: sw },
+    window: { addEventListener: () => {} },
+    document: { visibilityState: 'visible', addEventListener: () => {} },
+    onStateChange: s => snapshots.push(s),
+    onReload: () => {},
+    retryDelaysMs: [],
+    updateTimeoutMs: 30
+  });
+  mgr.start();
+  await mgr.waitUntilReady();
+
+  // Offline check returns offline without calling reg.update().
+  assert.deepEqual(await mgr.checkForUpdate(), { status: 'offline' });
+  assert.equal(updateCalls, 0);
+
+  // Online up-to-date check deduplicates concurrent calls.
+  online = true;
+  let releaseUpdate;
+  updateImpl = () => new Promise(r => { releaseUpdate = r; });
+  const p1 = mgr.checkForUpdate();
+  const p2 = mgr.checkForUpdate();
+  await new Promise(r => setTimeout(r, 5));
+  releaseUpdate();
+  const [r1, r2] = await Promise.all([p1, p2]);
+  assert.deepEqual(r1, { status: 'up-to-date' });
+  assert.deepEqual(r2, { status: 'up-to-date' });
+  assert.equal(updateCalls, 1);
+
+  // Hung reg.update() times out cleanly.
+  updateImpl = () => new Promise(() => {});
+  const timeoutRes = await mgr.checkForUpdate();
+  assert.equal(timeoutRes.status, 'error');
+  assert.match(timeoutRes.error, /timed out/i);
+
+  // Discovered update transitions updating: true -> false and resolves updated on activation.
+  const nextWorker = makeWorker('installing');
+  updateImpl = async () => {
+    reg.installing = nextWorker;
+    for (const fn of Array.from(regListeners)) fn();
+  };
+  const updatePromise = mgr.checkForUpdate();
+  await new Promise(r => setTimeout(r, 5));
+  assert.equal(mgr.getState().updating, true);
+
+  // If superseded by a replacement worker, follow the replacement instead of failing.
+  const replacementWorker = makeWorker('installing');
+  reg.installing = replacementWorker;
+  nextWorker.setState('redundant');
+  await new Promise(r => setTimeout(r, 5));
+  assert.equal(mgr.getState().updating, true);
+
+  reg.installing = null;
+  reg.active = replacementWorker;
+  replacementWorker.setState('activated');
+  assert.deepEqual(await updatePromise, { status: 'updated' });
+  assert.equal(mgr.getState().updating, false);
+
+  // Redundant worker with no replacement resolves as error and clears updating flag.
+  const brokenWorker = makeWorker('installing');
+  updateImpl = async () => {
+    reg.installing = brokenWorker;
+    for (const fn of Array.from(regListeners)) fn();
+  };
+  const failPromise = mgr.checkForUpdate();
+  await new Promise(r => setTimeout(r, 5));
+  reg.installing = null;
+  brokenWorker.setState('redundant');
+  const failRes = await failPromise;
+  assert.equal(failRes.status, 'error');
+  assert.equal(mgr.getState().updating, false);
+});

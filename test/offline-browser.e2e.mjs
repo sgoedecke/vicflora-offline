@@ -500,7 +500,7 @@ async function run() {
     assert.match(aboutText.photos, /offline/i);
 
     // Click Drop offline images button.
-    await cdp.eval(`Array.from(document.querySelectorAll('#photos-controls button')).find(b => /drop/i.test(b.textContent)).click()`);
+    await cdp.eval(`Array.from(document.querySelectorAll('#offline-controls button')).find(b => /drop/i.test(b.textContent)).click()`);
     await waitFor(
       () => cdp.eval(`(async () => !(await caches.keys()).includes('vicflora-photos'))()`),
       { timeoutMs: 5000, label: 'vicflora-photos cache deleted' }
@@ -515,10 +515,10 @@ async function run() {
       uploadThroughput: -1
     });
     await waitFor(
-      () => cdp.eval(`Boolean(Array.from(document.querySelectorAll('#photos-controls button')).find(b => /download/i.test(b.textContent)))`),
+      () => cdp.eval(`Boolean(Array.from(document.querySelectorAll('#offline-controls button')).find(b => /download/i.test(b.textContent)))`),
       { timeoutMs: 5000, label: 'Download offline images button' }
     );
-    await cdp.eval(`Array.from(document.querySelectorAll('#photos-controls button')).find(b => /download/i.test(b.textContent)).click()`);
+    await cdp.eval(`Array.from(document.querySelectorAll('#offline-controls button')).find(b => /download/i.test(b.textContent)).click()`);
     await waitFor(
       () =>
         cdp.eval(`(async () => {
@@ -527,10 +527,27 @@ async function run() {
         })()`),
       { timeoutMs: 90000, label: 'vicflora-photos re-synced' }
     );
-    console.log('   Drop + re-download verified cleanly.');
 
-    // 7. Simulate a CSS-only app-shell deploy: verify new SW activates, version rotates, and 0 data/photo files re-download!
-    console.log('7. Simulating a CSS-only deploy and verifying data + photos survive without re-downloading...');
+    // Verify manual "Check for updates" button reports up-to-date when nothing changed.
+    await waitFor(
+      () => cdp.eval(`Boolean(document.querySelector('[data-check-updates]'))`),
+      { timeoutMs: 5000, label: 'Check for updates button' }
+    );
+    await cdp.eval(`document.querySelector('[data-check-updates]').click()`);
+    const upToDateMsg = await waitFor(
+      () =>
+        cdp.eval(`(() => {
+          const text = document.getElementById('offline-core-status')?.textContent || '';
+          const btn = document.querySelector('[data-check-updates]');
+          return /everything is up to date/i.test(text) && btn ? text : null;
+        })()`),
+      { timeoutMs: 15000, label: 'Check for updates up-to-date message' }
+    );
+    assert.match(upToDateMsg, /everything is up to date/i);
+    console.log('   Drop + re-download + Check for updates (up-to-date) verified cleanly.');
+
+    // 7. Simulate a CSS-only app-shell deploy: click Check for updates and verify new SW activates, version rotates, and 0 data/photo files re-download!
+    console.log('7. Simulating a CSS-only deploy and verifying Check for updates + 0 data/photo re-downloads...');
     const newShellHash = 'eeeeeeeeeeee';
     const nextManifest = { ...manifest, shellHash: newShellHash };
     const cssBody = fs.readFileSync(path.join(PUBLIC_DIR, 'styles.css'), 'utf8') + '\n/* css-only deploy test */\n';
@@ -545,10 +562,7 @@ async function run() {
     });
 
     const requestsBeforeUpdate = server.requests.length;
-    await cdp.eval(`(async () => {
-      const reg = await navigator.serviceWorker.getRegistration();
-      await reg.update();
-    })()`);
+    await cdp.eval(`document.querySelector('[data-check-updates]').click()`);
 
     const updated = await waitFor(
       () =>
