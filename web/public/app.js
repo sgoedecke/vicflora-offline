@@ -1,12 +1,11 @@
 import { createNavigatorFromData, listSearchableKeys } from './modules/dichotomous.js';
 import { MultiAccessSession, listMultiKeys } from './modules/multiaccess.js';
 import {
-  buildTaxonIndex,
   findInfraspecificTaxa,
   findSoleInfraspecificProfile,
-  mergeDescriptionsIntoIndex,
+  loadSpeciesIndex,
   searchTaxa,
-  taxonIdFromUrl
+  taxonUrlFromId
 } from './modules/species.js';
 import { Glossary } from './modules/glossary.js';
 import { PhotoStore, formatBytes } from './modules/photos.js';
@@ -293,7 +292,7 @@ function switchView(view) {
     ensureMultiLoaded();
   }
   if (view === 'species') {
-    ensureDescriptionsLoaded();
+    if (currentSpeciesId) ensureDescriptionsLoaded();
     refreshPhotoStatus();
     if (!currentSpeciesId) speciesElements.search.focus();
   }
@@ -312,8 +311,8 @@ function initNavigation() {
   aboutLink?.addEventListener('click', () => switchView('about'));
 }
 
-function populateDichotomousSelect(keys) {
-  const entries = listSearchableKeys(keys);
+function populateDichotomousSelect(dichotomousBundle) {
+  const entries = listSearchableKeys(dichotomousBundle);
 
   const index1903 = entries.findIndex(entry => entry.id === '1903');
   if (index1903 > 0) {
@@ -332,15 +331,15 @@ function populateDichotomousSelect(keys) {
 }
 
 function setDichotomousSearchValue(keyId) {
-  const title = globalDichKeys[keyId]?.key_title || `Key ${keyId}`;
+  const title = globalDichKeys[keyId]?.title || `Key ${keyId}`;
   dichElements.search.value = `${title} [${keyId}]`;
 }
 
 function itemLabel(item, via) {
   if (!item) return '';
-  const name = item.item_name || '';
-  const viaName = via ? ` → ${via.item_name || ''}` : '';
-  const key = item.to_key || via?.to_key;
+  const name = item.name || '';
+  const viaName = via ? ` → ${via.name || ''}` : '';
+  const key = item.toKey || via?.toKey;
   return `${name}${viaName}${key ? ` (see key ${key})` : ''}`;
 }
 
@@ -386,7 +385,7 @@ function renderDichotomous() {
     button.type = 'button';
     button.dataset.index = index;
     button.innerHTML = `
-      <strong>${index + 1}. ${option.lead.lead_text}</strong>
+      <strong>${index + 1}. ${option.lead.text}</strong>
       ${option.item ? `<br/><span>${itemLabel(option.item, option.via)}</span>` : ''}
     `;
     button.addEventListener('click', () => handleDichotomousChoice(index));
@@ -443,7 +442,7 @@ function renderBracketed() {
         button.textContent = `→ ${lead.goto}`;
         dest.append(button);
       } else if (lead.item) {
-        const keyTarget = lead.item.to_key || lead.via?.to_key;
+        const keyTarget = lead.item.toKey || lead.via?.toKey;
         const name = document.createElement(keyTarget ? 'button' : 'span');
         name.className = 'taxon';
         if (keyTarget) {
@@ -453,8 +452,8 @@ function renderBracketed() {
           name.title = `Open key ${keyTarget}`;
         }
         name.textContent = lead.via
-          ? `${lead.item.item_name} → ${lead.via.item_name}`
-          : lead.item.item_name || '';
+          ? `${lead.item.name} → ${lead.via.name}`
+          : lead.item.name || '';
         if (keyTarget) name.append(' ›');
         dest.append(name);
       }
@@ -493,34 +492,36 @@ function setDichMode(mode) {
 }
 
 function showResult(item, via = null) {
-  dichResultItemId = item.item_id ?? null;
+  dichResultItemId = item.id ?? null;
   dichResult = { item, via };
   dichElements.result.classList.add('visible');
   const lines = [];
-  if (item.to_key) {
+  if (item.toKey) {
     lines.push(
-      `<h3><button type="button" class="link" data-next-key="${item.to_key}">${item.item_name || 'Result'}</button></h3>`
+      `<h3><button type="button" class="link" data-next-key="${item.toKey}">${item.name || 'Result'}</button></h3>`
     );
   } else {
-    lines.push(`<h3>${item.item_name || 'Result'}</h3>`);
+    lines.push(`<h3>${item.name || 'Result'}</h3>`);
   }
   if (via) {
-    lines.push(`<p>Represented in Victoria by <strong>${via.item_name || ''}</strong>.</p>`);
+    lines.push(`<p>Represented in Victoria by <strong>${via.name || ''}</strong>.</p>`);
   }
   lines.push('<div class="taxon-description"></div>');
-  if (item.url) {
-    lines.push(`<p><a href="${item.url}" target="_blank" rel="noopener">Open VicFlora entry</a></p>`);
+  const itemUrl = item.taxonId ? taxonUrlFromId(item.taxonId) : item.url;
+  const viaUrl = via?.taxonId ? taxonUrlFromId(via.taxonId) : via?.url;
+  if (itemUrl) {
+    lines.push(`<p><a href="${itemUrl}" target="_blank" rel="noopener">Open VicFlora entry</a></p>`);
   }
-  if (via?.url) {
-    lines.push(`<p><a href="${via.url}" target="_blank" rel="noopener">Open VicFlora entry for ${via.item_name || ''}</a></p>`);
+  if (viaUrl) {
+    lines.push(`<p><a href="${viaUrl}" target="_blank" rel="noopener">Open VicFlora entry for ${via.name || ''}</a></p>`);
   }
-  if (item.to_key) {
-    lines.push(`<p>Leads to key ${item.to_key}.</p>`);
+  if (item.toKey) {
+    lines.push(`<p>Leads to key ${item.toKey}.</p>`);
   }
   dichElements.result.innerHTML = lines.join('');
   fillDescription(
     dichElements.result.querySelector('.taxon-description'),
-    taxonIdFromUrl(via?.url) || taxonIdFromUrl(item.url)
+    via?.taxonId || item.taxonId
   );
   saveState();
 
@@ -632,7 +633,7 @@ function populateMultiSelect(list) {
   list.forEach(entry => {
     const option = document.createElement('option');
     option.value = entry.id;
-    const label = entry.displayTitle || entry.title || entry.id;
+    const label = entry.title || entry.id;
     option.textContent = `${label} (${entry.entities} taxa)`;
     multiElements.select.appendChild(option);
   });
@@ -643,9 +644,8 @@ function renderMultiSummary(session, keyInfo) {
   const totalTaxa = session.possibleTaxa.size + session.eliminatedTaxa.size;
   const remaining = session.possibleTaxa.size;
   const progress = totalTaxa ? Math.round(((totalTaxa - remaining) / totalTaxa) * 100) : 0;
-  const title = keyInfo.displayTitle || keyInfo.title;
   multiElements.summary.innerHTML = `
-    <strong>${title}</strong><br/>
+    <strong>${keyInfo.title}</strong><br/>
     ${keyInfo.entities} taxa · ${keyInfo.characters} characters<br/>
     Remaining: ${remaining} (${progress}% filtered)
   `;
@@ -811,13 +811,13 @@ function renderMultiRemaining(session) {
   const list = document.createElement('ol');
   sample.forEach(taxon => {
     const item = document.createElement('li');
-    const taxonId = taxonIdFromUrl(taxon.url);
+    const taxonId = taxon.taxonId;
     if (taxonId) {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'link';
       button.dataset.taxon = taxonId;
-      button.dataset.fallbackUrl = taxon.url;
+      button.dataset.fallbackUrl = taxon.url || taxonUrlFromId(taxonId);
       button.textContent = taxon.name;
       item.appendChild(button);
     } else if (taxon.url) {
@@ -903,10 +903,15 @@ function bindMultiControls(list) {
 
 async function loadData() {
   setStatus('Loading key bundles…');
-  const [dichotomousBundle] = await Promise.all([fetchJSON('./data/dichotomous-keys.json'), loadGlossary()]);
+  const [dichotomousBundle, speciesIndexBundle] = await Promise.all([
+    fetchJSON('./data/dichotomous-keys.json'),
+    fetchJSON('./data/species-index.json'),
+    loadGlossary()
+  ]);
 
   globalDichKeys = dichotomousBundle.keys || {};
-  const dichEntries = populateDichotomousSelect(globalDichKeys);
+  taxonIndex = loadSpeciesIndex(speciesIndexBundle);
+  const dichEntries = populateDichotomousSelect(dichotomousBundle);
   if (dichEntries.length) {
     dichNavigator = createNavigatorFromData(globalDichKeys, dichEntries[0].id);
     const saved = savedState.dich;
@@ -922,22 +927,13 @@ async function loadData() {
     setDichotomousSearchValue(dichNavigator.startKeyId);
     renderDichotomous();
     const savedResult = saved?.resultItemId != null ? dichNavigator.findItem(saved.resultItemId) : null;
-    if (savedResult && !savedResult.to_key) {
+    if (savedResult && !savedResult.toKey) {
       showResult(savedResult);
     }
   }
   bindDichotomousControls();
-  taxonIndex = buildTaxonIndex(globalDichKeys, descriptions);
-  if (savedState.speciesId) {
-    if (taxonIndex.has(savedState.speciesId)) {
-      showSpecies(savedState.speciesId);
-    } else {
-      ensureDescriptionsLoaded().then(() => {
-        if (taxonIndex.has(savedState.speciesId)) {
-          showSpecies(savedState.speciesId);
-        }
-      });
-    }
+  if (savedState.speciesId && taxonIndex.has(savedState.speciesId)) {
+    showSpecies(savedState.speciesId);
   }
 
   setOfflineStatus();
@@ -967,7 +963,11 @@ async function loadMultiData() {
   if (multiList.length) {
     populateMultiSelect(multiList);
     const saved = savedState.multi;
-    const savedInfo = saved && multiList.find(entry => entry.id === saved.key);
+    const savedInfo =
+      saved &&
+      multiList.find(
+        entry => entry.id === saved.key || `key-${entry.id}-complete.json` === saved.key
+      );
     const keyInfo = savedInfo || multiList[0];
     startMultiSession(keyInfo);
     if (savedInfo) {
@@ -990,10 +990,6 @@ function escapeHtml(text) {
 const descriptionsLoader = createRetryableLoader(async () => {
   const bundle = await fetchJSON('./data/descriptions.json');
   descriptions = bundle.taxa || {};
-  mergeDescriptionsIntoIndex(taxonIndex, descriptions);
-  if (currentView === 'species' && speciesElements.search.value.trim()) {
-    renderSpeciesMatches();
-  }
 });
 
 // Descriptions are only fetched when first needed (a key result or the Species tab).
@@ -1360,13 +1356,14 @@ async function fillDescription(container, taxonId) {
   await ensureDescriptionsLoaded();
   if (!container.isConnected || container.dataset.renderToken !== token) return;
 
+  const entry = taxonIndex.get(taxonId);
   const taxon = descriptions[taxonId];
   const soleChild = findSoleInfraspecificProfile(taxonIndex, taxonId, descriptions);
   const primaryPhotoId = soleChild ? soleChild.entry.id : taxonId;
   const fallbackPhotoId = soleChild ? taxonId : '';
   const displayName = soleChild
     ? soleChild.entry.name
-    : (taxon?.name || taxonIndex.get(taxonId)?.name || 'Species photo');
+    : (entry?.name || 'Species photo');
 
   container.dataset.photoPrimaryId = primaryPhotoId;
   container.dataset.photoFallbackId = fallbackPhotoId;
@@ -1374,8 +1371,8 @@ async function fillDescription(container, taxonId) {
 
   // Render text immediately without waiting on IndexedDB or photo index network fetches.
   if (soleChild) {
-    const vernacular = taxon?.vernacular || soleChild.taxon.vernacular;
-    const rankLabel = INFRASPECIFIC_RANK_LABELS[soleChild.taxon.rank] || 'infraspecific taxon';
+    const vernacular = entry?.vernacular || soleChild.entry.vernacular;
+    const rankLabel = INFRASPECIFIC_RANK_LABELS[soleChild.entry.rank] || 'infraspecific taxon';
     const parentNotes = extractNotesHtml(taxon?.html);
     container.innerHTML = `
       ${vernacular ? `<p class="vernacular">${escapeHtml(vernacular)}</p>` : ''}
@@ -1394,14 +1391,15 @@ async function fillDescription(container, taxonId) {
     return;
   }
 
-  const children = findInfraspecificTaxa(taxonIndex, taxonId, descriptions);
+  const children = findInfraspecificTaxa(taxonIndex, taxonId);
+  const vernacular = entry?.vernacular;
   if (taxon?.html || children.length) {
     container.innerHTML = taxon?.html
       ? `
-        ${taxon.vernacular ? `<p class="vernacular">${escapeHtml(taxon.vernacular)}</p>` : ''}
+        ${vernacular ? `<p class="vernacular">${escapeHtml(vernacular)}</p>` : ''}
         ${taxon.html}
       `
-      : (taxon?.vernacular ? `<p class="vernacular">${escapeHtml(taxon.vernacular)}</p>` : '');
+      : (vernacular ? `<p class="vernacular">${escapeHtml(vernacular)}</p>` : '');
     for (const link of container.querySelectorAll('a[data-taxon]')) {
       if (!taxonIndex.has(link.dataset.taxon)) {
         link.removeAttribute('data-taxon');
@@ -1438,23 +1436,23 @@ function showSpecies(taxonId) {
 
   const keyButtons = entry.keys
     .map(keyId => {
-      const title = globalDichKeys[keyId]?.key_title || `Key ${keyId}`;
+      const title = globalDichKeys[keyId]?.title || `Key ${keyId}`;
       return `<li><button type="button" class="link" data-open-key="${escapeHtml(keyId)}">${escapeHtml(title)}</button></li>`;
     })
     .join('');
   const ownKey = entry.toKey && globalDichKeys[entry.toKey]
-    ? `<p><button type="button" class="secondary" data-open-key="${escapeHtml(entry.toKey)}">Open key to ${escapeHtml(globalDichKeys[entry.toKey].key_title)}</button></p>`
+    ? `<p><button type="button" class="secondary" data-open-key="${escapeHtml(entry.toKey)}">Open key to ${escapeHtml(globalDichKeys[entry.toKey].title)}</button></p>`
     : '';
   const appearsIn = keyButtons
     ? `<h4>Appears in</h4><ul class="key-links">${keyButtons}</ul>`
     : '';
 
   detail.innerHTML = `
-    <h3>${escapeHtml(descriptions[taxonId]?.name || entry.name)}</h3>
+    <h3>${escapeHtml(entry.name)}</h3>
     <div class="taxon-description"><p class="muted">No description bundled for this taxon.</p></div>
     ${ownKey}
     ${appearsIn}
-    <p><a href="https://vicflora.rbg.vic.gov.au/flora/taxon/${escapeHtml(taxonId)}" target="_blank" rel="noopener">Open VicFlora entry</a></p>
+    <p><a href="${escapeHtml(taxonUrlFromId(taxonId))}" target="_blank" rel="noopener">Open VicFlora entry</a></p>
   `;
   fillDescription(detail.querySelector('.taxon-description'), taxonId);
   saveState();
@@ -1472,10 +1470,10 @@ function openDichotomousKey(keyId) {
 }
 
 function renderSpeciesMatches() {
-  const results = searchTaxa(taxonIndex, speciesElements.search.value, descriptions);
+  const results = searchTaxa(taxonIndex, speciesElements.search.value);
   speciesElements.matches.innerHTML = results
     .map(entry => {
-      const vernacular = descriptions[entry.id]?.vernacular;
+      const vernacular = entry.vernacular;
       return `<li><button type="button" data-taxon="${escapeHtml(entry.id)}">
         <span class="scientific_name">${escapeHtml(entry.name)}</span>
         ${vernacular ? `<small>${escapeHtml(vernacular)}</small>` : ''}
@@ -1564,18 +1562,16 @@ function initGlossary() {
 }
 
 function initSpecies() {
-  speciesElements.search.addEventListener('input', async () => {
-    await ensureDescriptionsLoaded();
+  speciesElements.search.addEventListener('input', () => {
     renderSpeciesMatches();
   });
 
   // Taxon links can appear in search results, multi-access results, and inside description notes.
-  document.addEventListener('click', async event => {
+  document.addEventListener('click', event => {
     const taxonLink = event.target.closest('[data-taxon]');
     if (taxonLink) {
       const id = taxonLink.dataset.taxon;
       event.preventDefault();
-      await ensureDescriptionsLoaded();
       if (taxonIndex.has(id)) {
         switchView('species');
         showSpecies(id);
@@ -1931,8 +1927,10 @@ function retryMissingViewData({ retryIfInFlight = false } = {}) {
   if (currentView === 'multi' && !multiLoader.isCompleted()) {
     ensureMultiLoaded({ retryIfInFlight });
   }
-  if (currentView === 'species' && !descriptionsLoader.isCompleted()) {
-    ensureDescriptionsLoaded({ retryIfInFlight });
+  if (currentView === 'species' && currentSpeciesId && !descriptionsLoader.isCompleted()) {
+    ensureDescriptionsLoaded({ retryIfInFlight }).then(() => {
+      if (currentSpeciesId) showSpecies(currentSpeciesId);
+    });
   }
 }
 

@@ -5,29 +5,29 @@ function buildIndex(keyData) {
   const items = new Map();
 
   (keyData.leads || []).forEach(lead => {
-    if (!leadsByParent.has(lead.parent_id)) {
-      leadsByParent.set(lead.parent_id, []);
+    if (!leadsByParent.has(lead.parent)) {
+      leadsByParent.set(lead.parent, []);
     }
-    leadsByParent.get(lead.parent_id).push(lead);
+    leadsByParent.get(lead.parent).push(lead);
   });
 
   (keyData.items || []).forEach(item => {
-    items.set(item.item_id, item);
+    items.set(item.id, item);
   });
 
   return { leadsByParent, items };
 }
 
 function keyContextFromData(keyId, keyData) {
-  const root = keyData?.first_step?.root_node_id;
+  const root = keyData?.root;
   if (!root) {
-    throw new Error(`Key ${keyId} missing first_step.root_node_id`);
+    throw new Error(`Key ${keyId} missing root`);
   }
   const { leadsByParent, items } = buildIndex(keyData);
   return {
     keyId,
-    keyTitle: keyData.key_title || `Key ${keyId}`,
-    taxonomicScope: keyData.taxonomic_scope?.item_name || null,
+    keyTitle: keyData.title || `Key ${keyId}`,
+    taxonomicScope: keyData.scope?.name || null,
     root,
     leadsByParent,
     items,
@@ -40,8 +40,8 @@ const LINK_THROUGH = '[link through]';
 // KeyBase models single-member groups (e.g. a family with one genus) as a lead
 // ending at the group, with one "[link through]" child pointing at the member.
 function linkThroughItem(context, lead) {
-  const children = context.leadsByParent.get(lead.lead_id) || [];
-  const link = children.find(child => child.lead_text === LINK_THROUGH && child.item);
+  const children = context.leadsByParent.get(lead.id) || [];
+  const link = children.find(child => child.text === LINK_THROUGH && child.item);
   return link ? context.items.get(link.item) || null : null;
 }
 
@@ -51,7 +51,7 @@ function buildBracketedKey(context) {
   const couplets = [];
   const numberByNode = new Map();
   const isCouplet = nodeId =>
-    (context.leadsByParent.get(nodeId) || []).some(lead => lead.lead_text !== LINK_THROUGH);
+    (context.leadsByParent.get(nodeId) || []).some(lead => lead.text !== LINK_THROUGH);
 
   const visit = (nodeId, parentNumber) => {
     const number = couplets.length + 1;
@@ -61,12 +61,12 @@ function buildBracketedKey(context) {
 
     for (const lead of context.leadsByParent.get(nodeId) || []) {
       const item = lead.item ? context.items.get(lead.item) || null : null;
-      const entry = { leadId: lead.lead_id, text: lead.lead_text, item, via: null, goto: null };
+      const entry = { leadId: lead.id, text: lead.text, item, via: null, goto: null };
       if (item) {
         entry.via = linkThroughItem(context, lead);
-      } else if (isCouplet(lead.lead_id)) {
-        visit(lead.lead_id, number);
-        entry.goto = numberByNode.get(lead.lead_id);
+      } else if (isCouplet(lead.id)) {
+        visit(lead.id, number);
+        entry.goto = numberByNode.get(lead.id);
       }
       couplet.leads.push(entry);
     }
@@ -121,7 +121,7 @@ export class DichotomousNavigator {
         lead: option,
         item,
         via,
-        hasLink: Boolean(item?.to_key || via?.to_key)
+        hasLink: Boolean(item?.toKey || via?.toKey)
       };
     });
   }
@@ -147,9 +147,9 @@ export class DichotomousNavigator {
     const { lead, item, via } = choice;
 
     if (item) {
-      const target = item.to_key ? item : via?.to_key ? via : null;
+      const target = item.toKey ? item : via?.toKey ? via : null;
       if (target) {
-        this.openKey(String(target.to_key));
+        this.openKey(String(target.toKey));
         return {
           type: 'key-transition',
           item: target
@@ -163,7 +163,7 @@ export class DichotomousNavigator {
     }
 
     state.history.push(state.currentLeadId);
-    state.currentLeadId = lead.lead_id;
+    state.currentLeadId = lead.id;
     return {
       type: 'continue'
     };
@@ -236,32 +236,27 @@ export function createNavigatorFromData(rawKeys, startKeyId = START_KEY_DEFAULT)
   return new DichotomousNavigator(rawKeys, startKeyId);
 }
 
-function lastEdited(key) {
-  const times = [key.timestamp_created, key.timestamp_modified].filter(Boolean).sort();
-  return times[times.length - 1] || '';
-}
+// Returns the build-time deduplicated searchable key list from a compiled
+// dichotomous bundle, with a simple fallback for synthetic key maps in tests.
+export function listSearchableKeys(bundleOrKeys) {
+  if (Array.isArray(bundleOrKeys?.searchableKeys)) {
+    return bundleOrKeys.searchableKeys.map(({ id, title }) => ({ id, title }));
+  }
 
-// KeyBase contains some keys uploaded more than once under the same title.
-// Keep every key navigable, but only list one per title in search: prefer the
-// copy a parent key links to, then the most recently edited.
-export function listSearchableKeys(rawKeys) {
+  const keys = bundleOrKeys?.keys || bundleOrKeys || {};
   const linked = new Set();
-  for (const key of Object.values(rawKeys)) {
+  for (const key of Object.values(keys)) {
     for (const item of key.items || []) {
-      if (item?.to_key) linked.add(String(item.to_key));
+      if (item?.toKey) linked.add(String(item.toKey));
     }
   }
 
   const byTitle = new Map();
-  for (const [id, key] of Object.entries(rawKeys)) {
-    const title = key.key_title || `Key ${id}`;
-    const candidate = { id, title, linked: linked.has(id), edited: lastEdited(key) };
+  for (const [id, key] of Object.entries(keys)) {
+    const title = key.title || `Key ${id}`;
+    const candidate = { id, title, linked: linked.has(id) };
     const current = byTitle.get(title);
-    if (
-      !current ||
-      (candidate.linked && !current.linked) ||
-      (candidate.linked === current.linked && candidate.edited > current.edited)
-    ) {
+    if (!current || (candidate.linked && !current.linked)) {
       byTitle.set(title, candidate);
     }
   }

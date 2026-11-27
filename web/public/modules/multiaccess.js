@@ -1,33 +1,12 @@
-const LOWERCASE_WORDS = new Set(['of', 'and', 'the', 'in']);
-
-function titleCase(value) {
-  return value.replace(/\w+/g, (word, index) => {
-    const lower = word.toLowerCase();
-    if (index > 0 && LOWERCASE_WORDS.has(lower)) {
-      return lower;
-    }
-    return lower.charAt(0).toUpperCase() + lower.slice(1);
-  });
-}
-
-function normalizeKeyTitle(title) {
-  if (!title) return '';
-  const pattern = /^(?:multi[\s-]*access\s+key|key)\s+to\s+(?:the\s+)?/i;
-  const cleaned = title
-    .trim()
-    .replace(pattern, '')
-    .replace(/_updated.*$/i, '')
-    .replace(/(\bVictoria)\d+$/i, '$1')
-    .trim();
-  return cleaned ? titleCase(cleaned) : titleCase(title.trim());
-}
+import { taxonUrlFromId } from './species.js';
 
 // Lucid score codes (as used by VicFlora's Lucid player):
 // 0 absent/unscored, 1 common, 2 rare, 3 uncertain, 4 common & misinterpreted,
 // 5 rare & misinterpreted. VicFlora keys retain uncertain and misinterpreted
 // scores, so any non-zero score counts as a match.
-function isMatchingScore(score) {
-  return score >= 1 && score <= 5;
+// Scores are compiled as compact digit strings ("01020..."), one char per entity.
+function isMatchingScoreChar(code) {
+  return code >= 49 && code <= 53; // '1'..'5'
 }
 
 // Lucid measures are [type, outsideMin, normalMin, normalMax, outsideMax].
@@ -46,10 +25,10 @@ function parseMeasure(raw) {
 export class MultiAccessSession {
   constructor(keyData) {
     this.keyData = keyData;
-    this.scores = keyData.decompressedScores || {};
-    this.measures = keyData.decompressedMeasures || {};
+    this.scores = keyData.scores || {};
+    this.measures = keyData.measures || {};
     this.entities = keyData.entities || [];
-    // Score rows are indexed by entity position, so keep both id and index.
+    // Score strings are indexed by entity position, so keep both id and index.
     this.taxonIds = this.entities.map(entity => String(entity.id));
     this.taxonIndex = new Map(this.taxonIds.map((id, index) => [id, index]));
     this.entityById = new Map(this.entities.map(entity => [String(entity.id), entity]));
@@ -120,7 +99,9 @@ export class MultiAccessSession {
   stateMatchesTaxon(stateId, taxonId) {
     const row = this.scores[stateId] ?? this.scores[String(stateId)];
     if (!row) return false;
-    return isMatchingScore(row[this.taxonIndex.get(taxonId)]);
+    const idx = this.taxonIndex.get(taxonId);
+    if (idx === undefined) return false;
+    return isMatchingScoreChar(row.charCodeAt(idx));
   }
 
   getMeasure(characterId, taxonId) {
@@ -197,17 +178,19 @@ export class MultiAccessSession {
 
   getTaxonName(taxonId) {
     const entity = this.entityById.get(String(taxonId));
-    return entity?.name || entity?.title || `Taxon ${taxonId}`;
+    return entity?.name || `Taxon ${taxonId}`;
+  }
+
+  getTaxonId(taxonId) {
+    const entity = this.entityById.get(String(taxonId));
+    return entity?.taxonId || null;
   }
 
   getTaxonUrl(taxonId) {
     const entity = this.entityById.get(String(taxonId));
     if (!entity) return null;
-
-    if (entity.url) return entity.url;
-
-    const profileEntry = entity.text?.find(item => typeof item?.path === 'string' && item.path.includes('/flora/taxon/'));
-    return profileEntry?.path || null;
+    if (entity.taxonId) return taxonUrlFromId(entity.taxonId);
+    return entity.url || null;
   }
 
   // Range of values across the remaining taxa that have a measurement.
@@ -287,7 +270,12 @@ export class MultiAccessSession {
 
   remainingTaxa(limit = 25) {
     const list = Array.from(this.possibleTaxa)
-      .map(id => ({ id, name: this.getTaxonName(id), url: this.getTaxonUrl(id) }))
+      .map(id => ({
+        id,
+        name: this.getTaxonName(id),
+        taxonId: this.getTaxonId(id),
+        url: this.getTaxonUrl(id)
+      }))
       .sort((a, b) => a.name.localeCompare(b.name));
     return {
       total: list.length,
@@ -326,10 +314,9 @@ export class MultiAccessSession {
 
 export function listMultiKeys(bundle) {
   return Object.entries(bundle || {})
-    .map(([fileName, key]) => ({
-      id: fileName,
-      title: key.title || fileName,
-      displayTitle: normalizeKeyTitle(key.title || fileName),
+    .map(([id, key]) => ({
+      id,
+      title: key.title || id,
       entities: key.entities?.length || 0,
       characters: key.features?.length || 0,
       data: key

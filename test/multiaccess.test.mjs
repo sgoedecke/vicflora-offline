@@ -5,18 +5,26 @@ import { MultiAccessSession } from '../web/public/modules/multiaccess.js';
 import { createNavigatorFromData, listSearchableKeys } from '../web/public/modules/dichotomous.js';
 
 const readJSON = file => JSON.parse(readFileSync(new URL(`../web/public/data/${file}`, import.meta.url)));
-const multiKeys = readJSON('multi-keys.json').keys;
-const dichKeys = readJSON('dichotomous-keys.json').keys;
+const multiBundle = readJSON('multi-keys.json');
+const dichBundle = readJSON('dichotomous-keys.json');
+const multiKeys = multiBundle.keys;
+const dichKeys = dichBundle.keys;
 
-// Independent reading of the raw Lucid data: scores are a state x taxon matrix
+// Independent reading of the compiled Lucid score strings ('0'-'5' per taxon index)
 // where 1-5 mean present (common, rare, uncertain, misinterpreted).
 function expectedForState(key, stateId) {
-  const row = key.decompressedScores[stateId];
-  return key.entities.filter((_, i) => row[i] >= 1 && row[i] <= 5).map(e => String(e.id)).sort();
+  const row = key.scores[stateId];
+  return key.entities
+    .filter((_, i) => {
+      const score = row.charCodeAt(i) - 48;
+      return score >= 1 && score <= 5;
+    })
+    .map(e => String(e.id))
+    .sort();
 }
 
 function expectedForMeasure(key, characterId, value) {
-  const measures = key.decompressedMeasures[String(characterId)] || {};
+  const measures = key.measures[String(characterId)] || {};
   return key.entities
     .filter(e => {
       const m = measures[String(e.id)];
@@ -29,8 +37,21 @@ function expectedForMeasure(key, characterId, value) {
 }
 
 const sorted = set => [...set].sort();
-const familiesKey = Object.values(multiKeys).find(k => k.title.includes('families of flowering plants'));
+const familiesKey = Object.values(multiKeys).find(k => k.title.toLowerCase().includes('families of flowering plants'));
 const lifeform = familiesKey.features.find(f => f.name === 'Habit' && f.type === 1);
+
+test('compiled multi-access keys use clean IDs, clean titles, and compact score strings', () => {
+  for (const [keyId, key] of Object.entries(multiKeys)) {
+    assert.ok(!keyId.startsWith('key-') && !keyId.endsWith('.json'), `dirty multi-key id: ${keyId}`);
+    assert.ok(key.title && !key.title.endsWith('.json'), `dirty title: ${key.title}`);
+    assert.equal('decompressedScores' in key, false);
+    assert.equal('decompressedMeasures' in key, false);
+    for (const [stateId, row] of Object.entries(key.scores)) {
+      assert.equal(typeof row, 'string', `${keyId} state ${stateId} should be a digit string`);
+      assert.equal(row.length, key.entities.length);
+    }
+  }
+});
 
 test('every key starts with all of its taxa', () => {
   for (const key of Object.values(multiKeys)) {
@@ -79,7 +100,7 @@ test('selections on different characters combine with AND, and undo reverses the
 test('numeric selections use the outside range and keep uncertain taxa', () => {
   let checked = 0;
   for (const key of Object.values(multiKeys)) {
-    for (const [characterId, measures] of Object.entries(key.decompressedMeasures || {})) {
+    for (const [characterId, measures] of Object.entries(key.measures || {})) {
       const sample = Object.values(measures).find(m => m && m[0] === 1 && m.length === 5);
       if (!sample) continue;
       for (const value of [sample[1], sample[4], (sample[2] + sample[3]) / 2]) {
@@ -131,7 +152,7 @@ test('dichotomous progress survives serialize/restore, including across linked k
       const probe = createNavigatorFromData(dichKeys, '1903');
       path.forEach(i => probe.chooseOption(i));
       const options = probe.getOptions();
-      const linkIndex = options.findIndex(o => o.item?.to_key);
+      const linkIndex = options.findIndex(o => o.item?.toKey);
       if (linkIndex >= 0) return [...path, linkIndex];
       options.forEach((o, i) => { if (!o.item) queue.push([...path, i]); });
     }
@@ -149,16 +170,17 @@ test('dichotomous progress survives serialize/restore, including across linked k
   restored.restore(saved);
   assert.deepEqual(restored.serialize(), nav.serialize());
   assert.deepEqual(restored.getHeader(), nav.getHeader());
-  assert.deepEqual(restored.getOptions().map(o => o.lead.lead_id), nav.getOptions().map(o => o.lead.lead_id));
+  assert.deepEqual(restored.getOptions().map(o => o.lead.id), nav.getOptions().map(o => o.lead.id));
 
   assert.throws(() => restored.restore({ stack: [{ keyId: 'missing', currentLeadId: 1, history: [] }] }));
 });
 
 test('dichotomous search lists every key title once, picking the canonical copy', () => {
-  const entries = listSearchableKeys(dichKeys);
+  const entries = listSearchableKeys(dichBundle);
+  assert.deepEqual(entries, dichBundle.searchableKeys);
   const titles = entries.map(e => e.title);
   assert.equal(new Set(titles).size, titles.length);
-  assert.equal(new Set(Object.values(dichKeys).map(k => k.key_title)).size, titles.length);
+  assert.equal(new Set(Object.values(dichKeys).map(k => k.title)).size, titles.length);
 
   const idFor = title => entries.find(e => e.title === title)?.id;
   assert.equal(idFor('Hibbertia'), '2245');
@@ -173,7 +195,7 @@ test('dichotomous search lists every key title once, picking the canonical copy'
 test('bracketed layout numbers every couplet depth-first and covers every lead', () => {
   for (const [id, key] of Object.entries(dichKeys)) {
     const { couplets } = createNavigatorFromData(dichKeys, id).getBracketed();
-    const realLeads = key.leads.filter(lead => lead.lead_text !== '[link through]');
+    const realLeads = key.leads.filter(lead => lead.text !== '[link through]');
     assert.equal(couplets.flatMap(c => c.leads).length, realLeads.length, `key ${id}`);
     couplets.forEach((couplet, index) => {
       assert.equal(couplet.number, index + 1);
@@ -201,7 +223,7 @@ test('bracketed view tracks the step-by-step position', () => {
 test('"[link through]" leads continue into the single member\'s key', () => {
   const nav = createNavigatorFromData(dichKeys, '1904');
   const path = [];
-  const find = () => nav.getOptions().findIndex(o => o.item?.item_name === 'Isoetaceae');
+  const find = () => nav.getOptions().findIndex(o => o.item?.name === 'Isoetaceae');
   // Walk the ferns key until the Isoetaceae lead is offered.
   const walk = () => {
     if (find() >= 0) return true;
@@ -218,7 +240,7 @@ test('"[link through]" leads continue into the single member\'s key', () => {
   };
   assert.ok(walk());
   const option = nav.getOptions()[find()];
-  assert.equal(option.via?.item_name, 'Isoetes');
+  assert.equal(option.via?.name, 'Isoetes');
   const outcome = nav.chooseOption(find());
   assert.equal(outcome.type, 'key-transition');
   assert.equal(nav.getHeader().keyId, '1914');

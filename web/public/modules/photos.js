@@ -40,9 +40,19 @@ export function isValidPhotoIndex(data) {
       typeof data === 'object' &&
       typeof data.version === 'string' &&
       Array.isArray(data.shards) &&
-      data.taxa &&
-      typeof data.taxa === 'object'
+      data.media &&
+      typeof data.media === 'object'
   );
+}
+
+function countDrawings(index) {
+  let count = 0;
+  for (const list of Object.values(index?.media || {})) {
+    if (Array.isArray(list) && list.some(item => item?.kind === 'drawing')) {
+      count += 1;
+    }
+  }
+  return count;
 }
 
 export function isConstrainedConnection(connection) {
@@ -52,59 +62,57 @@ export function isConstrainedConnection(connection) {
   return type === 'slow-2g' || type === '2g';
 }
 
-export function getPhotoMeta(index, taxonId) {
-  const row = index?.taxa?.[taxonId];
-  if (!Array.isArray(row) || row.length < 5) return null;
-  const [shard, offset, length, imgHash, attribution, urlOrSuffix, rawKind, rawCaption] = row;
-  if (!imgHash) return null;
-  return {
-    shard,
-    offset,
-    length,
-    key: String(imgHash),
-    kind: rawKind === 'drawing' ? 'drawing' : 'photo',
-    caption: typeof rawCaption === 'string' ? rawCaption : '',
-    attribution: attribution || 'VicFlora',
-    onlineUrl: resolveOnlineUrl(index, urlOrSuffix)
-  };
+function resolveCredit(index, credit) {
+  if (typeof credit === 'number' && Array.isArray(index?.credits)) {
+    return index.credits[credit] || 'VicFlora';
+  }
+  return credit || 'VicFlora';
 }
 
-export function getDrawingMeta(index, taxonId) {
-  const row = index?.drawings?.[taxonId];
-  if (!Array.isArray(row) || row.length < 5) return null;
-  const [shard, offset, length, imgHash, attribution, urlOrSuffix, rawCaption] = row;
-  if (!imgHash) return null;
+function hydrateMediaItem(index, item) {
+  if (!item || typeof item !== 'object' || !item.hash) return null;
   return {
-    shard,
-    offset,
-    length,
-    key: String(imgHash),
-    kind: 'drawing',
-    caption: typeof rawCaption === 'string' ? rawCaption : '',
-    attribution: attribution || 'VicFlora',
-    onlineUrl: resolveOnlineUrl(index, urlOrSuffix)
+    shard: item.shard,
+    offset: item.offset,
+    length: item.length,
+    key: String(item.hash),
+    kind: item.kind === 'drawing' ? 'drawing' : 'photo',
+    caption: typeof item.caption === 'string' ? item.caption : '',
+    attribution: resolveCredit(index, item.credit),
+    onlineUrl: resolveOnlineUrl(index, item.url)
   };
 }
 
 export function getTaxonMediaMetas(index, taxonId) {
+  const list = index?.media?.[taxonId];
+  if (!Array.isArray(list) || !list.length) return [];
   const items = [];
-  const primary = getPhotoMeta(index, taxonId);
-  if (primary) items.push(primary);
-  const drawing = getDrawingMeta(index, taxonId);
-  if (drawing && drawing.key !== primary?.key) items.push(drawing);
+  for (const raw of list) {
+    const meta = hydrateMediaItem(index, raw);
+    if (meta) items.push(meta);
+  }
   return items;
+}
+
+export function getPhotoMeta(index, taxonId) {
+  return getTaxonMediaMetas(index, taxonId)[0] || null;
+}
+
+export function getDrawingMeta(index, taxonId) {
+  const metas = getTaxonMediaMetas(index, taxonId);
+  return metas.find(item => item.kind === 'drawing') || null;
 }
 
 export function groupEntriesByShard(index) {
   const shardCount = index?.shards?.length || 0;
   const groups = Array.from({ length: shardCount }, () => new Map());
-  const sources = [index?.taxa, index?.drawings];
-  for (const map of sources) {
-    for (const row of Object.values(map || {})) {
-      if (!Array.isArray(row) || row.length < 4) continue;
-      const [shard, offset, length, imgHash] = row;
-      if (shard < 0 || shard >= shardCount || !imgHash) continue;
-      const key = String(imgHash);
+  for (const list of Object.values(index?.media || {})) {
+    if (!Array.isArray(list)) continue;
+    for (const item of list) {
+      if (!item || typeof item !== 'object' || !item.hash) continue;
+      const { shard, offset, length, hash } = item;
+      if (shard < 0 || shard >= shardCount) continue;
+      const key = String(hash);
       if (!groups[shard].has(key)) {
         groups[shard].set(key, { offset, length });
       }
@@ -115,11 +123,11 @@ export function groupEntriesByShard(index) {
 
 export function getActiveImageKeys(index) {
   const keys = new Set();
-  const sources = [index?.taxa, index?.drawings];
-  for (const map of sources) {
-    for (const row of Object.values(map || {})) {
-      if (Array.isArray(row) && row.length >= 4 && row[3]) {
-        keys.add(String(row[3]));
+  for (const list of Object.values(index?.media || {})) {
+    if (!Array.isArray(list)) continue;
+    for (const item of list) {
+      if (item?.hash) {
+        keys.add(String(item.hash));
       }
     }
   }
@@ -619,8 +627,8 @@ export class PhotoStore {
         shardCount: this.index?.shards?.length || 0,
         totalBytes: this.index?.totalBytes || 0,
         totalImages: this.index?.totalImages || 0,
-        taxaCount: this.index?.taxaCount || Object.keys(this.index?.taxa || {}).length,
-        drawingsCount: this.index?.drawingsCount || Object.keys(this.index?.drawings || {}).length,
+        taxaCount: this.index?.taxaCount || Object.keys(this.index?.media || {}).length,
+        drawingsCount: this.index?.drawingsCount || countDrawings(this.index),
         downloadedAt: null
       };
     }
@@ -663,8 +671,8 @@ export class PhotoStore {
       shardCount: shards.length,
       totalBytes: index?.totalBytes || 0,
       totalImages: index?.totalImages || 0,
-      taxaCount: index?.taxaCount || Object.keys(index?.taxa || {}).length,
-      drawingsCount: index?.drawingsCount || Object.keys(index?.drawings || {}).length,
+      taxaCount: index?.taxaCount || Object.keys(index?.media || {}).length,
+      drawingsCount: index?.drawingsCount || countDrawings(index),
       downloadedAt: stored?.downloadedAt || null
     };
   }

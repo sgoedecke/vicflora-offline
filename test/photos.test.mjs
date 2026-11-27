@@ -22,6 +22,7 @@ const {
   formatDrawingCaption,
   pickBestDrawing
 } = require('../scripts/fetch-photos.js');
+const { compilePhotosIndex } = require('../scripts/build-web-data.js');
 
 function sha256Hex(bytes) {
   return crypto.createHash('sha256').update(bytes).digest('hex');
@@ -214,15 +215,16 @@ test('photo helpers resolve URLs, content-addressed keys, shards, WebP headers, 
   const index = {
     version: '1',
     cdnPrefix: 'https://cdn.example/preview/',
+    credits: ['Alice · CC BY 4.0', '© Bob', 'Carol'],
     shards: [
       { file: 'photos-00-aaaa.bin', sha256: 'a'.repeat(64), bytes: 40, count: 2 },
       { file: 'photos-01-bbbb.bin', sha256: 'b'.repeat(64), bytes: 20, count: 1 }
     ],
-    taxa: {
-      a: [0, 0, 20, 'hashA1111111', 'Alice · CC BY 4.0', 'abc.jpg'],
-      b: [0, 0, 20, 'hashA1111111', 'Alice · CC BY 4.0', 'abc.jpg'], // shared hero image
-      c: [0, 20, 20, 'hashC3333333', '© Bob', 'https://other.example/c.jpg'],
-      d: [1, 0, 20, 'hashD4444444', 'Carol', 'def.jpg']
+    media: {
+      a: [{ kind: 'photo', shard: 0, offset: 0, length: 20, hash: 'hashA1111111', credit: 0, url: 'abc.jpg' }],
+      b: [{ kind: 'photo', shard: 0, offset: 0, length: 20, hash: 'hashA1111111', credit: 0, url: 'abc.jpg' }], // shared hero image
+      c: [{ kind: 'photo', shard: 0, offset: 20, length: 20, hash: 'hashC3333333', credit: 1, url: 'https://other.example/c.jpg' }],
+      d: [{ kind: 'photo', shard: 1, offset: 0, length: 20, hash: 'hashD4444444', credit: 2, url: 'def.jpg' }]
     }
   };
 
@@ -276,15 +278,16 @@ test('PhotoStore syncs verified shards, skips when current, incrementally update
     totalBytes: s0.bytes + s1.bytes,
     totalImages: 3,
     taxaCount: 4,
+    credits: ['Alice', 'Bob', 'Carol'],
     shards: [
       { file: s0.file, sha256: s0.sha256, bytes: s0.bytes, count: 2 },
       { file: s1.file, sha256: s1.sha256, bytes: s1.bytes, count: 1 }
     ],
-    taxa: {
-      a: [0, s0.entries[0].offset, s0.entries[0].length, s0.entries[0].hash, 'Alice', 'a.jpg'],
-      b: [0, s0.entries[0].offset, s0.entries[0].length, s0.entries[0].hash, 'Alice', 'a.jpg'],
-      c: [0, s0.entries[1].offset, s0.entries[1].length, s0.entries[1].hash, 'Bob', 'c.jpg'],
-      d: [1, s1.entries[0].offset, s1.entries[0].length, s1.entries[0].hash, 'Carol', 'd.jpg']
+    media: {
+      a: [{ kind: 'photo', shard: 0, offset: s0.entries[0].offset, length: s0.entries[0].length, hash: s0.entries[0].hash, credit: 0, url: 'a.jpg' }],
+      b: [{ kind: 'photo', shard: 0, offset: s0.entries[0].offset, length: s0.entries[0].length, hash: s0.entries[0].hash, credit: 0, url: 'a.jpg' }],
+      c: [{ kind: 'photo', shard: 0, offset: s0.entries[1].offset, length: s0.entries[1].length, hash: s0.entries[1].hash, credit: 1, url: 'c.jpg' }],
+      d: [{ kind: 'photo', shard: 1, offset: s1.entries[0].offset, length: s1.entries[0].length, hash: s1.entries[0].hash, credit: 2, url: 'd.jpg' }]
     }
   };
 
@@ -351,13 +354,14 @@ test('PhotoStore syncs verified shards, skips when current, incrementally update
     ...currentIndex,
     version: 'v-hash-2',
     totalBytes: s0.bytes + s1New.bytes,
+    credits: ['Alice', 'Bob', 'Carol 2'],
     shards: [
       { file: s0.file, sha256: s0.sha256, bytes: s0.bytes, count: 2 },
       { file: s1New.file, sha256: s1New.sha256, bytes: s1New.bytes, count: 1 }
     ],
-    taxa: {
-      ...currentIndex.taxa,
-      d: [1, s1New.entries[0].offset, s1New.entries[0].length, s1New.entries[0].hash, 'Carol 2', 'd2.jpg']
+    media: {
+      ...currentIndex.media,
+      d: [{ kind: 'photo', shard: 1, offset: s1New.entries[0].offset, length: s1New.entries[0].length, hash: s1New.entries[0].hash, credit: 2, url: 'd2.jpg' }]
     }
   };
 
@@ -384,9 +388,10 @@ test('C1 regression: manifest update without re-sync never serves wrong-species 
     cdnPrefix: 'https://cdn.example/',
     totalBytes: s0Old.bytes,
     totalImages: 1,
+    credits: ['Old Credit'],
     shards: [{ file: s0Old.file, sha256: s0Old.sha256, bytes: s0Old.bytes, count: 1 }],
-    taxa: {
-      taxonA: [0, 0, s0Old.entries[0].length, s0Old.entries[0].hash, 'Old Credit', 'old.jpg']
+    media: {
+      taxonA: [{ kind: 'photo', shard: 0, offset: 0, length: s0Old.entries[0].length, hash: s0Old.entries[0].hash, credit: 0, url: 'old.jpg' }]
     }
   };
 
@@ -396,10 +401,11 @@ test('C1 regression: manifest update without re-sync never serves wrong-species 
     cdnPrefix: 'https://cdn.example/',
     totalBytes: s0New.bytes,
     totalImages: 1,
+    credits: ['New Credit'],
     shards: [{ file: s0New.file, sha256: s0New.sha256, bytes: s0New.bytes, count: 1 }],
-    taxa: {
+    media: {
       // Offset 0 of shard 0 is now assigned to taxonB with a different content hash!
-      taxonB: [0, 0, s0New.entries[0].length, s0New.entries[0].hash, 'New Credit', 'new.jpg']
+      taxonB: [{ kind: 'photo', shard: 0, offset: 0, length: s0New.entries[0].length, hash: s0New.entries[0].hash, credit: 0, url: 'new.jpg' }]
     }
   };
 
@@ -439,8 +445,9 @@ test('C2 regression: rejects captive-portal HTML 200, truncated body, and bad SH
     format: 'image/webp',
     totalBytes: s0.bytes,
     totalImages: 1,
+    credits: ['Alice'],
     shards: [{ file: s0.file, sha256: s0.sha256, bytes: s0.bytes, count: 1 }],
-    taxa: { a: [0, 0, s0.entries[0].length, s0.entries[0].hash, 'Alice', 'a.jpg'] }
+    media: { a: [{ kind: 'photo', shard: 0, offset: 0, length: s0.entries[0].length, hash: s0.entries[0].hash, credit: 0, url: 'a.jpg' }] }
   };
 
   const badResponses = [
@@ -486,8 +493,9 @@ test('C3 regression: full pack refresh that fails mid-way keeps previous offline
     format: 'image/webp',
     totalBytes: sOld.bytes,
     totalImages: 1,
+    credits: ['Alice'],
     shards: [{ file: sOld.file, sha256: sOld.sha256, bytes: sOld.bytes, count: 1 }],
-    taxa: { a: [0, 0, sOld.entries[0].length, sOld.entries[0].hash, 'Alice', 'a.jpg'] }
+    media: { a: [{ kind: 'photo', shard: 0, offset: 0, length: sOld.entries[0].length, hash: sOld.entries[0].hash, credit: 0, url: 'a.jpg' }] }
   };
 
   const indexV2 = {
@@ -495,10 +503,11 @@ test('C3 regression: full pack refresh that fails mid-way keeps previous offline
     format: 'image/webp',
     totalBytes: sNew.bytes,
     totalImages: 1,
+    credits: ['Alice', 'Bob'],
     shards: [{ file: sNew.file, sha256: sNew.sha256, bytes: sNew.bytes, count: 1 }],
-    taxa: {
-      a: [0, 0, sOld.entries[0].length, sOld.entries[0].hash, 'Alice', 'a.jpg'],
-      b: [0, 0, sNew.entries[0].length, sNew.entries[0].hash, 'Bob', 'b.jpg']
+    media: {
+      a: [{ kind: 'photo', shard: 0, offset: 0, length: sOld.entries[0].length, hash: sOld.entries[0].hash, credit: 0, url: 'a.jpg' }],
+      b: [{ kind: 'photo', shard: 0, offset: 0, length: sNew.entries[0].length, hash: sNew.entries[0].hash, credit: 1, url: 'b.jpg' }]
     }
   };
 
@@ -533,8 +542,9 @@ test('H1 regression: hung IndexedDB lookup times out cleanly instead of blocking
   const db = createMemoryDb({ hangGetImage: true });
   const index = {
     version: 'v1',
+    credits: ['Alice'],
     shards: [{ file: 'photos-00-aaa.bin', sha256: 'a'.repeat(64), bytes: 20, count: 1 }],
-    taxa: { a: [0, 0, 20, 'hashA', 'Alice', 'a.jpg'] }
+    media: { a: [{ kind: 'photo', shard: 0, offset: 0, length: 20, hash: 'hashA', credit: 0, url: 'a.jpg' }] }
   };
   const store = new PhotoStore({
     baseUrl: './data/photos',
@@ -560,8 +570,9 @@ test('H2 regression: stalled mid-stream fetch aborts on idle timeout and succeed
     format: 'image/webp',
     totalBytes: s0.bytes,
     totalImages: 1,
+    credits: ['Alice'],
     shards: [{ file: s0.file, sha256: s0.sha256, bytes: s0.bytes, count: 1 }],
-    taxa: { a: [0, 0, s0.entries[0].length, s0.entries[0].hash, 'Alice', 'a.jpg'] }
+    media: { a: [{ kind: 'photo', shard: 0, offset: 0, length: s0.entries[0].length, hash: s0.entries[0].hash, credit: 0, url: 'a.jpg' }] }
   };
 
   let shardAttempts = 0;
@@ -623,8 +634,9 @@ test('H4/M3/M4 regressions: Save-Data deferral, cross-tab lock contention, and Q
     cdnPrefix: 'https://cdn.example/',
     totalBytes: s0.bytes,
     totalImages: 1,
+    credits: ['Alice'],
     shards: [{ file: s0.file, sha256: s0.sha256, bytes: s0.bytes, count: 1 }],
-    taxa: { a: [0, 0, s0.entries[0].length, s0.entries[0].hash, 'Alice', 'a.jpg'] }
+    media: { a: [{ kind: 'photo', shard: 0, offset: 0, length: s0.entries[0].length, hash: s0.entries[0].hash, credit: 0, url: 'a.jpg' }] }
   };
   const fetchImpl = async url => (url.endsWith('/index.json') ? makeJsonResponse(index) : makeBinaryResponse(s0.buffer));
 
@@ -724,16 +736,18 @@ test('QA regressions: pre-header retry, failed v2 preserves v1 index, empty inde
     format: 'image/webp',
     totalBytes: s1.bytes,
     totalImages: 1,
+    credits: ['Alice v1'],
     shards: [{ file: s1.file, sha256: s1.sha256, bytes: s1.bytes, count: 1 }],
-    taxa: { a: [0, 0, s1.entries[0].length, s1.entries[0].hash, 'Alice v1', 'a1.jpg'] }
+    media: { a: [{ kind: 'photo', shard: 0, offset: 0, length: s1.entries[0].length, hash: s1.entries[0].hash, credit: 0, url: 'a1.jpg' }] }
   };
   const indexV2 = {
     version: 'v2',
     format: 'image/webp',
     totalBytes: s2.bytes,
     totalImages: 1,
+    credits: ['Alice v2'],
     shards: [{ file: s2.file, sha256: s2.sha256, bytes: s2.bytes, count: 1 }],
-    taxa: { a: [0, 0, s2.entries[0].length, s2.entries[0].hash, 'Alice v2', 'a2.jpg'] }
+    media: { a: [{ kind: 'photo', shard: 0, offset: 0, length: s2.entries[0].length, hash: s2.entries[0].hash, credit: 0, url: 'a2.jpg' }] }
   };
 
   // 1. Pre-header fetch() throw retries and succeeds on attempt 2.
@@ -768,7 +782,7 @@ test('QA regressions: pre-header retry, failed v2 preserves v1 index, empty inde
   assert.equal(indexFetches, 1);
 
   // 2. Empty fallback index must NOT wipe working in-memory index.
-  store.fetch = async () => makeJsonResponse({ version: '0', totalBytes: 0, totalImages: 0, shards: [], taxa: {} });
+  store.fetch = async () => makeJsonResponse({ version: '0', totalBytes: 0, totalImages: 0, shards: [], credits: [], media: {} });
   await store.syncPack();
   assert.equal((await store.getMediaSources('a'))[0].offline, true);
 
@@ -869,13 +883,20 @@ test('dual media: PhotoStore syncs, serves, and garbage-collects paired photos a
     totalImages: 3,
     taxaCount: 2,
     drawingsCount: 1,
+    credits: [
+      'Photographer (CC BY 4.0)',
+      'Anita Barley (CC BY-NC-SA 4.0)',
+      'Illustrator (CC BY-NC-SA 4.0)'
+    ],
     shards: [{ file: s0.file, sha256: s0.sha256, bytes: s0.bytes, count: 3 }],
-    taxa: {
-      'taxon-both': [0, ePhoto.offset, ePhoto.length, ePhoto.hash, 'Photographer (CC BY 4.0)', 'p.jpg'],
-      'taxon-draw-only': [0, eHeroDraw.offset, eHeroDraw.length, eHeroDraw.hash, 'Illustrator (CC BY-NC-SA 4.0)', 'hd.jpg', 'drawing', 'a. habit']
-    },
-    drawings: {
-      'taxon-both': [0, eDraw.offset, eDraw.length, eDraw.hash, 'Anita Barley (CC BY-NC-SA 4.0)', 'd.jpg', 'a. habit, ×1; b. flower, ×4']
+    media: {
+      'taxon-both': [
+        { kind: 'photo', shard: 0, offset: ePhoto.offset, length: ePhoto.length, hash: ePhoto.hash, credit: 0, url: 'p.jpg' },
+        { kind: 'drawing', shard: 0, offset: eDraw.offset, length: eDraw.length, hash: eDraw.hash, credit: 1, url: 'd.jpg', caption: 'a. habit, ×1; b. flower, ×4' }
+      ],
+      'taxon-draw-only': [
+        { kind: 'drawing', shard: 0, offset: eHeroDraw.offset, length: eHeroDraw.length, hash: eHeroDraw.hash, credit: 2, url: 'hd.jpg', caption: 'a. habit' }
+      ]
     }
   };
 
@@ -940,8 +961,9 @@ test('drop offline images & disable resync clears storage, skips sync, and allow
     cdnPrefix: 'https://cdn.example/',
     totalBytes: s0.bytes,
     totalImages: 1,
+    credits: ['Alice'],
     shards: [{ file: s0.file, sha256: s0.sha256, bytes: s0.bytes, count: 1 }],
-    taxa: { a: [0, 0, s0.entries[0].length, s0.entries[0].hash, 'Alice', 'a.jpg'] }
+    media: { a: [{ kind: 'photo', shard: 0, offset: 0, length: s0.entries[0].length, hash: s0.entries[0].hash, credit: 0, url: 'a.jpg' }] }
   };
 
   const prefsMap = new Map();
@@ -1009,6 +1031,77 @@ test('drop offline images & disable resync clears storage, skips sync, and allow
   assert.equal(resync.synced, true);
   assert.equal(db.images.size, 1);
   assert.equal(shardFetches, 2);
+});
+
+test('compilePhotosIndex normalizes mismatched positional arrays into named media objects with interned credits', () => {
+  const raw = {
+    version: 'v-raw',
+    format: 'image/webp',
+    cdnPrefix: 'https://cdn.example/',
+    totalBytes: 100,
+    totalImages: 3,
+    taxaCount: 2,
+    drawingsCount: 1,
+    shards: [{ file: 'photos-00.bin', sha256: 'a'.repeat(64), bytes: 100, count: 3 }],
+    taxa: {
+      't-both': [0, 0, 30, 'h1', 'Shared Credit', 'p.jpg'],
+      't-draw': [0, 30, 30, 'h2', 'Shared Credit', 'hd.jpg', 'drawing', 'a. habit']
+    },
+    drawings: {
+      't-both': [0, 60, 40, 'h3', 'Artist Credit', 'd.jpg', 'a. leaf; b. flower']
+    }
+  };
+  const compiled = compilePhotosIndex(raw);
+  assert.equal('taxa' in compiled, false);
+  assert.equal('drawings' in compiled, false);
+  assert.deepEqual(compiled.credits, ['Shared Credit', 'Artist Credit']);
+  assert.deepEqual(getPhotoMeta(compiled, 't-both'), {
+    shard: 0,
+    offset: 0,
+    length: 30,
+    key: 'h1',
+    kind: 'photo',
+    caption: '',
+    attribution: 'Shared Credit',
+    onlineUrl: 'https://cdn.example/p.jpg'
+  });
+  assert.deepEqual(getDrawingMeta(compiled, 't-both'), {
+    shard: 0,
+    offset: 60,
+    length: 40,
+    key: 'h3',
+    kind: 'drawing',
+    caption: 'a. leaf; b. flower',
+    attribution: 'Artist Credit',
+    onlineUrl: 'https://cdn.example/d.jpg'
+  });
+  assert.deepEqual(getPhotoMeta(compiled, 't-draw'), {
+    shard: 0,
+    offset: 30,
+    length: 30,
+    key: 'h2',
+    kind: 'drawing',
+    caption: 'a. habit',
+    attribution: 'Shared Credit',
+    onlineUrl: 'https://cdn.example/hd.jpg'
+  });
+
+  // Verify the built web/public/data/photos/index.json matches raw vicflora-data/photos/index.json losslessly.
+  const builtPath = new URL('../web/public/data/photos/index.json', import.meta.url);
+  const rawPath = new URL('../vicflora-data/photos/index.json', import.meta.url);
+  if (fs.existsSync(builtPath) && fs.existsSync(rawPath)) {
+    const built = JSON.parse(fs.readFileSync(builtPath, 'utf8'));
+    const rawSource = JSON.parse(fs.readFileSync(rawPath, 'utf8'));
+    assert.ok(Array.isArray(built.credits) && built.credits.length > 0);
+    assert.equal('taxa' in built, false);
+    assert.equal('drawings' in built, false);
+    assert.equal(Object.keys(built.media).length, built.taxaCount);
+    const rawHashes = new Set([
+      ...Object.values(rawSource.taxa || {}).map(e => String(e[3])),
+      ...Object.values(rawSource.drawings || {}).map(e => String(e[3]))
+    ]);
+    assert.equal(getActiveImageKeys(built).size, rawHashes.size);
+  }
 });
 
 

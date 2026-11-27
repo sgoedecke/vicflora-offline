@@ -143,6 +143,7 @@ async function fetchBatch(ids) {
         id
         taxonRank
         taxonomicStatus
+        parent { id }
         taxonName { fullName }
         preferredVernacularName { name }
         currentProfile { profile }
@@ -228,6 +229,7 @@ async function fetchAndStore(store, ids, fallbackNames, { acceptedOnly = false }
       store.taxa[id] = {
         name: taxon?.taxonName?.fullName || fallbackNames.get(id) || null,
         rank: taxon?.taxonRank || null,
+        parentId: taxon?.parent?.id || null,
         vernacular: taxon?.preferredVernacularName?.name || null,
         html: profile ? sanitizeProfile(profile) : null,
         bioregions
