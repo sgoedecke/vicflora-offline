@@ -337,6 +337,11 @@ async function run() {
       () => cdp.eval(`document.querySelectorAll('#dichotomous-options > button[data-index]').length > 0`),
       { timeoutMs: 10000, label: 'dichotomous root options' }
     );
+    const rootTitle = await cdp.eval(`(() => {
+      const header = document.getElementById('dichotomous-header');
+      return !header?.hidden ? (header.querySelector('strong')?.textContent?.trim() || '') : '';
+    })()`);
+    assert.equal(rootTitle, 'Main groups of plants in Victoria');
     let linkedTitle = null;
     for (let step = 0; step < 15; step += 1) {
       const state = await cdp.eval(`(() => {

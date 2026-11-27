@@ -77,9 +77,9 @@ function normalizeKeyTitle(title) {
 
   // Bryophyte keys use the "Key to Pottiaceae genera" form
   const trailingCategoryPattern = /\s+(genera|species|subspecies|varieties)$/i;
-  cleaned = cleaned.replace(trailingCategoryPattern, '');
+  cleaned = cleaned.replace(trailingCategoryPattern, '').trim();
 
-  return cleaned.trim();
+  return cleaned ? cleaned.charAt(0).toUpperCase() + cleaned.slice(1) : cleaned;
 }
 
 function titleCase(value) {

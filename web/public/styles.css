@@ -309,14 +309,7 @@ header h1 {
   border: 1px solid var(--accent);
 }
 
-.home-dich-btn {
-  width: 100%;
-  padding: 0.85rem 1.25rem;
-  font-size: 1rem;
-  border-radius: 0.7rem;
-}
-
-.home-multi-heading {
+.home-section-heading {
   margin: 0 0 0.75rem;
   font-size: 0.95rem;
   font-weight: 600;
@@ -339,6 +332,10 @@ header h1 {
   color: var(--fg);
   text-decoration: none;
   transition: transform 0.1s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.quick-key-card--dich {
+  background: rgba(37, 99, 235, 0.06);
 }
 
 .quick-key-card:hover,
@@ -1527,6 +1524,10 @@ code {
 
   .quick-key-card {
     background: rgba(45, 212, 191, 0.06);
+  }
+
+  .quick-key-card--dich {
+    background: rgba(56, 189, 248, 0.08);
   }
 
   .quick-key-card:hover,

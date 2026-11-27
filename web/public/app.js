@@ -13,8 +13,6 @@ import { createBioregionMap, ensureBioregionsLoaded } from './modules/bioregions
 import { parseRoute, formatRoute } from './modules/router.js';
 import { createSearchIndex, searchUnified } from './modules/search.js';
 
-const DEFAULT_DICH_KEY_ID = '1903';
-
 const statusEl = document.querySelector('#status');
 const aboutLink = document.querySelector('#about-link');
 const views = {
@@ -738,12 +736,8 @@ function itemLabel(item, via) {
 
 async function renderDichotomousRoute(route, seq) {
   const meta = dichKeyMetaById.get(route.keyId);
-  const hideHeader = route.keyId === DEFAULT_DICH_KEY_ID;
   if (!dichLoader.isCompleted()) {
-    dichElements.header.hidden = hideHeader;
-    dichElements.header.innerHTML = hideHeader
-      ? ''
-      : `<strong>${escapeHtml(meta?.title || `Key ${route.keyId}`)}</strong>`;
+    dichElements.header.innerHTML = `<strong>${escapeHtml(meta?.title || `Key ${route.keyId}`)}</strong>`;
     dichElements.options.hidden = false;
     dichElements.bracketed.hidden = true;
     dichElements.options.innerHTML = '<p class="muted">Loading dichotomous key…</p>';
@@ -763,7 +757,6 @@ async function renderDichotomousRoute(route, seq) {
 
   if (!globalDichKeys[route.keyId]) {
     dichNavigator = null;
-    dichElements.header.hidden = false;
     dichElements.header.innerHTML = `<strong>Key ${escapeHtml(route.keyId)} not found</strong>`;
     dichElements.options.hidden = false;
     dichElements.bracketed.hidden = true;
@@ -811,9 +804,7 @@ function renderDichotomous(mode) {
   if (!dichNavigator) return;
   dichResult = null;
   const header = dichNavigator.getHeader();
-  const hideHeader = dichNavigator.currentKeyId === DEFAULT_DICH_KEY_ID;
-  dichElements.header.hidden = hideHeader;
-  dichElements.header.innerHTML = hideHeader ? '' : `<strong>${escapeHtml(header.keyTitle)}</strong>`;
+  dichElements.header.innerHTML = `<strong>${escapeHtml(header.keyTitle)}</strong>`;
 
   dichElements.modeButtons.forEach(button => {
     const isCurrent =
