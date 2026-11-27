@@ -37,6 +37,10 @@ export function parseRoute(hash) {
     return { view: 'taxon', taxonId: first };
   }
 
+  if (section === 'glossary' && first) {
+    return { view: 'glossary', term: first };
+  }
+
   if (section === 'about') {
     return { view: 'about' };
   }
@@ -68,6 +72,10 @@ export function formatRoute(route) {
     return `#/taxon/${encodeURIComponent(String(route.taxonId))}`;
   }
 
+  if (route.view === 'glossary' && route.term) {
+    return `#/glossary/${encodeURIComponent(String(route.term))}`;
+  }
+
   if (route.view === 'about') {
     return '#/about';
   }
@@ -85,6 +93,9 @@ export function routesEqual(a, b) {
   }
   if (a.view === 'taxon') {
     return a.taxonId === b.taxonId;
+  }
+  if (a.view === 'glossary') {
+    return a.term === b.term;
   }
   return true;
 }

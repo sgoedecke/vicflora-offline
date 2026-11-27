@@ -67,7 +67,42 @@ function normalizeTaxaEntries(source) {
   return [];
 }
 
-export function createSearchIndex(raw = {}, taxonSource = null) {
+function stripHtml(html) {
+  if (!html) return '';
+  return String(html)
+    .replace(/<\/?(?:p|div|br|li|ul|ol|h[1-6])\b[^>]*>/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&deg;/g, '°')
+    .replace(/&ndash;/g, '–')
+    .replace(/&mdash;/g, '—')
+    .replace(/&times;/g, '×')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeGlossaryEntries(source) {
+  if (!source) return [];
+  if (Array.isArray(source)) return source;
+  if (source.terms instanceof Map) return Array.from(source.terms.values());
+  return [];
+}
+
+function summarizeGlossaryEntry(entry) {
+  const plain = stripHtml(entry.definition);
+  if (plain) {
+    return plain.length > 100 ? `${plain.slice(0, 99).trimEnd()}…` : plain;
+  }
+  const firstRelated = Array.isArray(entry.related) ? entry.related[0]?.[1] : null;
+  return firstRelated ? `See ${firstRelated}` : null;
+}
+
+export function createSearchIndex(raw = {}, taxonSource = null, glossarySource = null) {
   const multiAccessKeys = (raw.multiAccessKeys || []).map(entry => ({
     id: String(entry.id),
     title: entry.title || String(entry.id),
@@ -96,6 +131,18 @@ export function createSearchIndex(raw = {}, taxonSource = null) {
     _vernacular: (entry.vernacular || '').toLowerCase()
   }));
 
+  const rawGlossary =
+    glossarySource != null
+      ? normalizeGlossaryEntries(glossarySource)
+      : normalizeGlossaryEntries(raw.glossary);
+  const glossaryTerms = rawGlossary
+    .filter(entry => entry && entry.name)
+    .map(entry => ({
+      name: String(entry.name),
+      preview: summarizeGlossaryEntry(entry),
+      _name: String(entry.name).toLowerCase()
+    }));
+
   const multiKeyById = new Map(multiAccessKeys.map(k => [k.id, k]));
   const dichKeyById = new Map(dichotomousKeys.map(k => [k.id, k]));
   const taxonById = new Map(taxa.map(t => [t.id, t]));
@@ -104,6 +151,7 @@ export function createSearchIndex(raw = {}, taxonSource = null) {
     multiAccessKeys,
     dichotomousKeys,
     taxa,
+    glossaryTerms,
     multiKeyById,
     dichKeyById,
     taxonById
@@ -113,7 +161,7 @@ export function createSearchIndex(raw = {}, taxonSource = null) {
 export function searchUnified(
   index,
   query,
-  { multiLimit = 5, dichLimit = 8, taxonLimit = 20 } = {}
+  { multiLimit = 5, dichLimit = 8, taxonLimit = 20, glossaryLimit = 8 } = {}
 ) {
   const q = normalizeQuery(query);
   if (!index || q.length < 2) {
@@ -122,6 +170,7 @@ export function searchUnified(
       multiAccessKeys: [],
       dichotomousKeys: [],
       taxa: [],
+      glossaryTerms: [],
       total: 0
     };
   }
@@ -183,15 +232,31 @@ export function searchUnified(
   }
   taxonScored.sort((a, b) => a.score - b.score || a.entry.name.localeCompare(b.entry.name));
 
+  const glossaryScored = [];
+  for (const entry of index.glossaryTerms || []) {
+    const score = scoreField(entry._name, q, alts, tokens);
+    if (score >= 0) {
+      glossaryScored.push({ entry, score });
+    }
+  }
+  glossaryScored.sort(
+    (a, b) =>
+      a.score - b.score ||
+      a.entry.name.length - b.entry.name.length ||
+      a.entry.name.localeCompare(b.entry.name)
+  );
+
   const multiAccessKeys = multiScored.slice(0, multiLimit).map(({ entry }) => entry);
   const dichotomousKeys = dichScored.slice(0, dichLimit).map(({ entry }) => entry);
   const taxa = taxonScored.slice(0, taxonLimit).map(({ entry }) => entry);
+  const glossaryTerms = glossaryScored.slice(0, glossaryLimit).map(({ entry }) => entry);
 
   return {
     query: q,
     multiAccessKeys,
     dichotomousKeys,
     taxa,
-    total: multiAccessKeys.length + dichotomousKeys.length + taxa.length
+    glossaryTerms,
+    total: multiAccessKeys.length + dichotomousKeys.length + taxa.length + glossaryTerms.length
   };
 }

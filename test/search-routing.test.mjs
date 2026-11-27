@@ -15,8 +15,11 @@ const speciesIndexRaw = JSON.parse(
 const dichBundle = JSON.parse(
   await fs.readFile(new URL('../web/public/data/dichotomous-keys.json', import.meta.url), 'utf8')
 );
+const glossaryRaw = JSON.parse(
+  await fs.readFile(new URL('../web/public/data/glossary.json', import.meta.url), 'utf8')
+);
 const taxonIndex = loadSpeciesIndex(speciesIndexRaw);
-const searchIndex = createSearchIndex(searchIndexRaw, taxonIndex);
+const searchIndex = createSearchIndex(searchIndexRaw, taxonIndex, glossaryRaw);
 
 test('parseRoute and formatRoute round-trip all supported hash routes', () => {
   const cases = [
@@ -43,6 +46,16 @@ test('parseRoute and formatRoute round-trip all supported hash routes', () => {
       '#/taxon/862c3252-415d-40f6-9b69-7b02c5677f7c',
       { view: 'taxon', taxonId: '862c3252-415d-40f6-9b69-7b02c5677f7c' },
       '#/taxon/862c3252-415d-40f6-9b69-7b02c5677f7c'
+    ],
+    [
+      '#/glossary/actinomorphic',
+      { view: 'glossary', term: 'actinomorphic' },
+      '#/glossary/actinomorphic'
+    ],
+    [
+      '#/glossary/juvenile%20leaves',
+      { view: 'glossary', term: 'juvenile leaves' },
+      '#/glossary/juvenile%20leaves'
     ],
     ['#/about', { view: 'about' }, '#/about'],
     ['#/unknown/path', { view: 'home' }, '#/']
@@ -108,6 +121,16 @@ test('unified search groups Multi-Access Keys, Dichotomous Keys, and Taxa togeth
   assert.ok(
     ssp.taxa.some(t => /microsorum pustulatum subsp\./i.test(t.name)),
     '"ssp" shorthand should normalize to "subsp."'
+  );
+
+  const actinomorphic = searchUnified(searchIndex, 'actinomorphic');
+  assert.equal(actinomorphic.glossaryTerms[0]?.name, 'actinomorphic');
+  assert.ok(actinomorphic.glossaryTerms[0]?.preview, 'Glossary search result should include definition preview');
+
+  const phyllodes = searchUnified(searchIndex, 'phyllodes');
+  assert.ok(
+    phyllodes.glossaryTerms.some(g => g.name === 'phyllode'),
+    'Plural glossary query "phyllodes" should match "phyllode"'
   );
 });
 

@@ -274,6 +274,12 @@ header h1 {
   border-color: rgba(21, 128, 61, 0.22);
 }
 
+.result-badge--glossary {
+  background: rgba(180, 83, 9, 0.1);
+  color: #b45309;
+  border-color: rgba(180, 83, 9, 0.22);
+}
+
 .search-empty {
   padding: 1rem 1.1rem;
   margin: 0;
@@ -405,6 +411,11 @@ header h1 {
 .view-badge--taxon {
   background: rgba(21, 128, 61, 0.1);
   color: #15803d;
+}
+
+.view-badge--glossary {
+  background: rgba(180, 83, 9, 0.1);
+  color: #b45309;
 }
 
 .dich-header strong {
@@ -1279,8 +1290,47 @@ body.lightbox-open {
   margin: 1rem 0 0.25rem;
 }
 
-.taxon-detail .muted {
+.taxon-detail .muted,
+.glossary-detail .muted {
   color: var(--muted);
+}
+
+.glossary-detail {
+  margin-top: 0.75rem;
+  line-height: 1.55;
+}
+
+.glossary-detail h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.45rem;
+}
+
+.glossary-detail h3 {
+  margin: 1.15rem 0 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.glossary-detail p {
+  margin: 0 0 0.65rem;
+}
+
+.glossary-detail .gloss-related {
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.glossary-detail .gloss-related li + li {
+  margin-top: 0.25rem;
+}
+
+.glossary-detail a.link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .key-links {
@@ -1528,6 +1578,13 @@ code {
     background: rgba(74, 222, 128, 0.14);
     color: #86efac;
     border-color: rgba(74, 222, 128, 0.28);
+  }
+
+  .result-badge--glossary,
+  .view-badge--glossary {
+    background: rgba(251, 191, 36, 0.14);
+    color: #fcd34d;
+    border-color: rgba(251, 191, 36, 0.28);
   }
 
   .quick-key-card {

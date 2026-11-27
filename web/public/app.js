@@ -20,6 +20,7 @@ const views = {
   key: document.querySelector('#view-dichotomous'),
   multi: document.querySelector('#view-multi'),
   taxon: document.querySelector('#view-species'),
+  glossary: document.querySelector('#view-glossary'),
   about: document.querySelector('#view-about')
 };
 
@@ -59,6 +60,10 @@ const multiElements = {
 const speciesElements = {
   detail: document.querySelector('#species-detail'),
   rankBadge: document.querySelector('#species-rank-badge')
+};
+
+const glossaryElements = {
+  detail: document.querySelector('#glossary-detail')
 };
 
 const offlineCoreStatusEl = document.querySelector('#offline-core-status');
@@ -316,23 +321,26 @@ function formatMeasurement(value) {
 
 async function loadGlossary() {
   try {
-    glossary = new Glossary(await dataStore.readJson('glossary'));
+    const terms = await dataStore.readJson('glossary');
+    glossary = new Glossary(terms);
+    return terms;
   } catch (error) {
     console.warn('Could not load glossary:', error);
+    return [];
   }
 }
 
 async function loadCoreData() {
   setStatus('Loading search index…');
   dataStore.loadManifest().then(updateVersionBadge).catch(() => {});
-  const [searchIndexBundle, speciesIndexBundle] = await Promise.all([
+  const [searchIndexBundle, speciesIndexBundle, glossaryTerms] = await Promise.all([
     dataStore.readJson('searchIndex'),
     dataStore.readJson('speciesIndex'),
     loadGlossary()
   ]);
 
   taxonIndex = loadSpeciesIndex(speciesIndexBundle);
-  unifiedSearchIndex = createSearchIndex(searchIndexBundle, taxonIndex);
+  unifiedSearchIndex = createSearchIndex(searchIndexBundle, taxonIndex, glossaryTerms);
   multiKeyMetaList = unifiedSearchIndex.multiAccessKeys;
   dichKeyMetaById = unifiedSearchIndex.dichKeyById;
 
@@ -468,6 +476,10 @@ async function renderRoute(route) {
   }
   if (route.view === 'taxon') {
     await renderTaxonRoute(route, seq);
+    return;
+  }
+  if (route.view === 'glossary') {
+    await renderGlossaryRoute(route, seq);
   }
 }
 
@@ -553,11 +565,16 @@ function renderUnifiedSearch() {
     return;
   }
 
-  const { multiAccessKeys, dichotomousKeys, taxa } = searchUnified(unifiedSearchIndex, trimmed, {
-    multiLimit: 5,
-    dichLimit: 8,
-    taxonLimit: 20
-  });
+  const { multiAccessKeys, dichotomousKeys, taxa, glossaryTerms } = searchUnified(
+    unifiedSearchIndex,
+    trimmed,
+    {
+      multiLimit: 5,
+      dichLimit: 8,
+      taxonLimit: 20,
+      glossaryLimit: 8
+    }
+  );
 
   const groups = [];
 
@@ -624,6 +641,27 @@ function renderUnifiedSearch() {
       )
       .join('');
     groups.push(renderSearchGroup(`Taxa & Species (${taxa.length})`, items));
+  }
+
+  if (glossaryTerms.length) {
+    const items = glossaryTerms
+      .map(
+        entry => `
+          <li>
+            <a class="search-result-item" role="option" href="${escapeHtml(formatRoute({ view: 'glossary', term: entry.name }))}">
+              <span class="search-result-main">
+                <span class="search-result-title">${escapeHtml(entry.name)}</span>
+                ${entry.preview ? `<span class="search-result-sub">${escapeHtml(entry.preview)}</span>` : ''}
+              </span>
+              <span class="search-result-badges">
+                <span class="result-badge result-badge--glossary">Glossary</span>
+              </span>
+            </a>
+          </li>
+        `
+      )
+      .join('');
+    groups.push(renderSearchGroup(`Glossary (${glossaryTerms.length})`, items));
   }
 
   if (!groups.length) {
@@ -1941,6 +1979,77 @@ const RELATIONSHIP_LABELS = {
   'isAdjectiveOf': 'Noun'
 };
 
+function linkifyGlossaryDefinition(container, { mode = 'route' } = {}) {
+  if (!container || !glossary) return;
+  container.querySelectorAll('a.glossary-link').forEach(link => {
+    const text = link.textContent.trim();
+    const target = glossary.lookup(text);
+    if (!target) {
+      link.replaceWith(document.createTextNode(text));
+      return;
+    }
+    if (mode === 'popover') {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'link';
+      btn.dataset.gloss = target.name;
+      btn.textContent = text;
+      link.replaceWith(btn);
+    } else {
+      link.className = 'link';
+      link.href = formatRoute({ view: 'glossary', term: target.name });
+    }
+  });
+}
+
+async function renderGlossaryRoute(route, seq) {
+  if (!glossaryElements.detail) return;
+  const requested = route.term || '';
+
+  if (!glossary && !appBooted) {
+    glossaryElements.detail.innerHTML = '<p class="muted">Loading glossary…</p>';
+    await bootData().catch(() => {});
+    if (seq !== routeRenderSeq) return;
+  }
+
+  const term = glossary?.lookup(requested);
+  if (!term) {
+    glossaryElements.detail.innerHTML = `
+      <h2>Glossary term not found</h2>
+      <p class="muted">No glossary entry matches <code>${escapeHtml(requested)}</code>.</p>
+      <p><a href="#/">Return home</a> or search above.</p>
+    `;
+    return;
+  }
+
+  const relatedItems = (term.related || [])
+    .filter(([, name]) => name !== term.definedBy)
+    .map(([type, name]) => {
+      const label = RELATIONSHIP_LABELS[type] || 'See';
+      const target = glossary.lookup(name);
+      const link = target
+        ? `<a class="link" href="${escapeHtml(formatRoute({ view: 'glossary', term: target.name }))}">${escapeHtml(name)}</a>`
+        : escapeHtml(name);
+      return `<li><span>${label}:</span> ${link}</li>`;
+    })
+    .join('');
+
+  const variantNote = term.definedBy
+    ? `<p class="muted">Variant of <a class="link" href="${escapeHtml(formatRoute({ view: 'glossary', term: term.definedBy }))}"><strong>${escapeHtml(term.definedBy)}</strong></a></p>`
+    : '';
+
+  glossaryElements.detail.innerHTML = `
+    <h2>${escapeHtml(term.name)}</h2>
+    ${variantNote}
+    <div class="gloss-definition">${term.definition || '<p class="muted">No definition available.</p>'}</div>
+    ${relatedItems ? `<h3>Related terms</h3><ul class="gloss-related">${relatedItems}</ul>` : ''}
+  `;
+  linkifyGlossaryDefinition(glossaryElements.detail.querySelector('.gloss-definition'), {
+    mode: 'route'
+  });
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
 function showGlossaryTerm(word) {
   const term = glossary?.lookup(word);
   if (!term) return;
@@ -1961,6 +2070,9 @@ function showGlossaryTerm(word) {
     <div class="gloss-definition">${term.definition || '<p class="muted">No definition.</p>'}</div>
     ${related ? `<ul class="gloss-related">${related}</ul>` : ''}
   `;
+  linkifyGlossaryDefinition(glossaryPopover.querySelector('.gloss-definition'), {
+    mode: 'popover'
+  });
   glossaryPopover.hidden = false;
 }
 

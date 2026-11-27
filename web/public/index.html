@@ -29,10 +29,10 @@
             <input
               id="unified-search"
               type="search"
-              placeholder="Search species, common names, or keys…"
+              placeholder="Search species, keys, or glossary…"
               autocomplete="off"
               spellcheck="false"
-              aria-label="Search species, common names, or keys"
+              aria-label="Search species, keys, or glossary"
               aria-controls="unified-search-results"
               aria-expanded="false"
             />
@@ -132,6 +132,16 @@
             <span id="species-rank-badge" class="view-badge view-badge--taxon">Taxon</span>
           </div>
           <article id="species-detail" class="taxon-detail"></article>
+        </div>
+      </section>
+
+      <section id="view-glossary" class="view">
+        <div class="panel">
+          <div class="view-nav-bar">
+            <a href="#/" class="back-home" data-clear-search="true">← Home</a>
+            <span class="view-badge view-badge--glossary">Glossary</span>
+          </div>
+          <article id="glossary-detail" class="glossary-detail"></article>
         </div>
       </section>
 
