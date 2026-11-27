@@ -8,13 +8,16 @@
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="stylesheet" href="./styles.css" />
-    <script defer src="https://sg-analytics.pikapod.net/script.js" data-website-id="44a3b329-ce01-4ec4-9026-c4336cb75eb6"></script>
+    <script async src="https://sg-analytics.pikapod.net/script.js" data-website-id="44a3b329-ce01-4ec4-9026-c4336cb75eb6"></script>
   </head>
   <body>
     <header>
       <div class="header-top">
         <h1>VicFlora Offline Keys</h1>
-        <span class="app-version" aria-label="App version">v17</span>
+        <div class="header-meta">
+          <button id="install-app-btn" type="button" class="secondary install-app-btn" hidden>Install app</button>
+          <span class="app-version" aria-label="App version">v18</span>
+        </div>
       </div>
       <p>Multi-access and dichotomous keys from <a target="_blank" href="https://vicflora.rbg.vic.gov.au/">VicFlora</a>.</p>
       <nav class="tabs" role="tablist">
@@ -103,6 +106,10 @@
           <p>
             This static web app bundles selected VicFlora dichotomous and multi-access keys.
           </p>
+          <div class="photos-storage-box">
+            <p id="offline-core-status" class="muted"></p>
+            <div id="offline-core-controls" class="photos-controls"></div>
+          </div>
           <div class="photos-storage-box">
             <p id="photos-status" class="muted"></p>
             <div id="photos-controls" class="photos-controls"></div>

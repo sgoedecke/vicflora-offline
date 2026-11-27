@@ -10,6 +10,7 @@ import {
 } from './modules/species.js';
 import { Glossary } from './modules/glossary.js';
 import { PhotoStore, formatBytes } from './modules/photos.js';
+import { createOfflineManager, createRetryableLoader } from './modules/offline.js';
 
 const statusEl = document.querySelector('#status');
 const viewButtons = document.querySelectorAll('header nav button');
@@ -50,8 +51,12 @@ const speciesElements = {
   detail: document.querySelector('#species-detail')
 };
 
+const offlineCoreStatusEl = document.querySelector('#offline-core-status');
+const offlineCoreControlsEl = document.querySelector('#offline-core-controls');
+const installAppBtn = document.querySelector('#install-app-btn');
 const photosStatusEl = document.querySelector('#photos-status');
 const photosControlsEl = document.querySelector('#photos-controls');
+let deferredInstallPrompt = null;
 
 const photoStore = new PhotoStore();
 let photoStatus = null;
@@ -66,6 +71,8 @@ let lastStatusUpdateAt = 0;
 let lastAutoSyncAttemptAt = 0;
 let lastPhotoCheckAt = 0;
 let appBooted = false;
+let dichControlsBound = false;
+let statusOwnedByOffline = false;
 let descriptionRenderSeq = 0;
 
 let dichNavigator = null;
@@ -79,8 +86,6 @@ let multiState = {
 let currentView = 'dichotomous';
 let dichResultItemId = null;
 let dichResult = null;
-let multiLoad = null;
-let descriptionsLoad = null;
 let descriptions = {};
 let taxonIndex = new Map();
 let currentSpeciesId = null;
@@ -88,7 +93,15 @@ let glossary = null;
 const glossaryPopover = document.querySelector('#gloss-popover');
 
 const READY_MESSAGE = 'Ready to use offline. Add to Home Screen for easy access.';
+const READY_INSTALLED_MESSAGE = 'Ready to use offline.';
 const STORAGE_KEY = 'vicflora-offline-state-v1';
+
+function isRunningStandalone() {
+  return Boolean(
+    window.matchMedia?.('(display-mode: standalone)')?.matches ||
+      navigator.standalone === true
+  );
+}
 
 // Progress is saved so it survives Android killing the app in the background
 // (e.g. while switching to the camera). `savedState` is the snapshot from
@@ -130,8 +143,124 @@ async function fetchJSON(url) {
   return response.json();
 }
 
-function setStatus(message) {
+function setStatus(message, { managedByOffline = false } = {}) {
+  statusOwnedByOffline = managedByOffline;
   statusEl.textContent = message || '';
+}
+
+function getOfflineStatusMessage() {
+  const offline = offlineManager.getState();
+  if (offline.status === 'ready') {
+    return isRunningStandalone() ? READY_INSTALLED_MESSAGE : READY_MESSAGE;
+  }
+  if (offline.status === 'unsupported') {
+    return 'Keys loaded. Offline caching is unavailable in this browser.';
+  }
+  if (offline.status === 'offline-incomplete') {
+    return 'Offline setup incomplete — reconnect to finish downloading keys for offline use.';
+  }
+  if (offline.status === 'failed') {
+    return 'Offline download was interrupted — retrying automatically when connected…';
+  }
+  if (Number.isFinite(offline.cached) && Number.isFinite(offline.total) && offline.total > 0) {
+    return `Downloading keys for offline use (${offline.cached}/${offline.total})…`;
+  }
+  return 'Downloading keys for offline use…';
+}
+
+function setOfflineStatus() {
+  setStatus(getOfflineStatusMessage(), { managedByOffline: true });
+}
+
+function renderOfflineCoreStatus() {
+  if (!offlineCoreStatusEl) return;
+  const offline = offlineManager.getState();
+  if (offline.status === 'ready') {
+    offlineCoreStatusEl.textContent = 'Offline keys & descriptions ready.';
+    if (offlineCoreControlsEl) offlineCoreControlsEl.innerHTML = '';
+    return;
+  }
+  if (offline.status === 'unsupported') {
+    offlineCoreStatusEl.textContent =
+      'Offline caching is unavailable in this browser (e.g. private browsing or an in-app browser). Open in Safari or Chrome to use offline.';
+    if (offlineCoreControlsEl) offlineCoreControlsEl.innerHTML = '';
+    return;
+  }
+  if (offline.status === 'installing' || offline.status === 'checking') {
+    const progress =
+      Number.isFinite(offline.cached) && Number.isFinite(offline.total) && offline.total > 0
+        ? ` (${offline.cached}/${offline.total})`
+        : '';
+    offlineCoreStatusEl.textContent = `Downloading keys & descriptions for offline use${progress}… Keep this app open with reception until finished.`;
+    if (offlineCoreControlsEl) offlineCoreControlsEl.innerHTML = '';
+    return;
+  }
+  offlineCoreStatusEl.textContent =
+    offline.status === 'offline-incomplete'
+      ? 'Offline keys & descriptions have not finished downloading yet. Reconnect to finish.'
+      : 'Offline download was interrupted before finishing.';
+  if (offlineCoreControlsEl) {
+    offlineCoreControlsEl.innerHTML =
+      '<button type="button" class="secondary" data-offline-retry="true">Retry offline download</button>';
+  }
+}
+
+function isWaitingForCoreOffline() {
+  const status = offlineManager.getState().status;
+  return status !== 'ready' && status !== 'unsupported';
+}
+
+let lastOfflineStatus = null;
+const offlineManager = createOfflineManager({
+  onStateChange(state) {
+    const prevStatus = lastOfflineStatus;
+    lastOfflineStatus = state.status;
+    renderOfflineCoreStatus();
+    renderPhotosStatus();
+    if (appBooted && statusOwnedByOffline) {
+      setOfflineStatus();
+    }
+    const wasSettled = prevStatus === 'ready' || prevStatus === 'unsupported';
+    const isSettled = state.status === 'ready' || state.status === 'unsupported';
+    if (state.status === 'ready') {
+      retryMissingViewData({ retryIfInFlight: true });
+    }
+    if (appBooted && !wasSettled && isSettled && !photoStore.isDisabled()) {
+      syncPhotosInBackground({ immediate: true });
+    }
+  }
+});
+lastOfflineStatus = offlineManager.getState().status;
+
+function initInstallPrompt() {
+  if (!installAppBtn) return;
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    installAppBtn.hidden = false;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    installAppBtn.hidden = true;
+    if (appBooted && statusOwnedByOffline) {
+      setOfflineStatus();
+    }
+  });
+
+  installAppBtn.addEventListener('click', async () => {
+    const promptEvent = deferredInstallPrompt;
+    if (!promptEvent) return;
+    deferredInstallPrompt = null;
+    installAppBtn.hidden = true;
+    try {
+      await promptEvent.prompt();
+      await promptEvent.userChoice;
+    } catch {
+      // User dismissed or browser cancelled the install prompt.
+    }
+  });
 }
 
 function formatMeasurement(value) {
@@ -168,6 +297,7 @@ function switchView(view) {
     if (!currentSpeciesId) speciesElements.search.focus();
   }
   if (view === 'about') {
+    renderOfflineCoreStatus();
     refreshPhotoStatus();
   }
   saveState();
@@ -425,7 +555,9 @@ function handleDichotomousChoice(index) {
   }
 }
 
-function bindDichotomousControls(keys) {
+function bindDichotomousControls() {
+  if (dichControlsBound) return;
+  dichControlsBound = true;
   // Clear on focus so the full key list shows; restore if nothing is picked.
   dichElements.search.addEventListener('focus', () => {
     dichElements.search.placeholder = dichElements.search.value || 'Start typing a key…';
@@ -440,9 +572,9 @@ function bindDichotomousControls(keys) {
     if (!value) return;
     const match = Array.from(dichElements.datalist.options).find(option => option.value === value);
     const keyId = match?.dataset.keyId || value.replace(/.*\[(\d+)\]$/, '$1');
-    if (!keys[keyId]) return;
+    if (!globalDichKeys[keyId]) return;
     try {
-      dichNavigator = createNavigatorFromData(keys, keyId);
+      dichNavigator = createNavigatorFromData(globalDichKeys, keyId);
       renderDichotomous();
     } catch (error) {
       setStatus(error.message);
@@ -793,7 +925,7 @@ async function loadData() {
       showResult(savedResult);
     }
   }
-  bindDichotomousControls(globalDichKeys);
+  bindDichotomousControls();
   taxonIndex = buildTaxonIndex(globalDichKeys, descriptions);
   if (savedState.speciesId) {
     if (taxonIndex.has(savedState.speciesId)) {
@@ -807,19 +939,22 @@ async function loadData() {
     }
   }
 
-  setStatus(READY_MESSAGE);
+  setOfflineStatus();
 }
 
+const multiLoader = createRetryableLoader(loadMultiData);
+
 // The multi-access bundle is large, so it is only parsed when that tab is used.
-function ensureMultiLoaded() {
-  if (!multiLoad) {
-    multiLoad = loadMultiData().catch(error => {
-      multiLoad = null;
-      console.error(error);
-      setStatus(error.message);
-    });
-  }
-  return multiLoad;
+function ensureMultiLoaded({ retryIfInFlight = false } = {}) {
+  return multiLoader.run({ retryIfInFlight }).catch(error => {
+    console.error(error);
+    const msg =
+      navigator.onLine === false
+        ? 'Offline — multi-access keys have not finished downloading yet. Reconnect to load.'
+        : error.message;
+    multiElements.summary.textContent = msg;
+    setStatus(msg);
+  });
 }
 
 async function loadMultiData() {
@@ -844,27 +979,27 @@ async function loadMultiData() {
   }
   bindMultiControls(multiList);
 
-  setStatus(READY_MESSAGE);
+  setOfflineStatus();
 }
 
 function escapeHtml(text) {
   return String(text ?? '').replace(/[&<>"']/g, ch => `&#${ch.charCodeAt(0)};`);
 }
 
-// Descriptions are only fetched when first needed (a key result or the Species tab).
-function ensureDescriptionsLoaded() {
-  if (!descriptionsLoad) {
-    descriptionsLoad = fetchJSON('./data/descriptions.json')
-      .then(bundle => {
-        descriptions = bundle.taxa || {};
-        mergeDescriptionsIntoIndex(taxonIndex, descriptions);
-      })
-      .catch(error => {
-        descriptionsLoad = null;
-        console.warn('Could not load descriptions:', error);
-      });
+const descriptionsLoader = createRetryableLoader(async () => {
+  const bundle = await fetchJSON('./data/descriptions.json');
+  descriptions = bundle.taxa || {};
+  mergeDescriptionsIntoIndex(taxonIndex, descriptions);
+  if (currentView === 'species' && speciesElements.search.value.trim()) {
+    renderSpeciesMatches();
   }
-  return descriptionsLoad;
+});
+
+// Descriptions are only fetched when first needed (a key result or the Species tab).
+function ensureDescriptionsLoaded({ retryIfInFlight = false } = {}) {
+  return descriptionsLoader.run({ retryIfInFlight }).catch(error => {
+    console.warn('Could not load descriptions:', error);
+  });
 }
 
 const INFRASPECIFIC_RANK_LABELS = {
@@ -1422,27 +1557,6 @@ function initSpecies() {
   });
 }
 
-async function registerServiceWorker() {
-  if (!('serviceWorker' in navigator)) return;
-  const hadController = Boolean(navigator.serviceWorker.controller);
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!hadController || refreshing) return;
-    refreshing = true;
-    window.location.reload();
-  });
-  try {
-    const registration = await navigator.serviceWorker.register('./service-worker.js');
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        registration.update().catch(() => {});
-      }
-    });
-  } catch (error) {
-    console.warn('Service worker registration failed:', error);
-  }
-}
-
 function setPhotosControls(html) {
   if (!photosControlsEl) return;
   photosControlsEl.innerHTML = html;
@@ -1477,6 +1591,14 @@ function renderPhotosStatus() {
     photosStatusEl.textContent = 'Offline species photos paused: not enough free storage on this device.';
     setPhotosControls(
       '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
+    );
+    return;
+  }
+  if (photoStatus?.supported !== false && !photoStatus?.synced && isWaitingForCoreOffline()) {
+    photosStatusEl.textContent = 'Waiting for offline keys to finish before syncing photos…';
+    setPhotosControls(
+      '<button type="button" class="secondary" disabled>Sync now</button>' +
+        '<button type="button" class="danger-subtle" data-photo-drop="true">Drop offline images &amp; don’t resync</button>'
     );
     return;
   }
@@ -1567,26 +1689,23 @@ function refreshVisiblePhotos(imageKeys = null, { force = false } = {}) {
 }
 
 function updatePhotoProgressStatus(text) {
-  // Never stomp on key errors or non-default status messages.
+  // Never stomp on key errors, incomplete core caching, or user action messages.
   const current = statusEl.textContent || '';
-  if (current !== READY_MESSAGE && !current.startsWith('Caching offline photos')) return;
-  setStatus(text);
-}
-
-async function waitForCoreServiceWorker() {
-  if (!('serviceWorker' in navigator)) return;
-  try {
-    await Promise.race([
-      navigator.serviceWorker.ready,
-      new Promise(resolve => setTimeout(resolve, 15000))
-    ]);
-  } catch {
-    // Proceed even if SW failed to register (e.g. restricted private mode).
+  if (
+    !(statusOwnedByOffline && offlineManager.getState().status === 'ready') &&
+    !current.startsWith('Caching offline photos')
+  ) {
+    return;
   }
+  setStatus(text);
 }
 
 async function syncPhotosInBackground({ force = false, immediate = false } = {}) {
   if (photoStore.isDisabled() || photoSyncClearing) return;
+  if (isWaitingForCoreOffline()) {
+    renderPhotosStatus();
+    return;
+  }
   if (activePhotoSyncPromise) return activePhotoSyncPromise;
   const now = Date.now();
   if (!force && !immediate && now - lastAutoSyncAttemptAt < 5000) return;
@@ -1596,9 +1715,6 @@ async function syncPhotosInBackground({ force = false, immediate = false } = {})
   activePhotoSyncController = controller;
   const run = (async () => {
     try {
-      if (!force) {
-        await waitForCoreServiceWorker();
-      }
       if (controller.signal.aborted || photoStore.isDisabled()) return;
 
       photoSyncLastError = null;
@@ -1636,7 +1752,7 @@ async function syncPhotosInBackground({ force = false, immediate = false } = {})
         refreshVisiblePhotos();
       }
       if (statusEl.textContent.startsWith('Caching offline photos')) {
-        setStatus(READY_MESSAGE);
+        setOfflineStatus();
       }
     } catch (error) {
       photoSyncProgress = null;
@@ -1646,7 +1762,7 @@ async function syncPhotosInBackground({ force = false, immediate = false } = {})
       }
       await refreshPhotoStatus();
       if (statusEl.textContent.startsWith('Caching offline photos')) {
-        setStatus(READY_MESSAGE);
+        setOfflineStatus();
       }
     } finally {
       if (activePhotoSyncController === controller) {
@@ -1682,7 +1798,7 @@ async function dropOfflinePhotos() {
     photoSyncProgress = null;
     photoSyncClearing = false;
     if (statusEl.textContent.startsWith('Caching offline photos')) {
-      setStatus(READY_MESSAGE);
+      setOfflineStatus();
     }
     await refreshPhotoStatus();
     refreshVisiblePhotos(null, { force: true });
@@ -1722,6 +1838,11 @@ function initPhotos() {
     }
   });
   document.addEventListener('click', event => {
+    if (event.target.closest('[data-offline-retry]')) {
+      offlineManager.retryNow();
+      retryMissingViewData({ retryIfInFlight: true });
+      return;
+    }
     if (event.target.closest('[data-photo-drop]')) {
       dropOfflinePhotos();
       return;
@@ -1746,24 +1867,60 @@ function initPhotos() {
   refreshPhotoStatus();
 }
 
+const bootLoader = createRetryableLoader(async () => {
+  await loadData();
+  appBooted = true;
+  setOfflineStatus();
+  syncPhotosInBackground({ immediate: true });
+});
+
+function bootData({ retryIfInFlight = false } = {}) {
+  return bootLoader.run({ retryIfInFlight }).catch(error => {
+    console.error(error);
+    const offlineMsg =
+      navigator.onLine === false
+        ? 'Offline — keys have not finished downloading yet. Reconnect to load automatically.'
+        : `Could not load keys (${error.message}).`;
+    setStatus(offlineMsg);
+    if (!dichNavigator) {
+      dichElements.options.innerHTML =
+        `<p>${escapeHtml(offlineMsg)} <button type="button" class="secondary" data-offline-retry="true">Retry</button></p>`;
+    }
+  });
+}
+
+function retryMissingViewData({ retryIfInFlight = false } = {}) {
+  if (!appBooted) {
+    bootData({ retryIfInFlight });
+  }
+  if (currentView === 'multi' && !multiLoader.isCompleted()) {
+    ensureMultiLoaded({ retryIfInFlight });
+  }
+  if (currentView === 'species' && !descriptionsLoader.isCompleted()) {
+    ensureDescriptionsLoaded({ retryIfInFlight });
+  }
+}
+
 function init() {
   initNavigation();
+  initInstallPrompt();
   initSpecies();
   initPhotos();
   initGlossary();
-  registerServiceWorker();
+  offlineManager.start();
+  renderOfflineCoreStatus();
   if (savedState.view && savedState.view !== currentView) {
     switchView(savedState.view);
   }
-  loadData()
-    .then(() => {
-      appBooted = true;
-      syncPhotosInBackground({ immediate: true });
-    })
-    .catch(error => {
-      console.error(error);
-      setStatus(error.message);
-    });
+  window.addEventListener('online', () => {
+    retryMissingViewData({ retryIfInFlight: true });
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && navigator.onLine !== false) {
+      retryMissingViewData({ retryIfInFlight: true });
+    }
+  });
+  bootData();
 }
 
 init();
