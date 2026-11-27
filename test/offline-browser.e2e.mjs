@@ -337,12 +337,20 @@ async function run() {
       () => cdp.eval(`document.querySelectorAll('#dichotomous-options > button[data-index]').length > 0`),
       { timeoutMs: 10000, label: 'dichotomous root options' }
     );
-    const rootTitle = await cdp.eval(`(() => {
+    const rootHeader = await cdp.eval(`(() => {
       const header = document.getElementById('dichotomous-header');
-      return !header?.hidden ? (header.querySelector('strong')?.textContent?.trim() || '') : '';
+      return !header?.hidden
+        ? {
+            title: header.querySelector('strong')?.textContent?.trim() || '',
+            depth: header.querySelector('.dich-depth')?.textContent?.trim() || ''
+          }
+        : { title: '', depth: '' };
     })()`);
-    assert.equal(rootTitle, 'Main groups of plants in Victoria');
+    assert.equal(rootHeader.title, 'Main groups of plants in Victoria');
+    assert.equal(rootHeader.depth, 'Depth 1 · Step 1');
     let linkedTitle = null;
+    let linkedDepth = null;
+    let sawHigherStepInRoot = false;
     for (let step = 0; step < 15; step += 1) {
       const state = await cdp.eval(`(() => {
         const hash = window.location.hash;
@@ -365,27 +373,51 @@ async function run() {
         const hash = window.location.hash;
         const header = document.getElementById('dichotomous-header');
         const title = !header?.hidden ? (header.querySelector('strong')?.textContent?.trim() || '') : '';
-        return { hash, title };
+        const depth = !header?.hidden ? (header.querySelector('.dich-depth')?.textContent?.trim() || '') : '';
+        return { hash, title, depth };
       })()`);
+      if (check.hash.startsWith('#/key/1903') && /^Depth 1 · Step [2-9]/.test(check.depth)) {
+        sawHigherStepInRoot = true;
+      }
       if (check.title && !check.hash.startsWith('#/key/1903')) {
         linkedTitle = check.title;
+        linkedDepth = check.depth;
         break;
       }
       if (state.done) break;
     }
+    assert.ok(sawHigherStepInRoot, 'Expected step counter to advance inside Key 1903');
     assert.ok(linkedTitle, 'Expected dichotomous walk to transition into a linked key');
+    assert.equal(linkedDepth, 'Depth 2 · Step 1');
 
-    // Toggle Bracketed view and verify couplets render, then Back and Restart.
+    // Toggle Bracketed view and verify couplets + depth render, then Back and Restart.
     await cdp.eval(`document.querySelector('[data-dich-mode="bracketed"]').click()`);
     const bracketedCount = await waitFor(
       () => cdp.eval(`document.querySelectorAll('#dichotomous-bracketed li').length`),
       { timeoutMs: 5000, label: 'bracketed view couplets' }
     );
     assert.ok(bracketedCount > 0);
+    const bracketedDepth = await cdp.eval(
+      `document.querySelector('#dichotomous-header .dich-depth')?.textContent?.trim() || ''`
+    );
+    assert.equal(bracketedDepth, 'Depth 2');
     await cdp.eval(`document.querySelector('[data-dich-mode="interactive"]').click()`);
     await cdp.eval(`document.getElementById('dichotomous-restart').click()`);
+    const restartedDepth = await cdp.eval(
+      `document.querySelector('#dichotomous-header .dich-depth')?.textContent?.trim() || ''`
+    );
+    assert.equal(restartedDepth, 'Depth 2 · Step 1');
     await cdp.eval(`document.getElementById('dichotomous-back').click()`);
-    console.log(`   Linked key transition OK ("Key 1903" -> "${linkedTitle.split('\n')[0]}"), bracketed (${bracketedCount} rows), back & restart OK.`);
+    const backDepth = await waitFor(
+      () =>
+        cdp.eval(`(() => {
+          const d = document.querySelector('#dichotomous-header .dich-depth')?.textContent?.trim() || '';
+          return d.startsWith('Depth 1 · Step ') ? d : null;
+        })()`),
+      { timeoutMs: 5000, label: 'depth unwind on Back to parent key' }
+    );
+    assert.match(backDepth, /^Depth 1 · Step \d+$/);
+    console.log(`   Linked key transition OK ("Key 1903" -> "${linkedTitle.split('\n')[0]}", ${linkedDepth}), bracketed (${bracketedCount} rows, ${bracketedDepth}), back (${backDepth}) & restart OK.`);
 
     // 4. Multi-access key offline via Home quick-start card.
     console.log('4. Testing Multi-Access key offline...');

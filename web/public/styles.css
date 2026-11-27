@@ -418,9 +418,20 @@ header h1 {
   color: #b45309;
 }
 
+.dich-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
 .dich-header strong {
   color: var(--fg);
   font-size: 1.25rem;
+}
+
+.dich-depth {
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .dich-toolbar {

@@ -170,6 +170,58 @@ test('DichotomousNavigator.goToLead deep-links to any step and reconstructs pare
   assert.equal(fresh.goToLead('nonexistent-lead'), false);
 });
 
+test('DichotomousNavigator.navigateToKey tracks key-stack depth across linked keys, back, restart, and direct jumps', () => {
+  const nav = createNavigatorFromData(dichBundle.keys, '1903');
+  assert.equal(nav.getHeader().depth, 1);
+  assert.equal(nav.getHeader().step, 1);
+
+  const linkedItem = (dichBundle.keys['1903'].items || []).find(
+    item => item?.toKey && dichBundle.keys[String(item.toKey)]
+  );
+  assert.ok(linkedItem, 'Key 1903 should have a linked child key');
+  const childKeyId = String(linkedItem.toKey);
+
+  assert.equal(nav.hasLinkedKey(childKeyId), true);
+  nav.navigateToKey(childKeyId);
+  assert.equal(nav.currentKeyId, childKeyId);
+  assert.equal(nav.getHeader().depth, 2);
+  assert.equal(nav.getHeader().step, 1);
+
+  const childBranch = nav.getOptions().find(opt => !opt.item);
+  assert.ok(childBranch, 'Child key should have a branch option');
+  assert.equal(nav.goToLead(String(childBranch.lead.id)), true);
+  assert.equal(nav.getHeader().depth, 2);
+  assert.equal(nav.getHeader().step, 2);
+
+  nav.resetCurrentKey();
+  assert.equal(nav.currentKeyId, childKeyId);
+  assert.equal(nav.getHeader().depth, 2);
+  assert.equal(nav.getHeader().step, 1);
+
+  // Returning to an ancestor unwinds the stack.
+  nav.navigateToKey('1903');
+  assert.equal(nav.currentKeyId, '1903');
+  assert.equal(nav.getHeader().depth, 1);
+
+  // Following the linked key again pushes depth back to 2.
+  nav.navigateToKey(childKeyId);
+  assert.equal(nav.getHeader().depth, 2);
+
+  // Explicit resetStack (e.g. from unified search) starts fresh at depth 1.
+  nav.navigateToKey(childKeyId, { resetStack: true });
+  assert.equal(nav.currentKeyId, childKeyId);
+  assert.equal(nav.getHeader().depth, 1);
+
+  // Jumping to an unrelated key also starts fresh at depth 1.
+  const unrelatedKeyId = Object.keys(dichBundle.keys).find(
+    id => id !== childKeyId && !nav.hasLinkedKey(id)
+  );
+  assert.ok(unrelatedKeyId, 'Should find an unrelated key in the dataset');
+  nav.navigateToKey(unrelatedKeyId);
+  assert.equal(nav.currentKeyId, unrelatedKeyId);
+  assert.equal(nav.getHeader().depth, 1);
+});
+
 test('manifest precaches search-index.json and router/search modules', async () => {
   const manifest = JSON.parse(
     await fs.readFile(new URL('../web/public/data/manifest.json', import.meta.url), 'utf8')

@@ -236,6 +236,49 @@ export class DichotomousNavigator {
     this.pushState(this.loadKey(String(keyId)));
   }
 
+  hasLinkedKey(keyId) {
+    const target = String(keyId);
+    for (const item of this.currentState().context.items.values()) {
+      if (item?.toKey != null && String(item.toKey) === target) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Synchronize the key stack with a hash-route keyId: keep the stack on same key,
+  // unwind back to an ancestor on Back, push when following a linked key, and start
+  // a fresh stack for direct/search/unrelated jumps.
+  navigateToKey(keyId, { resetStack = false } = {}) {
+    const id = String(keyId);
+    if (resetStack) {
+      this.startKeyId = id;
+      this.reset();
+      return;
+    }
+    if (this.currentKeyId === id) {
+      return;
+    }
+    for (let i = this.stack.length - 1; i >= 0; i -= 1) {
+      if (this.stack[i].context.keyId === id) {
+        this.stack.length = i + 1;
+        return;
+      }
+    }
+    if (this.hasLinkedKey(id)) {
+      this.openKey(id);
+      return;
+    }
+    this.startKeyId = id;
+    this.reset();
+  }
+
+  resetCurrentKey() {
+    const state = this.currentState();
+    state.currentLeadId = state.context.root;
+    state.history = [];
+  }
+
   // Leave the current sub-key, ignoring any step-by-step history within it.
   exitKey() {
     if (this.stack.length > 1) {

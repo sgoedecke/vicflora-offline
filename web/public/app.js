@@ -104,6 +104,7 @@ let dichKeyMetaById = new Map();
 let dichNavigator = null;
 let globalDichKeys = {};
 let dichResult = null;
+let resetDichStackOnNextNav = false;
 const lastStepByKey = new Map();
 
 let multiKeyList = [];
@@ -453,6 +454,9 @@ function applyHashChange({ recordHistory = true } = {}) {
 async function renderRoute(route) {
   const seq = ++routeRenderSeq;
   setActiveView(route.view);
+  if (route.view !== 'key') {
+    resetDichStackOnNextNav = false;
+  }
 
   if (route.view === 'home') {
     renderUnifiedSearch();
@@ -719,7 +723,11 @@ function initUnifiedSearch() {
         floatingSearchOpen = false;
         searchElements.input.blur();
         const href = target.getAttribute('href');
-        if (href) navigateTo(parseRoute(href));
+        if (href) {
+          const parsed = parseRoute(href);
+          if (parsed.view === 'key') resetDichStackOnNextNav = true;
+          navigateTo(parsed);
+        }
       }
       return;
     }
@@ -743,6 +751,10 @@ function initUnifiedSearch() {
   searchElements.results.addEventListener('click', event => {
     const link = event.target.closest('.search-result-item');
     if (link) {
+      const href = link.getAttribute('href');
+      if (href && parseRoute(href).view === 'key') {
+        resetDichStackOnNextNav = true;
+      }
       floatingSearchOpen = false;
       searchElements.input.blur();
     }
@@ -805,16 +817,28 @@ async function renderDichotomousRoute(route, seq) {
     return;
   }
 
+  const shouldResetStack =
+    resetDichStackOnNextNav ||
+    Boolean(
+      previousRoute &&
+        previousRoute.view !== 'key' &&
+        dichNavigator &&
+        dichNavigator.currentKeyId !== route.keyId
+    );
+  resetDichStackOnNextNav = false;
+
   try {
-    if (!dichNavigator || dichNavigator.currentKeyId !== route.keyId) {
+    if (!dichNavigator) {
       dichNavigator = createNavigatorFromData(globalDichKeys, route.keyId);
+    } else {
+      dichNavigator.navigateToKey(route.keyId, { resetStack: shouldResetStack });
     }
 
     if (route.mode !== 'bracketed') {
       const targetLeadId = route.leadId || dichNavigator.rootNodeId;
       const ok = dichNavigator.goToLead(targetLeadId);
       if (!ok) {
-        dichNavigator.reset();
+        dichNavigator.resetCurrentKey();
       }
       if (dichNavigator.currentNodeId !== dichNavigator.rootNodeId) {
         lastStepByKey.set(route.keyId, dichNavigator.currentNodeId);
@@ -826,7 +850,7 @@ async function renderDichotomousRoute(route, seq) {
       if (remembered) {
         dichNavigator.goToLead(remembered);
       } else {
-        dichNavigator.reset();
+        dichNavigator.resetCurrentKey();
       }
     }
   } catch (error) {
@@ -838,11 +862,22 @@ async function renderDichotomousRoute(route, seq) {
   renderDichotomous(route.mode);
 }
 
+function formatDichotomousDepth(header, mode) {
+  if (mode === 'bracketed') {
+    return `Depth ${header.depth}`;
+  }
+  return `Depth ${header.depth} · Step ${header.step}`;
+}
+
 function renderDichotomous(mode) {
   if (!dichNavigator) return;
   dichResult = null;
   const header = dichNavigator.getHeader();
-  dichElements.header.innerHTML = `<strong>${escapeHtml(header.keyTitle)}</strong>`;
+  const depthText = formatDichotomousDepth(header, mode);
+  dichElements.header.innerHTML = `
+    <strong>${escapeHtml(header.keyTitle)}</strong>
+    <small class="dich-depth">${escapeHtml(depthText)}</small>
+  `;
 
   dichElements.modeButtons.forEach(button => {
     const isCurrent =
@@ -1121,7 +1156,7 @@ function bindDichotomousControls() {
     if (currentRoute.leadId) {
       navigateTo({ view: 'key', keyId: currentRoute.keyId, mode: currentRoute.mode, leadId: null });
     } else if (dichNavigator) {
-      dichNavigator.reset();
+      dichNavigator.resetCurrentKey();
       renderDichotomous(currentRoute.mode);
     }
   });
