@@ -51,6 +51,7 @@ const multiElements = {
   summary: document.querySelector('#multi-summary'),
   characters: document.querySelector('#multi-characters'),
   states: document.querySelector('#multi-states'),
+  statesHeading: document.querySelector('#multi-states-heading'),
   selections: document.querySelector('#multi-selections'),
   remaining: document.querySelector('#multi-remaining'),
   reset: document.querySelector('#multi-reset'),
@@ -1231,6 +1232,7 @@ async function renderMultiRoute(route, seq) {
     multiElements.summary.innerHTML = `<strong>Multi-access key not found.</strong> <a href="#/">Return home</a>`;
     multiElements.characters.innerHTML = '';
     multiElements.states.innerHTML = '';
+    if (multiElements.statesHeading) multiElements.statesHeading.textContent = 'States';
     multiElements.selections.innerHTML = '';
     multiElements.remaining.innerHTML = '';
     return;
@@ -1300,6 +1302,9 @@ function renderMultiStates(session, characterId) {
   const baseCharacter = session.getCharacterById(characterId);
   const characterName = session.getCharacterDisplayName(characterId);
   const statesCard = multiElements.states.closest('.card');
+  if (multiElements.statesHeading) {
+    multiElements.statesHeading.textContent = characterName;
+  }
 
   if (baseCharacter?.type === 2) {
     const selection = session.getSelection(characterId);
@@ -1466,8 +1471,9 @@ function renderMultiAll(session) {
   renderMultiCharacters(session);
   if (multiState.currentCharacterId) {
     renderMultiStates(session, multiState.currentCharacterId);
-  }
-  if (!multiState.currentCharacterId) {
+  } else {
+    multiElements.states.innerHTML = '';
+    if (multiElements.statesHeading) multiElements.statesHeading.textContent = 'States';
     multiElements.states.closest('.card')?.classList.remove('active');
   }
   renderMultiSelections(session);
