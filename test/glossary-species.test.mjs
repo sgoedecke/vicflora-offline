@@ -16,7 +16,9 @@ import {
 const require = createRequire(import.meta.url);
 const {
   buildSpeciesIndexAndDescriptions,
-  compileDichotomousKey
+  compileDichotomousKey,
+  normalizeMultiKeyTitle,
+  stripInaccessibleFigureRefs
 } = require('../scripts/build-web-data.js');
 
 const glossary = new Glossary([
@@ -223,6 +225,52 @@ test('compiled JSON bundles are minified and strip duplicated metadata', () => {
   assert.equal('name' in sampleDesc, false, 'descriptions.json omits index metadata moved to species-index.json');
   assert.equal('vernacular' in sampleDesc, false);
   assert.ok(typeof sampleDesc.html === 'string' && sampleDesc.html.length > 0);
+});
+
+test('stripInaccessibleFigureRefs removes printed Flora of Victoria figure refs without mangling citations', () => {
+  assert.equal(
+    stripInaccessibleFigureRefs('<p>rough with stiff, bristly hairs. Figure 219a.</p>', { glossary: true }),
+    '<p>rough with stiff, bristly hairs.</p>'
+  );
+  assert.equal(
+    stripInaccessibleFigureRefs('<p>either branched (Figure 218ff) or unbranched.</p>', { glossary: true }),
+    '<p>either branched or unbranched.</p>'
+  );
+  assert.equal(
+    stripInaccessibleFigureRefs('<p>e.g. axile (Figure 221h), basal (Figure 221d).</p>', { glossary: true }),
+    '<p>e.g. axile, basal.</p>'
+  );
+  assert.equal(
+    stripInaccessibleFigureRefs('<p>woolly hairs. Figure 219i; hairy with hairs ascending.</p>', { glossary: true }),
+    '<p>woolly hairs; hairy with hairs ascending.</p>'
+  );
+  assert.equal(
+    stripInaccessibleFigureRefs('<p>Green Wattle (Figure 131g). Flowers Dec.–Jan.</p>'),
+    '<p>Green Wattle. Flowers Dec.–Jan.</p>'
+  );
+  // Academic citation prose in taxon descriptions is preserved.
+  const citation = '<p>Font (2023) provide illustrations of the character states in Figure 1, as well as colour images.</p>';
+  assert.equal(stripInaccessibleFigureRefs(citation), citation);
+
+  const bundledGlossary = JSON.parse(
+    fs.readFileSync(new URL('../web/public/data/glossary.json', import.meta.url), 'utf8')
+  );
+  const remaining = bundledGlossary.filter(
+    term => term.definition && /\bfig(?:ure|s)?\.?\s*\d/i.test(term.definition)
+  );
+  assert.deepEqual(remaining, [], 'bundled glossary should have no remaining printed Figure references');
+  const hispid = bundledGlossary.find(term => term.name === 'hispid');
+  assert.equal(hispid?.definition, '<p>rough with stiff, bristly hairs.</p>');
+});
+
+test('normalizeMultiKeyTitle strips trailing "of Victoria" and "in Victoria"', () => {
+  assert.equal(normalizeMultiKeyTitle('Multi access key to the Acacia of Victoria'), 'Acacia');
+  assert.equal(normalizeMultiKeyTitle('Key to the eucalypts of Victoria2'), 'Eucalypts');
+  assert.equal(normalizeMultiKeyTitle('Key to Brassicaceae in Victoria'), 'Brassicaceae');
+  assert.equal(
+    normalizeMultiKeyTitle('Multiaccess key to families of flowering plants in Victoria_updated Aug 2022'),
+    'Families of Flowering Plants'
+  );
 });
 
 test('app version badge is derived dynamically from the generated SW manifest', () => {

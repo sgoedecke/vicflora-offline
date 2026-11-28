@@ -20,6 +20,7 @@ export function loadSpeciesIndex(bundle) {
       id,
       name: raw.name || '',
       vernacular: raw.vernacular || null,
+      vernaculars: Array.isArray(raw.vernaculars) ? raw.vernaculars : [],
       rank: raw.rank || null,
       parentId: raw.parentId || null,
       children: Array.isArray(raw.children) ? raw.children : [],
@@ -59,18 +60,30 @@ export function findSoleInfraspecificProfile(index, taxonId, descriptions = {}) 
   return { entry: child, taxon: childTaxon };
 }
 
+function normalizeSearchText(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[-/]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function searchTaxa(index, query, limit = 30) {
   const q = query.trim().toLowerCase().replace(/\b(?:ssp\.?|subspecies)\b/g, 'subsp.');
+  const qNorm = normalizeSearchText(q);
   if (q.length < 2) return [];
   const scored = [];
   for (const entry of index.values()) {
     const name = entry.name.toLowerCase();
-    const vernacular = (entry.vernacular || '').toLowerCase();
+    const commonNames = [entry.vernacular, ...(entry.vernaculars || [])]
+      .filter(Boolean)
+      .map(normalizeSearchText);
     let score = -1;
     if (name.startsWith(q)) score = 0;
-    else if (vernacular.startsWith(q)) score = 1;
+    else if (commonNames.some(v => v.startsWith(qNorm))) score = 1;
     else if (name.includes(q)) score = 2;
-    else if (vernacular.includes(q)) score = 3;
+    else if (commonNames.some(v => v.includes(qNorm))) score = 3;
     if (score >= 0) scored.push({ entry, score });
   }
   scored.sort((a, b) => a.score - b.score || a.entry.name.localeCompare(b.entry.name));

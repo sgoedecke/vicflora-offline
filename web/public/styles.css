@@ -6,6 +6,7 @@
   --muted: #6b7280;
   --border: #d1d5db;
   --card-bg: #ffffff;
+  --popover-bg: #ffffff;
 }
 
 * {
@@ -723,6 +724,7 @@ button.link {
   padding: 1rem;
   background: rgba(34,197,94,0.1);
   display: none;
+  scroll-margin-top: 0.75rem;
 }
 
 .result.visible {
@@ -731,6 +733,10 @@ button.link {
 
 .result h3 {
   margin-top: 0;
+}
+
+.result-back-couplet {
+  margin: 0.75rem 0 0;
 }
 
 .segmented {
@@ -769,10 +775,12 @@ button.link {
 }
 
 .couplet {
-  padding: 0.5rem 0.5rem;
+  padding: 0.55rem 0.65rem;
   border-bottom: 1px solid var(--border);
-  border-left: 3px solid transparent;
-  scroll-margin-top: 0.5rem;
+  border-left: 4px solid transparent;
+  border-radius: 0.45rem;
+  scroll-margin-top: 1rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .couplet.on-path {
@@ -781,7 +789,12 @@ button.link {
 
 .couplet.current {
   border-left-color: var(--accent);
-  background: rgba(37, 99, 235, 0.06);
+  background: rgba(37, 99, 235, 0.13);
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.26);
+}
+
+.couplet.current .lead-number {
+  color: var(--accent);
 }
 
 .couplet.flash {
@@ -789,8 +802,13 @@ button.link {
 }
 
 @keyframes couplet-flash {
-  from { background: rgba(37, 99, 235, 0.25); }
-  to { background: transparent; }
+  from { background: rgba(37, 99, 235, 0.34); }
+  to { background: rgba(37, 99, 235, 0.13); }
+}
+
+@keyframes couplet-flash-dark {
+  from { background: rgba(56, 189, 248, 0.36); }
+  to { background: rgba(56, 189, 248, 0.16); }
 }
 
 .lead {
@@ -820,6 +838,11 @@ button.link {
 .lead-dest button.link {
   text-decoration: none;
   padding: 0.25rem 0;
+}
+
+.lead-dest button.link:hover,
+.lead-dest button.link:focus-visible {
+  text-decoration: underline;
 }
 
 .scientific_name,
@@ -1374,10 +1397,17 @@ body.lightbox-open {
 }
 
 .gloss {
-  text-decoration: underline dotted;
-  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-decoration: underline dashed;
+  text-decoration-color: color-mix(in srgb, var(--accent) 75%, currentColor);
+  text-decoration-thickness: 1.5px;
   text-underline-offset: 3px;
   cursor: help;
+}
+
+.gloss:hover,
+.gloss:focus-visible {
+  text-decoration-style: solid;
+  text-decoration-color: var(--accent);
 }
 
 .gloss-popover {
@@ -1388,13 +1418,13 @@ body.lightbox-open {
   width: min(560px, calc(100vw - 2rem));
   max-height: 50vh;
   overflow-y: auto;
-  background: var(--card-bg);
+  background: var(--popover-bg);
   color: var(--fg);
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   padding: 1rem 1.25rem;
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.25);
-  z-index: 10;
+  z-index: 50;
   line-height: 1.5;
 }
 
@@ -1498,6 +1528,20 @@ code {
     --muted: #94a3b8;
     --border: rgba(148, 163, 184, 0.3);
     --card-bg: rgba(15, 23, 42, 0.85);
+    --popover-bg: #1e293b;
+  }
+
+  .gloss-popover {
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+  }
+
+  .couplet.current {
+    background: rgba(56, 189, 248, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.35);
+  }
+
+  .couplet.flash {
+    animation-name: couplet-flash-dark;
   }
 
   .card-list button,

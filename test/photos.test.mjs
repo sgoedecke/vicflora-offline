@@ -17,6 +17,7 @@ import {
 import {
   formatAttribution,
   formatDrawingCaption,
+  imageAssetKey,
   pickBestDrawing
 } from '../scripts/fetch-photos.js';
 import { FakeCacheStorage } from './helpers/fake-caches.mjs';
@@ -145,6 +146,19 @@ test('photo/drawing metadata and attribution helpers behave as expected', () => 
       '1'
     ).id,
     '2'
+  );
+
+  // Distinct VicFlora Canto asset URLs must not collide even when VicFlora reuses numeric image IDs (e.g. 26399).
+  const photoUrl = 'https://vicflora-cdn.rbg.vic.gov.au/assets/canto/preview/6ultu0mof97h39lrefh91mbu7f-20240328130330931.jpg';
+  const drawingUrl = 'https://vicflora-cdn.rbg.vic.gov.au/assets/canto/preview/je3s5cpaa50lnfhbmlrrrum47h-20240327103354388.jpg';
+  assert.notEqual(imageAssetKey(photoUrl, '26399'), imageAssetKey(drawingUrl, '26399'));
+  assert.equal(
+    pickBestDrawing(
+      [{ id: '26399', subtype: 'Illustration', subjectCategory: 'Flora of Victoria Figure', previewUrl: drawingUrl }],
+      '26399',
+      photoUrl
+    )?.previewUrl,
+    drawingUrl
   );
 });
 

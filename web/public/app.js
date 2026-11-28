@@ -627,13 +627,17 @@ function renderUnifiedSearch() {
 
   if (taxa.length) {
     const items = taxa
-      .map(
-        entry => `
+      .map(entry => {
+        const subLabel =
+          entry.vernacular && entry.matchedVernacular && entry.matchedVernacular !== entry.vernacular
+            ? `${entry.vernacular} · ${entry.matchedVernacular}`
+            : (entry.vernacular || entry.matchedVernacular || '');
+        return `
           <li>
             <a class="search-result-item" role="option" href="${escapeHtml(formatRoute({ view: 'taxon', taxonId: entry.id }))}">
               <span class="search-result-main">
                 <span class="search-result-title scientific_name">${escapeHtml(entry.name)}</span>
-                ${entry.vernacular ? `<span class="search-result-sub">${escapeHtml(entry.vernacular)}</span>` : ''}
+                ${subLabel ? `<span class="search-result-sub">${escapeHtml(subLabel)}</span>` : ''}
               </span>
               <span class="search-result-badges">
                 ${entry.toKey ? '<span class="result-badge result-badge--has-key">Has key</span>' : ''}
@@ -641,8 +645,8 @@ function renderUnifiedSearch() {
               </span>
             </a>
           </li>
-        `
-      )
+        `;
+      })
       .join('');
     groups.push(renderSearchGroup(`Taxa & Species (${taxa.length})`, items));
   }
@@ -860,6 +864,9 @@ async function renderDichotomousRoute(route, seq) {
 
   bindDichotomousControls();
   renderDichotomous(route.mode);
+  if (route.mode !== 'bracketed' && previousRoute?.keyId !== route.keyId) {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
 }
 
 function formatDichotomousDepth(header, mode) {
@@ -967,7 +974,6 @@ function renderBracketed() {
         dest.append(button);
       } else if (lead.item) {
         const keyTarget = lead.item.toKey || lead.via?.toKey;
-        const taxonId = lead.via?.taxonId || lead.item.taxonId;
         const labelText = lead.via
           ? `${lead.item.name} → ${lead.via.name}`
           : lead.item.name || '';
@@ -979,18 +985,17 @@ function renderBracketed() {
           link.title = `Open key ${keyTarget}`;
           link.textContent = `${labelText} ›`;
           dest.append(link);
-        } else if (taxonId) {
-          const link = document.createElement('a');
-          link.className = 'taxon link';
-          link.href = formatRoute({ view: 'taxon', taxonId });
-          link.title = `Open profile for ${labelText}`;
-          link.textContent = labelText;
-          dest.append(link);
         } else {
-          const name = document.createElement('span');
-          name.className = 'taxon';
-          name.textContent = labelText;
-          dest.append(name);
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'taxon link scientific_name';
+          button.title = `Show ${labelText}`;
+          button.textContent = labelText;
+          button.addEventListener('click', () => {
+            setCurrentCouplet(couplet.number);
+            showResult(lead.item, lead.via, { fromCouplet: couplet.number });
+          });
+          dest.append(button);
         }
       }
 
@@ -1002,12 +1007,24 @@ function renderBracketed() {
 
   const current = numberByNode.get(currentNodeId);
   if (current > 1) {
-    scrollToCouplet(current, { flash: false, smooth: false });
+    scrollToCouplet(current, { flash: false, smooth: false, markCurrent: true });
+  } else {
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }
 }
 
-function scrollToCouplet(number, { flash = true, smooth = true } = {}) {
+function setCurrentCouplet(number) {
   const target = document.getElementById(`couplet-${number}`);
+  if (!target) return null;
+  for (const el of dichElements.bracketed.querySelectorAll('.couplet.current')) {
+    if (el !== target) el.classList.remove('current');
+  }
+  target.classList.add('current');
+  return target;
+}
+
+function scrollToCouplet(number, { flash = true, smooth = true, markCurrent = true } = {}) {
+  const target = markCurrent ? setCurrentCouplet(number) : document.getElementById(`couplet-${number}`);
   if (!target) return;
   target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
   if (flash) {
@@ -1017,7 +1034,7 @@ function scrollToCouplet(number, { flash = true, smooth = true } = {}) {
   }
 }
 
-function showResult(item, via = null) {
+function showResult(item, via = null, { fromCouplet = null } = {}) {
   dichResult = { item, via };
   dichElements.result.classList.add('visible');
   const taxonId = via?.taxonId || item.taxonId;
@@ -1063,9 +1080,15 @@ function showResult(item, via = null) {
       `<p><a href="${escapeHtml(viaUrl)}" target="_blank" rel="noopener">Open VicFlora entry for ${escapeHtml(via.name || '')}</a></p>`
     );
   }
+  if (fromCouplet != null) {
+    lines.push(
+      `<p class="result-back-couplet"><button type="button" class="secondary" data-back-to-couplet="${escapeHtml(fromCouplet)}">↑ Back to couplet ${escapeHtml(fromCouplet)}</button></p>`
+    );
+  }
 
   dichElements.result.innerHTML = lines.join('');
   fillDescription(dichElements.result.querySelector('.taxon-description'), taxonId);
+  dichElements.result.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function handleDichotomousChoice(index) {
@@ -1145,7 +1168,14 @@ function bindDichotomousControls() {
   dichElements.bracketed.addEventListener('click', event => {
     const target = event.target.closest('button[data-goto]');
     if (target) {
-      scrollToCouplet(target.dataset.goto);
+      scrollToCouplet(target.dataset.goto, { flash: true, smooth: true, markCurrent: true });
+    }
+  });
+
+  dichElements.result.addEventListener('click', event => {
+    const backBtn = event.target.closest('button[data-back-to-couplet]');
+    if (backBtn) {
+      scrollToCouplet(backBtn.dataset.backToCouplet, { flash: true, smooth: true, markCurrent: true });
     }
   });
 
@@ -1934,6 +1964,11 @@ function getKeyTitle(keyId) {
   return dichKeyMetaById.get(id)?.title || globalDichKeys[id]?.title || `Key ${id}`;
 }
 
+function formatAppearsInKeyLabel(keyId) {
+  const title = getKeyTitle(keyId);
+  return /^key\b/i.test(title) ? title : `Key to ${title}`;
+}
+
 async function renderTaxonRoute(route, seq) {
   const taxonId = route.taxonId;
   refreshPhotoStatus();
@@ -1965,15 +2000,16 @@ async function renderTaxonRoute(route, seq) {
   const keyLinks = (entry.keys || [])
     .map(keyId => {
       const href = formatRoute({ view: 'key', keyId: String(keyId) });
-      return `<li><a class="link" href="${escapeHtml(href)}">${escapeHtml(getKeyTitle(keyId))}</a></li>`;
+      return `<li><a class="link" href="${escapeHtml(href)}">${escapeHtml(formatAppearsInKeyLabel(keyId))}</a></li>`;
     })
     .join('');
 
   const ownKey = entry.toKey
     ? `<p><a class="btn-link btn-secondary" href="${escapeHtml(formatRoute({ view: 'key', keyId: String(entry.toKey) }))}">Open key to ${escapeHtml(getKeyTitle(entry.toKey))} →</a></p>`
     : '';
+  const appearsInHeading = (entry.keys || []).length === 1 ? 'Appears in key' : 'Appears in keys';
   const appearsIn = keyLinks
-    ? `<h4>Appears in</h4><ul class="key-links">${keyLinks}</ul>`
+    ? `<h4>${appearsInHeading}</h4><ul class="key-links">${keyLinks}</ul>`
     : '';
 
   detail.innerHTML = `

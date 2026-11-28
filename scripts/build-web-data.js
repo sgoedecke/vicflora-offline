@@ -8,6 +8,74 @@ const TAXON_URL = /\/flora\/taxon\/([0-9a-f-]{36})/i;
 const INFRASPECIFIC_RANKS = new Set(['SUBSPECIES', 'VARIETY', 'FORM']);
 const INFRASPECIFIC_MARKER = /\b(subsp\.|var\.|f\.)\b/;
 const LOWERCASE_WORDS = new Set(['of', 'and', 'the', 'in']);
+const FIGURE_NUM_RE = '\\d+(?:[a-z]+(?:(?:\\s*[,–—-]\\s*|&[nm]dash;)[a-z]+)*)?';
+
+const KEY_COMMON_ALIASES = {
+  acacia: ['Wattle', 'Wattles'],
+  asteraceae: ['Daisy', 'Daisies'],
+  brassicaceae: ['Brassicas', 'Mustards', 'Cresses'],
+  cyperaceae: ['Sedge', 'Sedges'],
+  eucalypts: ['Eucalypt', 'Gum', 'Gums', 'Gum trees', 'Eucalyptus'],
+  eucalyptus: ['Eucalypt', 'Eucalypts', 'Gum', 'Gums', 'Gum trees'],
+  fabaceae: ['Pea', 'Peas', 'Legumes'],
+  juncaceae: ['Rush', 'Rushes'],
+  poaceae: ['Grass', 'Grasses'],
+  orchidaceae: ['Orchid', 'Orchids'],
+  ranunculus: ['Buttercup', 'Buttercups'],
+  ptilotus: ['Mulla-mulla', 'Feather-heads'],
+  banksia: ['Banksias'],
+  grevillea: ['Grevilleas', 'Spider-flowers'],
+  melaleuca: ['Paperbark', 'Paperbarks', 'Honey-myrtles'],
+  leptospermum: ['Tea-tree', 'Tea-trees'],
+  callistemon: ['Bottlebrush', 'Bottlebrushes'],
+  hibbertia: ['Guinea-flower', 'Guinea-flowers'],
+  drosera: ['Sundew', 'Sundews'],
+  lomandra: ['Mat-rush', 'Mat-rushes'],
+  dianella: ['Flax-lily', 'Flax-lilies']
+};
+
+function stripInaccessibleFigureRefs(html, { glossary = false } = {}) {
+  if (!html || typeof html !== 'string') return html;
+  let cleaned = html.replace(
+    new RegExp(`\\s*\\(\\s*Figures?\\s+${FIGURE_NUM_RE}\\s*\\)`, 'gi'),
+    ''
+  );
+  if (glossary) {
+    cleaned = cleaned.replace(
+      new RegExp(`\\.?\\s*Figures?\\s+${FIGURE_NUM_RE}\\s*;`, 'gi'),
+      ';'
+    );
+    cleaned = cleaned.replace(
+      new RegExp(`\\s*Figures?\\s+${FIGURE_NUM_RE}\\.?(?=\\s*(?:</p>|$))`, 'gi'),
+      ''
+    );
+  }
+  return cleaned
+    .replace(/\s+([,.;:])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function collectKeyAliases(title, scopeName = null, scopeEntry = null) {
+  const seen = new Set();
+  const out = [];
+  const add = value => {
+    const trimmed = typeof value === 'string' ? value.trim() : '';
+    if (!trimmed) return;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(trimmed);
+  };
+  for (const label of [title, scopeName]) {
+    if (!label) continue;
+    const aliases = KEY_COMMON_ALIASES[String(label).trim().toLowerCase()];
+    if (aliases) aliases.forEach(add);
+  }
+  if (scopeEntry?.vernacular) add(scopeEntry.vernacular);
+  for (const alt of scopeEntry?.vernaculars || []) add(alt);
+  return out;
+}
 
 const DATA_BUNDLES = [
   { id: 'bioregions', file: 'bioregions.json' },
@@ -100,6 +168,7 @@ function normalizeMultiKeyTitle(title) {
     .replace(pattern, '')
     .replace(/_updated.*$/i, '')
     .replace(/(\bVictoria)\d+$/i, '$1')
+    .replace(/\s+(?:of|in)\s+Victoria$/i, '')
     .trim();
   return cleaned ? titleCase(cleaned) : titleCase(title.trim());
 }
@@ -260,6 +329,7 @@ function buildSpeciesIndexAndDescriptions(dichotomousKeys, multiKeys, rawDescrip
         id,
         name,
         vernacular: null,
+        vernaculars: [],
         rank: null,
         parentId: null,
         children: [],
@@ -298,23 +368,30 @@ function buildSpeciesIndexAndDescriptions(dichotomousKeys, multiKeys, rawDescrip
 
   const slimDescriptions = {};
   for (const [id, taxon] of Object.entries(rawDescriptionsTaxa || {})) {
+    const cleanHtml = taxon?.html ? stripInaccessibleFigureRefs(taxon.html) : null;
     if (taxon?.name) {
       const entry = ensureRecord(id, taxon.name);
       entry.name = taxon.name;
       if (taxon.vernacular) entry.vernacular = taxon.vernacular;
+      if (Array.isArray(taxon.vernaculars) && taxon.vernaculars.length) {
+        entry.vernaculars = taxon.vernaculars.filter(Boolean);
+      }
       if (taxon.rank) entry.rank = taxon.rank;
       if (taxon.parentId) entry.parentId = taxon.parentId;
-      entry.hasOwnDesc = hasOwnDescriptionHtml(taxon.html);
+      entry.hasOwnDesc = hasOwnDescriptionHtml(cleanHtml);
     } else if (records.has(id)) {
       const entry = records.get(id);
       if (taxon?.vernacular) entry.vernacular = taxon.vernacular;
+      if (Array.isArray(taxon?.vernaculars) && taxon.vernaculars.length) {
+        entry.vernaculars = taxon.vernaculars.filter(Boolean);
+      }
       if (taxon?.rank) entry.rank = taxon.rank;
       if (taxon?.parentId) entry.parentId = taxon.parentId;
-      entry.hasOwnDesc = hasOwnDescriptionHtml(taxon?.html);
+      entry.hasOwnDesc = hasOwnDescriptionHtml(cleanHtml);
     }
 
     const descOut = {};
-    if (taxon?.html) descOut.html = taxon.html;
+    if (cleanHtml) descOut.html = cleanHtml;
     if (taxon?.bioregions) descOut.bioregions = taxon.bioregions;
     if (Object.keys(descOut).length) {
       slimDescriptions[id] = descOut;
@@ -377,6 +454,15 @@ function buildSpeciesIndexAndDescriptions(dichotomousKeys, multiKeys, rawDescrip
       if (slimDescriptions[childId]?.html) {
         entry.soleChildId = childId;
       }
+      const child = records.get(childId);
+      if (child) {
+        if (!entry.vernacular && child.vernacular) {
+          entry.vernacular = child.vernacular;
+        }
+        if (!entry.vernaculars.length && child.vernaculars.length) {
+          entry.vernaculars = [...child.vernaculars];
+        }
+      }
     }
   }
 
@@ -385,6 +471,7 @@ function buildSpeciesIndexAndDescriptions(dichotomousKeys, multiKeys, rawDescrip
   for (const [id, entry] of records.entries()) {
     const out = { name: entry.name };
     if (entry.vernacular) out.vernacular = entry.vernacular;
+    if (entry.vernaculars.length) out.vernaculars = entry.vernaculars;
     if (entry.rank) out.rank = entry.rank;
     if (entry.parentId) out.parentId = entry.parentId;
     if (entry.children.length) out.children = entry.children;
@@ -520,28 +607,6 @@ async function main() {
     keys: multi
   });
 
-  // Compact key directory for instant unified search (taxa come from species-index.json).
-  const searchIndex = {
-    multiAccessKeys: Object.entries(multi)
-      .map(([id, entry]) => ({
-        id,
-        title: entry.title || id,
-        entities: Array.isArray(entry.entities) ? entry.entities.length : 0
-      }))
-      .sort((a, b) => a.title.localeCompare(b.title)),
-    dichotomousKeys: searchableKeys
-      .map(({ id, title }) => {
-        const scope = dichotomous[id]?.scope?.name || null;
-        return scope ? { id, title, scope } : { id, title };
-      })
-      .sort((a, b) => {
-        if (a.id === '1903') return -1;
-        if (b.id === '1903') return 1;
-        return a.title.localeCompare(b.title);
-      })
-  };
-  await writeJSON(path.join(webDataDir, 'search-index.json'), searchIndex);
-
   // Build lightweight species-index.json + slimmed minified descriptions.json.
   // Keep generated bundles deterministic (no build-time timestamps) so unchanged data hashes stay stable.
   const descriptionsPath = path.join(root, 'vicflora-data', 'taxon-descriptions.json');
@@ -561,10 +626,49 @@ async function main() {
     taxa: descriptions
   });
 
-  // Glossary (see scripts/fetch-glossary.js), minified.
+  // Compact key directory for instant unified search (taxa come from species-index.json).
+  const searchIndex = {
+    multiAccessKeys: Object.entries(multi)
+      .map(([id, entry]) => {
+        const title = entry.title || id;
+        const aliases = collectKeyAliases(title);
+        const out = {
+          id,
+          title,
+          entities: Array.isArray(entry.entities) ? entry.entities.length : 0
+        };
+        if (aliases.length) out.aliases = aliases;
+        return out;
+      })
+      .sort((a, b) => a.title.localeCompare(b.title)),
+    dichotomousKeys: searchableKeys
+      .map(({ id, title }) => {
+        const scope = dichotomous[id]?.scope?.name || null;
+        const scopeTaxonId = dichotomous[id]?.scope?.taxonId || null;
+        const scopeEntry = scopeTaxonId ? speciesIndex[scopeTaxonId] : null;
+        const aliases = collectKeyAliases(title, scope, scopeEntry);
+        const out = scope ? { id, title, scope } : { id, title };
+        if (aliases.length) out.aliases = aliases;
+        return out;
+      })
+      .sort((a, b) => {
+        if (a.id === '1903') return -1;
+        if (b.id === '1903') return 1;
+        return a.title.localeCompare(b.title);
+      })
+  };
+  await writeJSON(path.join(webDataDir, 'search-index.json'), searchIndex);
+
+  // Glossary (see scripts/fetch-glossary.js), minified with inaccessible printed figure refs removed.
   const glossaryPath = path.join(root, 'vicflora-data', 'glossary.json');
   if (await fileExists(glossaryPath)) {
-    await writeJSON(path.join(webDataDir, 'glossary.json'), await loadJSON(glossaryPath));
+    const rawGlossary = await loadJSON(glossaryPath);
+    const cleanedGlossary = rawGlossary.map(term =>
+      term?.definition
+        ? { ...term, definition: stripInaccessibleFigureRefs(term.definition, { glossary: true }) }
+        : term
+    );
+    await writeJSON(path.join(webDataDir, 'glossary.json'), cleanedGlossary);
   } else {
     await writeJSON(path.join(webDataDir, 'glossary.json'), []);
   }
@@ -714,7 +818,8 @@ module.exports = {
   buildSearchableKeys,
   buildSpeciesIndexAndDescriptions,
   normalizeKeyTitle,
-  normalizeMultiKeyTitle
+  normalizeMultiKeyTitle,
+  stripInaccessibleFigureRefs
 };
 
 if (require.main === module) {

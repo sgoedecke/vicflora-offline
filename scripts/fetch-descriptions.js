@@ -146,6 +146,7 @@ async function fetchBatch(ids) {
         parent { id }
         taxonName { fullName }
         preferredVernacularName { name }
+        vernacularNames { name isPreferred }
         currentProfile { profile }
         bioregions { bioregionCode occurrenceStatus establishmentMeans }
       }`
@@ -226,11 +227,23 @@ async function fetchAndStore(store, ids, fallbackNames, { acceptedOnly = false }
       if (acceptedOnly && (!taxon || taxon.taxonomicStatus !== 'ACCEPTED')) return;
       const profile = taxon?.currentProfile?.profile;
       const bioregions = summarizeTaxonBioregions(taxon?.bioregions);
+      const preferredVernacular = taxon?.preferredVernacularName?.name?.trim() || null;
+      const seenVern = new Set(preferredVernacular ? [preferredVernacular.toLowerCase()] : []);
+      const alternateVernaculars = [];
+      for (const v of taxon?.vernacularNames || []) {
+        const name = v?.name?.trim();
+        if (!name) continue;
+        const lower = name.toLowerCase();
+        if (seenVern.has(lower)) continue;
+        seenVern.add(lower);
+        alternateVernaculars.push(name);
+      }
       store.taxa[id] = {
         name: taxon?.taxonName?.fullName || fallbackNames.get(id) || null,
         rank: taxon?.taxonRank || null,
         parentId: taxon?.parent?.id || null,
-        vernacular: taxon?.preferredVernacularName?.name || null,
+        vernacular: preferredVernacular,
+        ...(alternateVernaculars.length ? { vernaculars: alternateVernaculars } : {}),
         html: profile ? sanitizeProfile(profile) : null,
         bioregions
       };

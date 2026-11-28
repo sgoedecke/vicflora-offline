@@ -6,6 +6,19 @@ function normalizeQuery(query) {
     .replace(/\b(?:ssp\.?|subspecies)\b/g, 'subsp.');
 }
 
+function normalizeCommonText(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[-/]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function collapseCommonText(text) {
+  return normalizeCommonText(text).replace(/\s+/g, '');
+}
+
 function singularVariants(q) {
   const variants = [];
   if (q.length < 4 || q.includes(' ')) return variants;
@@ -48,6 +61,25 @@ function scoreField(text, q, alts, tokens) {
   }
   if (allTokensMatch(text, tokens)) return 6;
   return -1;
+}
+
+function scoreCommonField(field, qNorm, qCollapsed, altsNorm, tokensNorm) {
+  if (!field || !field.norm) return -1;
+  const direct = scoreField(field.norm, qNorm, altsNorm, tokensNorm);
+  if (direct >= 0 && direct <= 3) return direct;
+  if (qCollapsed.length >= 4 && field.collapsed && field.collapsed.includes(qCollapsed)) {
+    return field.collapsed === qCollapsed ? 0.25 : 3.5;
+  }
+  return direct;
+}
+
+function buildCommonField(label) {
+  const norm = normalizeCommonText(label);
+  return {
+    raw: label,
+    norm,
+    collapsed: norm.replace(/\s+/g, '')
+  };
 }
 
 function normalizeTaxaEntries(source) {
@@ -107,29 +139,44 @@ export function createSearchIndex(raw = {}, taxonSource = null, glossarySource =
     id: String(entry.id),
     title: entry.title || String(entry.id),
     entities: Number.isFinite(entry.entities) ? entry.entities : null,
-    _title: (entry.title || String(entry.id)).toLowerCase()
+    aliases: Array.isArray(entry.aliases) ? entry.aliases : [],
+    _title: (entry.title || String(entry.id)).toLowerCase(),
+    _aliases: (Array.isArray(entry.aliases) ? entry.aliases : []).map(buildCommonField)
   }));
 
   const dichotomousKeys = (raw.dichotomousKeys || []).map(entry => ({
     id: String(entry.id),
     title: entry.title || `Key ${entry.id}`,
     scope: entry.scope || null,
+    aliases: Array.isArray(entry.aliases) ? entry.aliases : [],
     _id: String(entry.id).toLowerCase(),
     _title: (entry.title || `Key ${entry.id}`).toLowerCase(),
-    _scope: (entry.scope || '').toLowerCase()
+    _scope: (entry.scope || '').toLowerCase(),
+    _aliases: (Array.isArray(entry.aliases) ? entry.aliases : []).map(buildCommonField)
   }));
 
   const rawTaxa = taxonSource != null ? normalizeTaxaEntries(taxonSource) : normalizeTaxaEntries(raw.taxa);
-  const taxa = rawTaxa.map(entry => ({
-    id: String(entry.id),
-    name: entry.name || '',
-    vernacular: entry.vernacular || null,
-    rank: entry.rank || null,
-    toKey: entry.toKey ? String(entry.toKey) : null,
-    keys: Array.isArray(entry.keys) ? entry.keys.map(String) : [],
-    _name: (entry.name || '').toLowerCase(),
-    _vernacular: (entry.vernacular || '').toLowerCase()
-  }));
+  const taxa = rawTaxa.map(entry => {
+    const vernacular = entry.vernacular || null;
+    const vernaculars = Array.isArray(entry.vernaculars) ? entry.vernaculars.filter(Boolean) : [];
+    const allCommon = [];
+    if (vernacular) allCommon.push(buildCommonField(vernacular));
+    for (const alt of vernaculars) {
+      allCommon.push(buildCommonField(alt));
+    }
+    return {
+      id: String(entry.id),
+      name: entry.name || '',
+      vernacular,
+      vernaculars,
+      rank: entry.rank || null,
+      toKey: entry.toKey ? String(entry.toKey) : null,
+      keys: Array.isArray(entry.keys) ? entry.keys.map(String) : [],
+      _name: (entry.name || '').toLowerCase(),
+      _vernacular: (vernacular || '').toLowerCase(),
+      _commonFields: allCommon
+    };
+  });
 
   const rawGlossary =
     glossarySource != null
@@ -177,10 +224,36 @@ export function searchUnified(
 
   const alts = singularVariants(q);
   const tokens = q.split(' ').filter(Boolean);
+  const qNorm = normalizeCommonText(q);
+  const qCollapsed = collapseCommonText(q);
+  const altsNorm = singularVariants(qNorm);
+  const tokensNorm = qNorm.split(' ').filter(Boolean);
+
+  function bestCommonScore(fields) {
+    let bestScore = -1;
+    let bestLabel = null;
+    for (const field of fields || []) {
+      const s = scoreCommonField(field, qNorm, qCollapsed, altsNorm, tokensNorm);
+      if (s >= 0 && (bestScore < 0 || s < bestScore)) {
+        bestScore = s;
+        bestLabel = field.raw;
+      }
+    }
+    return { score: bestScore, label: bestLabel };
+  }
 
   const multiScored = [];
   for (const entry of index.multiAccessKeys) {
-    const score = scoreField(entry._title, q, alts, tokens);
+    const titleScore = scoreField(entry._title, q, alts, tokens);
+    const aliasMatch = bestCommonScore(entry._aliases);
+    let score = -1;
+    if (titleScore >= 0 && aliasMatch.score >= 0) {
+      score = Math.min(titleScore, aliasMatch.score + 0.5);
+    } else if (titleScore >= 0) {
+      score = titleScore;
+    } else if (aliasMatch.score >= 0) {
+      score = aliasMatch.score + 0.5;
+    }
     if (score >= 0) {
       multiScored.push({ entry, score });
     }
@@ -195,12 +268,14 @@ export function searchUnified(
     } else {
       const titleScore = scoreField(entry._title, q, alts, tokens);
       const scopeScore = entry._scope ? scoreField(entry._scope, q, alts, tokens) : -1;
-      if (titleScore >= 0 && scopeScore >= 0) {
-        score = Math.min(titleScore, scopeScore + 0.5);
-      } else if (titleScore >= 0) {
-        score = titleScore;
-      } else if (scopeScore >= 0) {
-        score = scopeScore + 0.5;
+      const aliasMatch = bestCommonScore(entry._aliases);
+      const candidates = [
+        titleScore >= 0 ? titleScore : null,
+        scopeScore >= 0 ? scopeScore + 0.5 : null,
+        aliasMatch.score >= 0 ? aliasMatch.score + 0.75 : null
+      ].filter(v => v != null);
+      if (candidates.length) {
+        score = Math.min(...candidates);
       }
     }
     if (score >= 0) {
@@ -217,17 +292,28 @@ export function searchUnified(
   const taxonScored = [];
   for (const entry of index.taxa) {
     const nameScore = scoreField(entry._name, q, alts, tokens);
-    const vernScore = entry._vernacular ? scoreField(entry._vernacular, q, alts, tokens) : -1;
+    const vernMatch = bestCommonScore(entry._commonFields);
+    const vernScore = vernMatch.score;
     let score = -1;
+    let matchedVernacular = null;
     if (nameScore >= 0 && vernScore >= 0) {
       score = Math.min(nameScore, vernScore + 0.5);
+      if (vernScore + 0.5 < nameScore && vernMatch.label && vernMatch.label !== entry.vernacular) {
+        matchedVernacular = vernMatch.label;
+      }
     } else if (nameScore >= 0) {
       score = nameScore;
     } else if (vernScore >= 0) {
       score = vernScore + 0.5;
+      if (vernMatch.label && vernMatch.label !== entry.vernacular) {
+        matchedVernacular = vernMatch.label;
+      }
     }
     if (score >= 0) {
-      taxonScored.push({ entry, score });
+      taxonScored.push({
+        entry: matchedVernacular ? { ...entry, matchedVernacular } : entry,
+        score
+      });
     }
   }
   taxonScored.sort((a, b) => a.score - b.score || a.entry.name.localeCompare(b.entry.name));

@@ -43,6 +43,7 @@ function parseArgs(argv) {
     limit: Infinity,
     packOnly: false,
     refreshMissing: false,
+    repairCollisions: false,
     allowPartial: false,
     concurrency: 4,
     outDir: null
@@ -58,6 +59,7 @@ function parseArgs(argv) {
       args.limit = n;
     } else if (arg === '--pack-only') args.packOnly = true;
     else if (arg === '--refresh-missing') args.refreshMissing = true;
+    else if (arg === '--repair-collisions') args.repairCollisions = true;
     else if (arg === '--allow-partial') args.allowPartial = true;
     else if (arg === '--out' || arg.startsWith('--out=')) {
       const raw = arg.startsWith('--out=') ? arg.slice('--out='.length) : argv[++i];
@@ -147,15 +149,31 @@ function formatDrawingCaption(rawCaption, scientificName = '') {
   return text;
 }
 
-function pickBestDrawing(images, heroImageId) {
+function imageAssetKey(url, fallbackId = '') {
+  if (typeof url === 'string' && url.trim()) {
+    const trimmed = url.trim();
+    const withoutQuery = trimmed.split(/[?#]/)[0];
+    const base = withoutQuery.slice(withoutQuery.lastIndexOf('/') + 1);
+    const stem = base.replace(/\.[a-z0-9]+$/i, '');
+    if (/^[a-zA-Z0-9_-]{8,}$/.test(stem)) {
+      return stem;
+    }
+    return `url_${crypto.createHash('sha256').update(trimmed).digest('hex').slice(0, 16)}`;
+  }
+  return String(fallbackId || '');
+}
+
+function pickBestDrawing(images, heroImageId, heroUrl = null) {
   if (!Array.isArray(images) || !images.length) return null;
-  const illustrations = images.filter(
-    img =>
-      img &&
-      img.subtype === 'Illustration' &&
-      (img.previewUrl || img.thumbnailUrl) &&
-      String(img.id) !== String(heroImageId || '')
-  );
+  const heroKey = heroUrl ? imageAssetKey(heroUrl) : null;
+  const illustrations = images.filter(img => {
+    const url = img?.previewUrl || img?.thumbnailUrl;
+    if (!img || img.subtype !== 'Illustration' || !url) return false;
+    if (heroKey) {
+      return imageAssetKey(url) !== heroKey;
+    }
+    return String(img.id) !== String(heroImageId || '');
+  });
   if (!illustrations.length) return null;
   const fov = illustrations.find(img => img.subjectCategory === 'Flora of Victoria Figure');
   return fov || illustrations[0];
@@ -259,6 +277,8 @@ async function fetchDrawingMetadata(taxonIds, metaCache, drawingCache, { refresh
             id
             subtype
             caption
+            previewUrl
+            thumbnailUrl
           }
           images(first: 25) {
             data {
@@ -283,11 +303,12 @@ async function fetchDrawingMetadata(taxonIds, metaCache, drawingCache, { refresh
       const node = data[`t${idx}`] || null;
       const hero = node?.heroImage || null;
       const heroId = hero?.id ? String(hero.id) : (metaCache[id]?.imageId || null);
+      const heroUrl = hero?.previewUrl || hero?.thumbnailUrl || metaCache[id]?.url || null;
       const heroSubtype = hero?.subtype || null;
       const fullName = node?.taxonName?.fullName || '';
       const heroCaption = heroSubtype === 'Illustration' ? formatDrawingCaption(hero?.caption, fullName) : '';
       const imgs = node?.images?.data || [];
-      const best = heroSubtype === 'Illustration' ? null : pickBestDrawing(imgs, heroId);
+      const best = heroSubtype === 'Illustration' ? null : pickBestDrawing(imgs, heroId, heroUrl);
 
       drawingCache[id] = {
         heroSubtype,
@@ -320,13 +341,13 @@ async function fetchDrawingMetadata(taxonIds, metaCache, drawingCache, { refresh
   }
 }
 
-function safeImageFileName(imageId) {
-  return `${String(imageId).replace(/[^a-zA-Z0-9_-]/g, '_')}.webp`;
+function safeImageFileName(assetKey) {
+  return `${String(assetKey).replace(/[^a-zA-Z0-9_-]/g, '_')}.webp`;
 }
 
-async function downloadAndTranscodeOne(imageId, url) {
-  const destPath = path.join(webpCacheDir, safeImageFileName(imageId));
-  const tmpSrc = path.join(webpCacheDir, `.tmp-${imageId.replace(/[^a-zA-Z0-9_-]/g, '_')}.src`);
+async function downloadAndTranscodeOne(assetKey, url) {
+  const destPath = path.join(webpCacheDir, safeImageFileName(assetKey));
+  const tmpSrc = path.join(webpCacheDir, `.tmp-${assetKey.replace(/[^a-zA-Z0-9_-]/g, '_')}.src`);
   const tmpOut = `${destPath}.tmp.webp`;
 
   for (let attempt = 1; ; attempt += 1) {
@@ -362,7 +383,7 @@ async function downloadAndTranscodeOne(imageId, url) {
 
 async function downloadAndTranscodeAll(uniqueImages, concurrency) {
   const existing = new Set(await fsp.readdir(webpCacheDir));
-  const todo = uniqueImages.filter(({ imageId }) => !existing.has(safeImageFileName(imageId)));
+  const todo = uniqueImages.filter(({ assetKey }) => !existing.has(safeImageFileName(assetKey)));
   if (!todo.length) {
     console.log(`All ${uniqueImages.length} unique images already cached as WebP.`);
     return [];
@@ -378,10 +399,10 @@ async function downloadAndTranscodeAll(uniqueImages, concurrency) {
     while (nextIdx < todo.length) {
       const current = todo[nextIdx++];
       try {
-        await downloadAndTranscodeOne(current.imageId, current.url);
+        await downloadAndTranscodeOne(current.assetKey, current.url);
       } catch (error) {
         failures.push({ ...current, error: error.message });
-        console.warn(`  ⚠️  Failed ${current.imageId}: ${error.message}`);
+        console.warn(`  ⚠️  Failed ${current.assetKey}: ${error.message}`);
       }
       completed += 1;
       if (completed % 100 === 0 || completed === todo.length) {
@@ -415,27 +436,30 @@ async function packShards(taxonIds, metaCache, drawingCache, targetOutDir, { all
   const sortedIds = [...taxonIds].sort();
 
   // Gather unique images (both primary hero images and paired botanical drawings)
+  // keyed by canonical asset key (derived from URL, not VicFlora's non-unique numeric id)
   // and verify cached WebP files exist before modifying output.
-  const uniqueImages = new Map(); // imageId -> { imageId, bucket }
+  const uniqueImages = new Map(); // assetKey -> { assetKey, bucket }
   const missingImages = [];
-  function collectImage(imageId) {
-    if (!imageId || uniqueImages.has(imageId)) return;
-    const filePath = path.join(webpCacheDir, safeImageFileName(imageId));
+  function collectImage(entry) {
+    if (!entry) return;
+    const assetKey = imageAssetKey(entry.url, entry.imageId);
+    if (!assetKey || uniqueImages.has(assetKey)) return;
+    const filePath = path.join(webpCacheDir, safeImageFileName(assetKey));
     if (!fs.existsSync(filePath)) {
-      missingImages.push(imageId);
+      missingImages.push(assetKey);
       return;
     }
-    uniqueImages.set(imageId, {
-      imageId,
-      bucket: shardBucketForImage(imageId, NUM_SHARDS)
+    uniqueImages.set(assetKey, {
+      assetKey,
+      bucket: shardBucketForImage(assetKey, NUM_SHARDS)
     });
   }
 
   for (const taxonId of sortedIds) {
     const meta = metaCache[taxonId];
-    if (meta) collectImage(meta.imageId);
+    if (meta) collectImage(meta);
     const drawing = drawingCache?.[taxonId]?.drawing;
-    if (drawing) collectImage(drawing.imageId);
+    if (drawing) collectImage(drawing);
   }
 
   if (missingImages.length && !allowPartial) {
@@ -450,7 +474,7 @@ async function packShards(taxonIds, metaCache, drawingCache, targetOutDir, { all
   // Group into stable hash buckets so adding/updating one species only changes 1 shard.
   const bucketLists = Array.from({ length: NUM_SHARDS }, () => []);
   for (const item of uniqueImages.values()) {
-    bucketLists[item.bucket].push(item.imageId);
+    bucketLists[item.bucket].push(item.assetKey);
   }
   for (const list of bucketLists) {
     list.sort();
@@ -461,7 +485,7 @@ async function packShards(taxonIds, metaCache, drawingCache, targetOutDir, { all
   await fsp.mkdir(stagingDir, { recursive: true });
 
   try {
-    const imageLocations = new Map(); // imageId -> { shard, offset, length, imgHash }
+    const imageLocations = new Map(); // assetKey -> { shard, offset, length, imgHash }
     const shards = [];
     let totalImageBytes = 0;
 
@@ -471,14 +495,14 @@ async function packShards(taxonIds, metaCache, drawingCache, targetOutDir, { all
       const buffers = [];
       let offset = 0;
 
-      for (const imageId of list) {
-        const filePath = path.join(webpCacheDir, safeImageFileName(imageId));
+      for (const assetKey of list) {
+        const filePath = path.join(webpCacheDir, safeImageFileName(assetKey));
         const buf = await fsp.readFile(filePath);
         if (!isValidWebpBuffer(buf)) {
-          throw new Error(`Invalid WebP header in cached image ${imageId}`);
+          throw new Error(`Invalid WebP header in cached image ${assetKey}`);
         }
         const imgHash = crypto.createHash('sha256').update(buf).digest('hex').slice(0, 12);
-        imageLocations.set(imageId, { shard: shardIndex, offset, length: buf.length, imgHash });
+        imageLocations.set(assetKey, { shard: shardIndex, offset, length: buf.length, imgHash });
         buffers.push(buf);
         offset += buf.length;
         totalImageBytes += buf.length;
@@ -497,7 +521,7 @@ async function packShards(taxonIds, metaCache, drawingCache, targetOutDir, { all
       const meta = metaCache[taxonId];
       const drawingInfo = drawingCache?.[taxonId] || null;
       if (meta) {
-        const loc = imageLocations.get(meta.imageId);
+        const loc = imageLocations.get(imageAssetKey(meta.url, meta.imageId));
         if (loc) {
           const compactUrl = meta.url.startsWith(CDN_PREFIX)
             ? meta.url.slice(CDN_PREFIX.length)
@@ -513,7 +537,7 @@ async function packShards(taxonIds, metaCache, drawingCache, targetOutDir, { all
 
       const drawing = drawingInfo?.drawing;
       if (drawing) {
-        const loc = imageLocations.get(drawing.imageId);
+        const loc = imageLocations.get(imageAssetKey(drawing.url, drawing.imageId));
         if (loc) {
           const compactUrl = drawing.url.startsWith(CDN_PREFIX)
             ? drawing.url.slice(CDN_PREFIX.length)
@@ -577,9 +601,190 @@ async function packShards(taxonIds, metaCache, drawingCache, targetOutDir, { all
   }
 }
 
+async function repairCollisionsFromShards(targetOutDir, concurrency, { allowPartial = false } = {}) {
+  const indexPath = path.join(targetOutDir, 'index.json');
+  const existingIndex = JSON.parse(await fsp.readFile(indexPath, 'utf8'));
+  const cdnPrefix = existingIndex.cdnPrefix || CDN_PREFIX;
+
+  const byHash = new Map();
+  const allEntries = [];
+  for (const [kind, obj] of [['taxa', existingIndex.taxa || {}], ['drawings', existingIndex.drawings || {}]]) {
+    for (const [taxonId, row] of Object.entries(obj)) {
+      if (!Array.isArray(row) || row.length < 6) continue;
+      const [shard, offset, length, hash, , url] = row;
+      const assetKey = imageAssetKey(url);
+      const item = { kind, taxonId, row, shard, offset, length, hash, url, assetKey };
+      allEntries.push(item);
+      if (!byHash.has(hash)) byHash.set(hash, []);
+      byHash.get(hash).push(item);
+    }
+  }
+
+  const collidedKeys = new Set();
+  for (const list of byHash.values()) {
+    const distinctKeys = new Set(list.map(x => x.assetKey));
+    if (distinctKeys.size > 1) {
+      for (const key of distinctKeys) collidedKeys.add(key);
+    }
+  }
+
+  if (!collidedKeys.size) {
+    console.log('No image collisions found in existing shards.');
+    return existingIndex;
+  }
+
+  const toFetch = new Map();
+  const cleanSourceByKey = new Map();
+  for (const item of allEntries) {
+    if (collidedKeys.has(item.assetKey)) {
+      if (!toFetch.has(item.assetKey)) {
+        const fullUrl = /^https?:\/\//i.test(item.url) ? item.url : `${cdnPrefix}${item.url}`;
+        toFetch.set(item.assetKey, { assetKey: item.assetKey, url: fullUrl });
+      }
+    } else if (!cleanSourceByKey.has(item.assetKey)) {
+      cleanSourceByKey.set(item.assetKey, item);
+    }
+  }
+
+  console.log(
+    `Found ${collidedKeys.size} collided asset(s) to re-fetch (${cleanSourceByKey.size} clean assets preserved from existing shards).`
+  );
+
+  const failures = await downloadAndTranscodeAll([...toFetch.values()], concurrency);
+  if (failures.length) {
+    console.warn(`⚠️  ${failures.length} collided image(s) failed to download/transcode.`);
+    if (!allowPartial) {
+      throw new Error(`Aborting repair due to ${failures.length} failed image(s).`);
+    }
+  }
+
+  // Read existing shard buffers for clean assets.
+  const shardBuffers = await Promise.all(
+    (existingIndex.shards || []).map(s => fsp.readFile(path.join(targetOutDir, s.file)))
+  );
+
+  const assetBuffers = new Map();
+  for (const [assetKey, item] of cleanSourceByKey.entries()) {
+    const shardBuf = shardBuffers[item.shard];
+    const buf = shardBuf.subarray(item.offset, item.offset + item.length);
+    if (!isValidWebpBuffer(buf)) {
+      throw new Error(`Invalid WebP header in existing shard for ${assetKey}`);
+    }
+    assetBuffers.set(assetKey, buf);
+  }
+  for (const assetKey of toFetch.keys()) {
+    const filePath = path.join(webpCacheDir, safeImageFileName(assetKey));
+    if (!fs.existsSync(filePath)) continue;
+    const buf = await fsp.readFile(filePath);
+    if (!isValidWebpBuffer(buf)) {
+      throw new Error(`Invalid WebP header in repaired image ${assetKey}`);
+    }
+    assetBuffers.set(assetKey, buf);
+  }
+
+  const bucketLists = Array.from({ length: NUM_SHARDS }, () => []);
+  for (const assetKey of assetBuffers.keys()) {
+    bucketLists[shardBucketForImage(assetKey, NUM_SHARDS)].push(assetKey);
+  }
+  for (const list of bucketLists) list.sort();
+
+  const stagingDir = path.join(path.dirname(targetOutDir), `.photos-staging-${process.pid}-${Date.now()}`);
+  await fsp.mkdir(stagingDir, { recursive: true });
+
+  try {
+    const imageLocations = new Map();
+    const shards = [];
+    let totalImageBytes = 0;
+
+    for (const list of bucketLists) {
+      if (!list.length) continue;
+      const shardIndex = shards.length;
+      const buffers = [];
+      let offset = 0;
+
+      for (const assetKey of list) {
+        const buf = assetBuffers.get(assetKey);
+        const imgHash = crypto.createHash('sha256').update(buf).digest('hex').slice(0, 12);
+        imageLocations.set(assetKey, { shard: shardIndex, offset, length: buf.length, imgHash });
+        buffers.push(buf);
+        offset += buf.length;
+        totalImageBytes += buf.length;
+      }
+
+      const combined = Buffer.concat(buffers, offset);
+      const sha256 = crypto.createHash('sha256').update(combined).digest('hex');
+      const file = `photos-${String(shardIndex).padStart(2, '0')}-${sha256.slice(0, 12)}.bin`;
+      await fsp.writeFile(path.join(stagingDir, file), combined);
+      shards.push({ file, sha256, bytes: offset, count: list.length });
+    }
+
+    const taxaEntries = {};
+    const drawingEntries = {};
+    for (const taxonId of Object.keys(existingIndex.taxa || {}).sort()) {
+      const row = existingIndex.taxa[taxonId];
+      const loc = imageLocations.get(imageAssetKey(row[5]));
+      if (!loc) continue;
+      taxaEntries[taxonId] = [loc.shard, loc.offset, loc.length, loc.imgHash, ...row.slice(4)];
+    }
+    for (const taxonId of Object.keys(existingIndex.drawings || {}).sort()) {
+      const row = existingIndex.drawings[taxonId];
+      const loc = imageLocations.get(imageAssetKey(row[5]));
+      if (!loc) continue;
+      drawingEntries[taxonId] = [loc.shard, loc.offset, loc.length, loc.imgHash, ...row.slice(4)];
+    }
+
+    const packVersion = crypto
+      .createHash('sha256')
+      .update(shards.map(s => `${s.file}:${s.sha256}`).join('|'))
+      .digest('hex')
+      .slice(0, 12);
+
+    const nextIndex = {
+      ...existingIndex,
+      version: packVersion,
+      generatedAt: new Date().toISOString(),
+      totalBytes: totalImageBytes,
+      totalImages: imageLocations.size,
+      taxaCount: Object.keys(taxaEntries).length,
+      drawingsCount: Object.keys(drawingEntries).length,
+      shards,
+      taxa: taxaEntries,
+      drawings: drawingEntries
+    };
+
+    await fsp.writeFile(path.join(stagingDir, 'index.json'), JSON.stringify(nextIndex));
+
+    const backupDir = `${targetOutDir}.bak-${process.pid}-${Date.now()}`;
+    await fsp.rename(targetOutDir, backupDir);
+    try {
+      await fsp.rename(stagingDir, targetOutDir);
+    } catch (error) {
+      if (fs.existsSync(backupDir)) {
+        await fsp.rename(backupDir, targetOutDir).catch(() => {});
+      }
+      throw error;
+    }
+    await fsp.rm(backupDir, { recursive: true, force: true });
+
+    console.log(
+      `✅ Repaired ${toFetch.size} collided assets; packed ${nextIndex.totalImages} unique images (${nextIndex.taxaCount} taxa, ${nextIndex.drawingsCount} paired drawings) into ${shards.length} shards (${(totalImageBytes / 1024 / 1024).toFixed(2)} MB).`
+    );
+    return nextIndex;
+  } catch (error) {
+    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(() => {});
+    throw error;
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   await fsp.mkdir(webpCacheDir, { recursive: true });
+
+  if (args.repairCollisions) {
+    const targetOutDir = args.outDir || defaultOutDir;
+    await repairCollisionsFromShards(targetOutDir, args.concurrency, { allowPartial: args.allowPartial });
+    return;
+  }
 
   const descriptions = JSON.parse(await fsp.readFile(descriptionsPath, 'utf8')).taxa || {};
   let taxonIds = Object.entries(descriptions)
@@ -616,12 +821,18 @@ async function main() {
     const uniqueMap = new Map();
     for (const id of taxonIds) {
       const meta = metaCache[id];
-      if (meta && !uniqueMap.has(meta.imageId)) {
-        uniqueMap.set(meta.imageId, { imageId: meta.imageId, url: meta.url });
+      if (meta) {
+        const assetKey = imageAssetKey(meta.url, meta.imageId);
+        if (assetKey && !uniqueMap.has(assetKey)) {
+          uniqueMap.set(assetKey, { assetKey, url: meta.url });
+        }
       }
       const drawing = drawingCache[id]?.drawing;
-      if (drawing && !uniqueMap.has(drawing.imageId)) {
-        uniqueMap.set(drawing.imageId, { imageId: drawing.imageId, url: drawing.url });
+      if (drawing) {
+        const assetKey = imageAssetKey(drawing.url, drawing.imageId);
+        if (assetKey && !uniqueMap.has(assetKey)) {
+          uniqueMap.set(assetKey, { assetKey, url: drawing.url });
+        }
       }
     }
     const failures = await downloadAndTranscodeAll([...uniqueMap.values()], args.concurrency);
@@ -646,6 +857,7 @@ if (require.main === module) {
 module.exports = {
   formatAttribution,
   formatDrawingCaption,
+  imageAssetKey,
   pickBestDrawing,
   cleanText,
   normalizePersonName,

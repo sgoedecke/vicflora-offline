@@ -134,6 +134,40 @@ test('unified search groups Multi-Access Keys, Dichotomous Keys, and Taxa togeth
   );
 });
 
+test('unified search expands common names across punctuation, alternates, and keys', () => {
+  for (const key of searchIndexRaw.multiAccessKeys) {
+    assert.doesNotMatch(key.title, /\b(?:of|in)\s+victoria\b/i, `multi-access card should omit "of/in Victoria": ${key.title}`);
+  }
+
+  const redGum = searchUnified(searchIndex, 'river red gum');
+  assert.equal(redGum.taxa[0]?.name, 'Eucalyptus camaldulensis');
+
+  const redgumCollapsed = searchUnified(searchIndex, 'redgum');
+  assert.ok(redgumCollapsed.taxa.some(t => t.name === 'Eucalyptus camaldulensis'));
+
+  const sweetBursaria = searchUnified(searchIndex, 'sweet bursaria');
+  assert.equal(sweetBursaria.taxa[0]?.name, 'Bursaria spinosa');
+  assert.equal(sweetBursaria.taxa[0]?.matchedVernacular, 'Sweet Bursaria');
+
+  const ribbonGum = searchUnified(searchIndex, 'ribbon gum');
+  assert.equal(ribbonGum.taxa[0]?.name, 'Eucalyptus viminalis');
+  assert.equal(ribbonGum.taxa[0]?.matchedVernacular, 'Ribbon Gum');
+
+  const featherHeads = searchUnified(searchIndex, 'feather heads');
+  assert.equal(featherHeads.taxa[0]?.name, 'Ptilotus macrocephalus');
+  assert.ok(featherHeads.dichotomousKeys.some(k => k.title === 'Ptilotus'));
+
+  const wattles = searchUnified(searchIndex, 'wattles');
+  assert.ok(wattles.multiAccessKeys.some(k => k.title === 'Acacia'));
+  assert.ok(wattles.dichotomousKeys.some(k => k.title === 'Acacia'));
+
+  const sheOak = searchUnified(searchIndex, 'she-oak');
+  assert.ok(sheOak.taxa.some(t => /sheoak/i.test(t.vernacular || '')));
+
+  const gunns = searchUnified(searchIndex, 'gunns alpine');
+  assert.equal(gunns.taxa[0]?.name, 'Ranunculus gunnianus');
+});
+
 test('loadSpeciesIndex preserves keys, toKey, rank, and vernacular', () => {
   assert.equal(taxonIndex.size, 8049);
   const acacia = [...taxonIndex.values()].find(t => t.name === 'Acacia');
